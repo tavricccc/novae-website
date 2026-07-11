@@ -47,7 +47,7 @@
 
 ## 圖片
 
-1. 確認來源大小、像素與圖片數符合 `rate-limits.config.json`。
+1. 確認來源大小、壓縮後尺寸與圖片數符合 `rate-limits.config.json`。
 2. 查看取得 upload session 的 action 是否成功。
 3. 在 Cloudinary 確認 authenticated resource 是否存在。
 4. 檢查 webhook URL、secret 與 Function log。

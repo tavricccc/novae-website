@@ -76,7 +76,7 @@ git diff
 
 `rate-limits.config.json` 的每個 action 項目包含 `limit` 與使用者訊息。秒級限制吸收突發流量，時／日級限制控制濫用與成本。調高數值前先確認 Edge、Redis、資料庫與第三方服務額度。
 
-`imageUploads` 控制提案、公告與留言可附圖片數；`imageCompression` 控制來源大小、像素、最長邊、目標 KB、WebP 品質與降階比例。瀏覽器限制是體驗層，後端仍會驗證上傳與 Markdown 引用。
+`imageUploads` 控制提案、公告與留言可附圖片數；`imageCompression` 控制來源大小、最長邊、目標 KB、WebP 品質與降階比例。瀏覽器限制是體驗層，後端仍會驗證上傳與 Markdown 引用。
 
 ### 每個限流欄位的影響
 
@@ -111,7 +111,6 @@ git diff
 | `maxUploadKilobytes` | 壓縮後希望不超過的目標大小；過低會增加模糊或失敗 |
 | `maxSourceMegabytes` | 選取原始檔的硬上限，超過時不進行壓縮 |
 | `maxDimension` | 輸出最長邊上限，降低會節省流量但損失細節 |
-| `maxPixels` | 原始解碼像素安全上限，保護記憶體與效能 |
 | `webpQuality` | 第一輪 WebP 品質，越高通常越清楚也越大 |
 | `outputScales` | 未達目標大小時依序縮圖的比例；必須由大到小評估 |
 

@@ -82,7 +82,7 @@ Lower limits reduce abuse and cost but reject legitimate peaks more often. Messa
 
 ### Image behavior
 
-`issueMaxImages`, `announcementMaxImages`, and `commentMaxImages` cap references per item. `maxSourceMegabytes` and `maxPixels` reject dangerous source files before expensive work. `maxDimension` limits the longest output edge. `maxUploadKilobytes` is the compression target, `webpQuality` is the first-pass quality, and `outputScales` are progressively smaller retries. Smaller values save bandwidth but can reduce readability and increase compression failures.
+`issueMaxImages`, `announcementMaxImages`, and `commentMaxImages` cap references per item. `maxSourceMegabytes` rejects oversized source files before expensive work. `maxDimension` limits the longest output edge. `maxUploadKilobytes` is the compression target, `webpQuality` is the first-pass quality, and `outputScales` are progressively smaller retries. Smaller values save bandwidth but can reduce readability and increase compression failures.
 
 ## Frontend environment variables
 
