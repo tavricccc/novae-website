@@ -1,120 +1,109 @@
-# 技術架構
+# 系統架構
 
-本專案採用前端靜態部署、Supabase 後端資料與 Edge Functions、Firebase 身份驗證、Cloudinary 圖片儲存、Notion 備份與 Upstash Redis 限流的組合。核心原則是：前端不直接處理敏感流程，所有寫入與敏感讀取都走受控後端 action。
+[English](en/architecture.md) · [文件首頁](README.md)
 
-## 技術棧
+本頁解釋元件責任、信任邊界與主要資料流。檔案級模組地圖請看 repository 根目錄的 [`structure.md`](../structure.md)。
 
-| 層級 | 技術 |
-| --- | --- |
-| 前端 | Vue 3、Vite、TypeScript、Vue Router、Tailwind、PWA / Workbox |
-| 身份 | Firebase Authentication、Firebase App Check、Firebase Cloud Messaging |
-| 後端 | Supabase Edge Functions、Deno、Supabase JS |
-| 資料庫 | Supabase Postgres、RLS、RPC、Trigger、Realtime、Cron |
-| 圖片 | Cloudinary authenticated upload、signed delivery URL、前端 WebP 壓縮 |
-| 背景工作 | Supabase Edge Functions、outbox、maintenance cleanup |
-| 備份同步 | Notion API |
-| 限流 | Upstash Redis REST |
-| 部署 | GitHub Actions、Vercel、Supabase CLI |
-| 驗證 | vue-tsc、ESLint、Vite build、Deno check、Node test runner、架構測試 |
-
-## 高階資料流
+## 系統概觀
 
 ```mermaid
 flowchart LR
-  User["使用者瀏覽器 / PWA"] --> Vercel["Vercel 前端"]
-  User --> Firebase["Firebase Auth / FCM"]
-  Vercel --> BackendAction["Supabase Edge Function: backendAction"]
-  BackendAction --> Postgres["Supabase Postgres + RLS"]
-  BackendAction --> Upstash["Upstash Redis 限流"]
-  BackendAction --> Cloudinary["Cloudinary 圖片簽名與查詢"]
-  Postgres --> Outbox["Outbox / Cron / Webhook"]
-  Outbox --> FCM["Firebase Cloud Messaging"]
-  Outbox --> Notion["Notion 備份"]
-  Outbox --> Cloudinary
-  Cloudinary --> CloudinaryWebhook["cloudinaryWebhook"]
-  CloudinaryWebhook --> Postgres
+  Browser["瀏覽器 / PWA"] --> Vercel["Vercel 靜態前端"]
+  Browser --> Firebase["Firebase Auth / App Check / FCM"]
+  Browser --> Gateway["Supabase backendAction"]
+  Gateway --> Postgres["Postgres + RLS + RPC"]
+  Gateway --> Redis["Upstash 限流"]
+  Gateway --> Images["Cloudinary"]
+  Postgres --> Worker["Outbox / Cron"]
+  Worker --> Firebase
+  Worker --> Notion["Notion 副本"]
+  Worker --> Images
+  Images --> Webhook["Cloudinary webhook"]
+  Webhook --> Postgres
 ```
 
-## 前端分層
+瀏覽器只持有可公開的 Firebase Web 設定與 Supabase publishable key。所有寫入、私密讀取、角色判斷、上傳簽名與外部副作用都在後端完成。
 
-| 目錄 | 責任 |
+## 技術棧與責任
+
+| 層 | 技術 | 責任 |
+| --- | --- | --- |
+| Web | Vue 3、TypeScript、Vite、Vue Router、Workbox | UI、路由、PWA、前端流程 |
+| 身分 | Firebase Auth、App Check | Google 登入、token 與來源驗證 |
+| 推播 | Firebase Cloud Messaging | 個人與 topic Web Push |
+| API | Supabase Edge Functions、Deno | 驗證、授權、限流、冪等與 action 分派 |
+| 資料 | Postgres、RLS、RPC、Realtime、Cron | 主要資料、交易、權限與排程 |
+| 媒體 | Cloudinary | authenticated image 儲存與 delivery |
+| 外部副本 | Notion API | 提案與公告的營運副本 |
+| 限流 | Upstash Redis REST | 跨執行個體的速率限制 |
+| 發布 | GitHub Actions、Vercel、Supabase CLI | 驗證、migration 與部署 |
+
+## 前端模組
+
+| 目錄 | 邊界 |
 | --- | --- |
-| `views/` | 路由頁面組裝與頁面級狀態 |
+| `views/` | 路由頁組裝與頁面級狀態；不直接讀寫資料 |
 | `components/` | 應用 UI 與事件轉發 |
-| `components/ui/` | 無業務資料來源的共用 UI |
-| `composables/` | Vue 狀態、生命週期、流程協調 |
-| `services/` | Supabase Edge Function / Supabase client 邊界 |
-| `lib/` | 無 Vue 相依的純函式 |
-| `types/` | 跨模組核心型別 |
-| `generated/` | 由 config 產生的型別化設定 |
+| `components/ui/` | 無業務資料、service 或 session 相依的共用 UI |
+| `composables/` | Vue 狀態、生命週期與跨元件流程 |
+| `services/` | Edge Function 與 Supabase client 邊界 |
+| `lib/` | 不依賴 Vue 的純函式 |
+| `types/` | 跨模組型別 |
+| `generated/` | 由 JSON 設定產生、應提交的型別化輸出 |
 
-前端只使用 `VITE_*` 公開環境變數。管理員名單、service role key、資料庫密碼、第三方 API secret 與 webhook secret 不會進入前端 bundle。
+`src/main.ts` 建立應用程式，`App.vue` 管理啟動閘門與 shell，router modules 負責路由與 session guard。業務元件不直接查表或自行拼裝 action。
 
-## 後端 Edge Functions
+## 後端入口
 
-| Function | 責任 |
-| --- | --- |
-| `backendAction` | 前端受控 action 入口，集中 CORS、Firebase 驗證、角色查詢、冪等與分派 |
-| `syncUser` | Firebase 登入後同步使用者角色與 custom claim |
-| `cloudinaryWebhook` | 驗證 Cloudinary 上傳完成通知，將圖片狀態轉為 ready 或 failed |
-| `outboxWorker` | 處理通知、推播、Notion 同步與外部副作用 |
-| `processDeletionJobs` | 處理 Cloudinary / Notion 清理工作 |
-| `maintenanceCleanup` | 手動維護入口，呼叫資料庫清理 RPC |
+| Function | 呼叫者 | 責任 |
+| --- | --- | --- |
+| `backendAction` | Web App、健康檢查 | 統一驗證、角色、限流、冪等與領域 action |
+| `syncUser` | 登入流程 | 同步允許網域使用者與角色 claim |
+| `cloudinaryWebhook` | Cloudinary | 驗證 webhook 並更新上傳狀態 |
+| `outboxWorker` | Cron／受控觸發 | 通知、FCM、Notion 與外部副作用 |
+| `processDeletionJobs` | Cron／受控觸發 | 清除 Cloudinary 資源與同步刪除狀態 |
+| `maintenanceCleanup` | 部署／維護者 | 執行資料保留與維護 RPC |
 
-`backendAction` 是前端主要後端入口，避免元件直接組 SQL 或自行呼叫敏感資料表。
+Functions 在 Supabase 設定中關閉內建 JWT 驗證，因為它們使用 Firebase token、webhook signature 或專用 secret 自行驗證。這不是公開匿名存取的意思。
 
-## 資料庫設計重點
+## 資料與授權
 
-- `app_api` schema：前端 Supabase client 可見的 API schema，仍受 RLS 保護。
-- `app_private` schema：service role Edge Functions 使用的私有 schema。
-- RLS：保護提案、留言、通知、角色與私密作者資料。
-- Trigger / outbox：內容異動與副作用事件在同一交易中建立，降低同步漏失。
-- RPC：提供清理、維護、聚合統計與受控資料操作。
-- Realtime：通知使用共享訂閱與 recipient 過濾；內容事件依公開、作者或管理員受眾授權，並以計數增量更新避免重讀整頁。
-- Dashboard：分類、使用者與活動時間由交易內 counter 維護，避免開啟統計頁時掃描主要內容表。
+- `app_api` 是可由 client 使用的 schema，仍受 RLS 與受控 RPC 保護。
+- `app_private` 保存後端流程所需的私有資料與 helper。
+- 公開提案資料與作者私密資料分離，避免一般讀取帶出身分。
+- 內容交易同時建立 outbox event，外部副作用失敗時可重試。
+- Realtime event 依公開、作者或管理員受眾授權。
+- Dashboard 使用交易內 counters 與聚合資料，避免每次掃描主要內容表。
 
-## 圖片流程
+## 主要流程
 
-1. 前端選圖後壓縮為 WebP。
-2. 前端向 `backendAction` 取得 Cloudinary signed upload session。
-3. 圖片直傳 Cloudinary authenticated resource。
-4. Cloudinary webhook 通知後端圖片完成。
-5. 內容正文只保存 `srp-upload://<id>`。
-6. 顯示時由後端批次換成 signed delivery URL。
-7. 刪除或失敗圖片由 deletion jobs 清理。
+### 登入
 
-這個流程避免公開原始 Cloudinary API secret，也讓圖片 URL 可以過期與重新簽名。
+1. 瀏覽器透過 Firebase Google provider 登入。
+2. 前端取得 Firebase ID token 並呼叫 `syncUser`。
+3. 後端驗證 token、email 驗證狀態與允許網域。
+4. 後端同步使用者與角色；後續 action 再次驗證，不信任前端角色。
 
-## 通知流程
+### 圖片
 
-1. 提案、公告、留言、附議達標或狀態變更建立 outbox event；一般附議計數只走 Realtime，並每兩小時聚合更新 Notion。
-2. `outboxWorker` claim pending events。
-3. 依事件類型建立 App 內通知。
-4. 全校公告與管理員待辦優先透過 FCM Topic 傳送，未完成 Topic 訂閱的裝置與個人通知使用 token 補送。
-5. 同步 Notion 或建立外部清理工作。
-6. 成功事件採短期保留或不落地；失敗只回寫追蹤碼，完整錯誤留在 Function logs 供 Dashboard 追查。
+1. 瀏覽器驗證尺寸並壓縮為 WebP。
+2. `backendAction` 驗證權限與額度，建立簽名上傳 session。
+3. 瀏覽器直傳 Cloudinary authenticated resource。
+4. Webhook 將 metadata 標記為 ready 或 failed。
+5. Markdown 只儲存 `srp-upload://<id>`；讀取時批次換成短效 signed URL。
+6. 未使用、失敗或已刪除資源由 deletion job 清理。
 
-## 部署流程
+### 通知與外部同步
 
-- `Deploy Supabase Backend`：檢查架構、link Supabase、推送 migrations、設定 Edge Function secrets、部署 functions、做健康檢查。
-- `Deploy Frontend to Vercel`：檢查前端部署 secrets、拉 Vercel project info、執行 Vercel build、部署 prebuilt artifacts。
-- `Verify PR`：跑型別、lint、build、架構測試與 audit。
-- Reset workflows：只供維護使用，正式環境需謹慎。
+1. 內容交易建立 outbox event。
+2. Worker claim 待處理事件，避免多個 worker 重複處理。
+3. 事件建立站內通知、FCM 訊息或 Notion 更新。
+4. 可重試失敗保留追蹤資訊；完整錯誤只留在 Function logs。
 
-## 架構測試
+## 部署拓樸
 
-`tests/architecture.test.mjs` 用來防止高風險架構回歸，例如：
+`main` 對應 GitHub `production` Environment，`dev` 對應 `development`。後端 workflow 先推 migrations、設定 secrets、部署 Functions 並 smoke test；前端 workflow 建置並部署 Vercel artifacts。若同一 commit 同時改到後端與前端，前端工作會等待相符的後端部署完成。
 
-- 前端誤放 Firebase Admin 或 service role 類設定。
-- Vercel workflow 混入後端部署責任。
-- Supabase backend workflow 沒有設定必要私密值。
-- webhook、outbox、FCM、Notion 或圖片流程缺少防護。
-- 通知與私密資料讀取繞過受控後端流程。
+## 架構約束
 
-## 設計取捨
-
-- 使用 Firebase Auth 而不是 Supabase Auth：方便校內 Google 登入、FCM 與 App Check 整合。
-- 使用 Supabase 承接資料與後端流程：RLS、Edge Functions、Postgres、Realtime 與 Cron 集中。
-- 使用 Cloudinary 而不是 Supabase Storage：支援 authenticated delivery、轉檔與媒體管理。
-- 使用 Notion 作為備份視圖：方便非工程管理員追蹤內容，但不作為主資料庫。
-- 使用 Upstash REST：適合 serverless Edge Function 的短請求限流。
+`tests/architecture.test.mjs` 防止私密設定進入前端、敏感資料繞過後端、分頁不穩定、圖片未驗證、通知越權及部署責任混雜。修改資料流時，除了單元行為也要更新這些靜態約束與本文件。

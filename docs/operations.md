@@ -1,190 +1,82 @@
-# 維運指南
+# 維運手冊
 
-這份文件說明平台上線後如何檢查、監控、排錯與維護。Dashboard 用來快速判斷健康狀態與取得追蹤碼；完整錯誤內容仍以 Supabase、Cloudinary 或 GitHub Actions logs 為準。
+[English](en/operations.md) · [文件首頁](README.md)
 
-## 上線後檢查清單
+本手冊提供部署後的例行檢查、事故處理與復原順序。雲端控制台的完整錯誤可能包含個人資料或敏感 metadata，分享前必須遮罩。
 
-每次正式部署後請檢查：
+## 服務目標
 
-1. Vercel 正式網址可以開啟。
-2. 校內 Google 帳號可以登入。
-3. 非允許網域帳號會被拒絕。
-4. `ADMIN_EMAILS` 內的帳號能進 Dashboard。
-5. 可以建立測試提案。
-6. 若分類需要審核，審核流程正常。
-7. 附議、取消附議與留言正常。
-8. 圖片可以上傳並在詳情頁顯示。
-9. Notion database 有同步資料。
-10. 推播權限與 App 內通知正常。
-11. Dashboard 沒有新的部署後異常。
+專案沒有內建 SLA。營運團隊應自行定義至少以下指標：登入成功率、主要 action 錯誤率、p95 latency、outbox 待處理與最老事件時間、推播失敗率、圖片失敗率、Notion 同步延遲、資料庫與供應商用量。
 
-## 日常監控
+## 每次部署後
 
-| 項目 | 看哪裡 | 處理 |
-| --- | --- | --- |
-| 前端部署 | GitHub Actions、Vercel Deployments | 部署失敗時先看 GitHub Actions log。 |
-| 後端部署 | GitHub Actions、Supabase Functions | deployment secrets 或 migration 失敗會在 workflow 顯示。 |
-| 平台異常 | 管理員 Dashboard | 優先看錯誤追蹤碼、來源、時間與最近維護結果。 |
-| Notion 同步 | Dashboard、Notion database | 檢查 integration 權限與 token。 |
-| 圖片處理 | Dashboard、Cloudinary usage | 檢查 webhook、圖片限制與 deletion jobs。 |
-| 推播 | Dashboard、Firebase / FCM | 檢查 VAPID key、token 寫入與使用者權限。 |
-| 限流 | Dashboard、Upstash usage | 檢查是否有異常高頻操作。 |
+1. 確認 GitHub Actions 後端與前端 workflow 成功。
+2. 檢查 `backendAction` smoke test 與 maintenance cleanup 回應。
+3. 以一般使用者與管理員各完成一次登入和受權限保護的讀取。
+4. 建立低風險測試內容，驗證寫入、Realtime、圖片與通知。
+5. 檢查 Dashboard、Supabase Function logs、database health 與 Vercel logs。
+6. 監看至少一個背景工作週期，確認 outbox 沒有持續累積。
+
+## 例行節奏
+
+| 頻率 | 檢查 |
+| --- | --- |
+| 每日 | 登入與 action 錯誤、outbox backlog、Function 失敗、供應商事故 |
+| 每週 | 圖片／Notion／FCM 失敗、資料庫容量、Redis 用量、管理員名單 |
+| 每月 | 帳單與額度、token／key 使用狀態、依賴更新、資料保留與備份還原演練 |
+| 每學期 | 允許網域、分類規則、附議門檻、回覆期限、管理責任與隱私告知 |
 
 ## Dashboard 判讀
 
-Dashboard 應優先用於回答：
+- 計數突然歸零：先確認環境與時間範圍，再檢查 counter 更新與最近 migration。
+- outbox backlog 上升：檢查 worker 排程、claim、外部供應商與重試狀態。
+- 圖片失敗增加：檢查 Cloudinary webhook、簽章時間、額度與 deletion jobs。
+- Notion 延遲增加：檢查 integration 權限、database schema 與 API rate limits。
+- 推播下降但站內通知正常：檢查 service account、VAPID、topic subscription 與瀏覽器權限。
 
-- 最近有沒有同步、通知、推播或清理異常？
-- 錯誤是否有追蹤碼可以回報？
-- 哪些外部服務可能失敗？
-- 維護排程是否正常完成？
-- 各分類提案與留言量是否異常？
-- 是否有累積的待處理工作？
+Dashboard 是快速診斷入口，不是 log 或稽核紀錄的替代品。
 
-使用者遇到錯誤時，應提供畫面上的追蹤碼、發生時間與操作情境。Dashboard 近期異常只保留追蹤碼、來源與時間；管理員再以追蹤碼到對應的 Edge Function logs 找完整錯誤。
+## 事故處理
 
-## 錯誤處理流程
+1. **確認影響**：記錄開始時間、環境、使用者範圍、錯誤 action 與最近部署。
+2. **保留證據**：保存 workflow run、request ID、匿名化錯誤與供應商狀態；不要貼出 token。
+3. **降低傷害**：停止有問題的部署或背景觸發，必要時暫停特定整合；不要先 reset 資料。
+4. **定位層級**：瀏覽器／Vercel、Firebase、Edge Function、Postgres、Redis、Cloudinary、Notion 或 FCM。
+5. **修復與驗證**：使用最小修正，跑對應檢查，再執行 smoke test。
+6. **復原 backlog**：確認冪等後再重試 worker 或 deletion job，觀察數量下降。
+7. **結案**：記錄時間線、原因、影響、修正與預防項目；若涉及資料或憑證，依組織程序通知。
 
-1. 收到使用者回報，先記錄追蹤碼、時間、帳號網域、操作頁面與動作。
-2. 到 Dashboard 查看近期異常。
-3. 判斷來源：前端讀取、後端 action、圖片、通知、Notion、推播、維護清理。
-4. 以追蹤碼搜尋 Supabase Function logs，確認完整錯誤與失敗階段。
-5. 視來源再查 GitHub Actions、Cloudinary、Notion 或 Upstash。
-6. 修復後重試原操作，確認 Dashboard 不再新增同類錯誤。
+## 常見處置
 
-## 資料保留
+| 症狀 | 先做什麼 | 避免 |
+| --- | --- | --- |
+| 全部 action 401/403 | 比對 Firebase project、允許網域與 service account | 關閉驗證 |
+| migration 失敗 | 閱讀第一個 SQL 錯誤並比對 migration history | 修改已部署 migration |
+| outbox 卡住 | 檢查 worker secret、排程與最早失敗事件 | 無限重跑造成重複副作用 |
+| 圖片 pending | 檢查 webhook secret、URL 與 Cloudinary delivery | 將資源改成公開 |
+| 成本突升 | 依服務拆用量，檢查讀取、上傳、egress 與 retry | 未定位來源就升級全部方案 |
 
-正式內容與短期維運資料採不同保留策略。提案、公告、留言與狀態是平台正式資料，不因日常維護自動清除；通知、即時事件、背景工作紀錄與暫存資料只保留近期操作需要的範圍。
+更細的逐項判斷見[故障排除](troubleshooting.md)。
 
-| 資料類型 | 保留策略 |
-| --- | --- |
-| 提案、公告、留言與附議 | 正式內容資料，不設定日常 TTL。 |
-| Notion 對應資料 | 作為備份與同步定位使用，不因日常維護自動清除。 |
-| App 內通知 | 保留 7 天。 |
-| Realtime 內容事件 | 保留 1 天。 |
-| Outbox 成功事件 | 完成後保留 1 天。 |
-| Outbox 失敗事件 | 失敗後保留 3 天。 |
-| Web Push 發送成功紀錄 | 不寫入資料庫。 |
-| Web Push 發送失敗紀錄 | 同一通知聚合為一筆，只保存追蹤碼並保留 3 天。 |
-| 冪等操作紀錄 | 保留 24 小時。 |
-| 未附加圖片暫存 | pending 保留 24 小時；ready 未附加保留 48 小時；failed 保留 24 小時。 |
-| 私密圖片簽名網址快取 | 最長重用 7 天；過期後由維護清理移除快取網址。 |
-| 維護清理紀錄 | 保留 7 天。 |
-| 外部資源刪除工作 | completed 保留 1 天；failed 保留 3 天；pending / processing 不因 TTL 清除。 |
+## 資料保留與刪除
 
-這樣可以降低資料庫中短期事件與診斷資料長期累積，也讓 Dashboard 聚焦近期需要處理的問題。
+Cron 與 `maintenanceCleanup` 負責短期操作資料、失敗紀錄與暫存資料的保留。內容刪除可能同時涉及 Postgres、Cloudinary 與 Notion 標記；不要只在單一供應商手動刪除。修改保留政策時要新增 migration、更新隱私告知並驗證 deletion jobs。
 
-正式維運時請分清楚：
+## 備份與復原
 
-- 內容資料：提案、公告、留言與狀態，是平台正式資料。
-- 備份資料：Notion 同步內容，供人工查閱與備援。
-- 短期維運資料：通知、事件、錯誤、追蹤碼、維護紀錄與暫存資料，主要用於近期操作與排錯。
-
-## 背景工作
-
-| 工作 | 責任 |
-| --- | --- |
-| Outbox worker | 發送 App 內通知、Web Push、Notion 同步與外部副作用 |
-| Deletion jobs | 清理 Cloudinary / Notion 相關外部資源 |
-| Maintenance cleanup | 清理過期診斷資料、維護紀錄與可過期暫存資料 |
-| Cloudinary webhook | 接收圖片上傳完成通知 |
-
-如果背景工作失敗，通常不代表使用者主操作一定失敗；但通知、同步或清理可能延遲，需要 Dashboard 追蹤。
-背景工作採有上限重試；資料庫只在有工作到期或滿批次仍有待處理項目時再次喚醒對應 worker，空閒檢查不會呼叫 Edge Function。
-
-## 分類移除清理
-
-分類從 `config/issue-categories.config.json` 移除後，後端部署會觸發一次維護清理。清理會：
-
-- 刪除資料庫中已不屬於有效分類的提案。
-- 連帶刪除該提案的留言、附議與私密作者資料。
-- 將該提案與留言綁定的 Cloudinary 圖片排入刪除工作。
-- 保留 Notion 備份頁面，並透過背景同步標記為已刪除。
-
-若只修改 config 但沒有部署後端，資料庫中的舊分類資料不會自動清理。
-
-## 部署操作
-
-正式部署順序：
-
-1. `Deploy Supabase Backend`
-2. `Deploy Frontend to Vercel`
-
-原因：
-
-- 後端 migration 與 Edge Functions 先更新，前端才不會呼叫不存在的新 action。
-- 前端部署後若 service worker 更新，使用者會拿到新版介面。
-
-若只修改文件，不需要部署前端或後端；若修改 `src/`、`public/`、`vite.config.ts` 或前端設定，會觸發前端部署；若修改 `supabase/` 或 `config/`，會影響後端部署。
-
-## 版本更新提示
-
-前端會檢查 `version.json`。當遠端版本較新時會自動更新，並在導頁前以有上限的等待讓新版 service worker 接手；若自動重載多次仍未完成，會改為不可略過的手動更新提示，避免無限重載。
-
-維運建議：
-
-- 前後端有相依變更時先部署後端。
-- 部署完成後開一次正式網址，確認更新提示與重新整理流程正常。
-- 若使用者回報更新後仍異常，請請他提供追蹤碼與發生時間。
-
-## 常見事故與處理
-
-| 狀況 | 優先檢查 |
-| --- | --- |
-| 全站無法登入 | Firebase Authorized domains、Firebase API key、`ALLOWED_DOMAIN` |
-| 管理員權限消失 | `ADMIN_EMAILS`、`syncUser` logs、重新登入 |
-| 提案送出失敗 | Dashboard 追蹤碼、Upstash 限流、backendAction logs |
-| 圖片一直 pending | Cloudinary webhook URL、`CLOUDINARY_WEBHOOK_SECRET`、Cloudinary usage |
-| Notion 不同步 | `NOTION_TOKEN`、database 是否分享給 integration、Notion API 狀態 |
-| 推播收不到 | 使用者瀏覽器權限、`VITE_FIREBASE_VAPID_KEY`、FCM token 寫入 |
-| Dashboard 沒資料 | 管理員角色、backendAction healthcheck、Supabase migration 是否完成 |
-| 部署失敗 | GitHub Environment secrets 是否填在 `production`，名稱是否完全一致 |
-
-## Reset workflow
-
-| Workflow | 風險 |
-| --- | --- |
-| `Reset Supabase Database` | 會重置資料庫架構與資料，正式環境不可隨意執行。 |
-| `Reset Cloudinary Assets` | 會刪除 Cloudinary 資源，可能造成圖片無法顯示。 |
-
-執行 reset 前請至少確認：
-
-1. 這是測試環境或已完成備份。
-2. 管理員與使用者已被通知。
-3. 知道如何重新部署後端與前端。
-4. 知道如何重新建立必要設定。
+- 使用 Supabase 提供的資料庫備份能力，並依方案確認保留期與復原點。
+- Notion 僅為方便營運的副本，不保證完整、一致或可還原 schema。
+- Cloudinary 資產與資料庫 metadata 必須一起考量。
+- 每月以隔離環境演練還原，記錄 RPO/RTO 與缺口。
+- 復原後輪替暫時憑證，重跑 smoke test，確認背景工作不會重複外部副作用。
 
 ## 本機維護指令
 
 ```bash
-npm run typecheck
-npm run lint
-npm run build
-npm run check:edge
-npm run test:architecture
-```
-
-完整本機驗證：
-
-```bash
 npm run verify:local
-```
-
-Supabase 本機資料庫：
-
-```bash
 npm run db:start
 npm run db:reset:local
 npm run db:lint:local
 ```
 
-## 維運角色建議
-
-| 角色 | 建議權限 |
-| --- | --- |
-| 專案維護者 | GitHub repo、Vercel、Supabase、Cloudinary、Firebase、Upstash |
-| 內容管理員 | App 管理員權限、Notion database 權限 |
-| 財務 / 帳務負責人 | 各雲端服務 billing read access |
-| 備援管理員 | 至少一位可更新 secrets 與重新部署的人 |
-
-不要讓只有一個人掌握所有雲端帳號與 secrets。正式上線後，帳號交接比程式碼更容易成為風險。
+這些指令只操作本機或驗證程式碼，不代表已驗證正式環境供應商整合。

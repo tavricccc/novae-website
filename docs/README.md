@@ -1,29 +1,53 @@
-# 專案文件索引
+# Novae documentation
 
-這個資料夾整理開源讀者、部署管理員與維護者需要的完整資訊。若只是要把平台部署起來，請先看正式環境部署教學；若要評估是否採用或二次開發，建議依序閱讀以下文件。
+[繁體中文](#繁體中文) · [English](#english)
 
-## 文件列表
+## 繁體中文
 
-- [專案總覽與亮點](project-overview.md)：說明平台解決的問題、核心功能、成熟度設計與適合採用的情境。
-- [技術架構](architecture.md)：說明前端、後端、資料庫、背景工作、圖片、通知與部署工作流如何分工。
-- [成本估算](costs.md)：整理正式環境的主要成本來源、免費方案起步建議與用量接近限制時的升級判斷。
-- [設定指南](configuration.md)：說明分類、權限、附議門檻、回覆期限、限流與圖片壓縮等 config 設定方式。
-- [資安與隱私模型](security.md)：說明登入、授權、RLS、後端受控 action、私密金鑰、圖片與 webhook 防護。
-- [維運指南](operations.md)：說明部署後檢查、監控 Dashboard、錯誤追蹤、資料保留與日常維護流程。
-- [正式環境部署教學](deployment-guide.md)：一步一步教第一次部署者 fork 專案、建立 secrets 並用 GitHub Actions 發布。
+這裡是Novae的完整文件。第一次使用請從[快速開始](quick-start.md)著手；準備正式上線時，再依序閱讀[設定指南](configuration.md)與[部署指南](deployment-guide.md)。
 
-## 讀者路線
-
-| 目標 | 建議閱讀 |
+| 我想要… | 文件 |
 | --- | --- |
-| 想知道專案值不值得採用 | 專案總覽與亮點、成本估算、資安與隱私模型 |
-| 第一次部署正式環境 | 正式環境部署教學、設定指南、維運指南 |
-| 想修改功能或接手維護 | 技術架構、設定指南、資安與隱私模型、維運指南 |
-| 想評估開源成熟度 | 專案總覽與亮點、技術架構、資安與隱私模型、維運指南 |
+| 了解產品定位與限制 | [專案總覽](project-overview.md) |
+| 在本機啟動專案 | [快速開始](quick-start.md) |
+| 學習學生與管理員怎麼操作 | [使用手冊](user-guide.md) |
+| 理解系統與資料流 | [系統架構](architecture.md) |
+| 調整分類、權限、限流與圖片規則 | [設定參考](configuration.md) |
+| 建立正式環境 | [部署指南](deployment-guide.md) |
+| 監控、維護或處理事故 | [維運手冊](operations.md) |
+| 排除常見問題 | [故障排除](troubleshooting.md) |
+| 評估安全與隱私 | [安全模型](security.md) |
+| 預估雲端費用 | [成本指南](costs.md) |
+| 送出 issue 或 pull request | [貢獻指南](contributing.md) |
 
-## 維護原則
+### 文件承諾
 
-- 文件應描述實際可運作的設計，不寫尚未完成的承諾。
-- 涉及雲端價格時要標註查價日期，並連到官方定價頁。
-- 涉及 secret 或權限時，必須明確區分前端公開設定與後端私密設定。
-- 修改 `config/`、部署流程、資安模型或背景工作時，請同步更新相關文件。
+- 文件只描述目前程式碼與自動化流程實際支援的行為。
+- 指令預設從 repository 根目錄執行；範例值不能直接用於正式環境。
+- 安全問題不要建立公開 issue，請依[安全模型](security.md#回報安全問題)私下回報。
+- 雲端服務的方案與價格會變動；成本文件提供估算方法，採購前仍須查閱供應商官方資訊。
+
+## English
+
+This is the complete documentation for the Novae. Start with the [quick start](en/quick-start.md). Before a production launch, follow the [configuration reference](en/configuration.md) and [deployment guide](en/deployment-guide.md).
+
+| I want to… | Document |
+| --- | --- |
+| Understand the product and its limits | [Project overview](en/project-overview.md) |
+| Run the project locally | [Quick start](en/quick-start.md) |
+| Learn student and administrator workflows | [User guide](en/user-guide.md) |
+| Understand the system and data flows | [Architecture](en/architecture.md) |
+| Configure categories, access, limits, and images | [Configuration reference](en/configuration.md) |
+| Create a production environment | [Deployment guide](en/deployment-guide.md) |
+| Monitor, maintain, or respond to incidents | [Operations runbook](en/operations.md) |
+| Resolve common failures | [Troubleshooting](en/troubleshooting.md) |
+| Review security and privacy | [Security model](en/security.md) |
+| Estimate cloud spend | [Cost guide](en/costs.md) |
+| Open an issue or pull request | [Contributing guide](en/contributing.md) |
+
+### Documentation promise
+
+- The docs describe behavior supported by the current code and automation, not planned features.
+- Commands run from the repository root unless stated otherwise. Example values are never production-ready.
+- Do not open a public issue for a vulnerability; use the private process in the [security model](en/security.md#reporting-a-vulnerability).
+- Cloud plans and prices change. Use the cost guide as an estimation method and verify current vendor terms before purchasing.

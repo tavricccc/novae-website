@@ -1,160 +1,158 @@
-# 設定指南
+# 設定參考
 
-本專案把提案分類、附議規則、讀取權限、限流與圖片限制集中在 `config/`。修改設定後，產生器會同步輸出前端與 Edge Functions 使用的型別化常數，避免前後端規則不一致。
+[English](en/configuration.md) · [文件首頁](README.md)
 
-## 設定檔
+設定分成三類：提交到 Git 的產品規則、進入前端 bundle 的公開環境變數，以及只存在部署平台的後端 secrets。不要跨越這三個邊界。
 
-| 檔案 | 用途 |
-| --- | --- |
-| `config/issue-categories.config.json` | 提案分類、讀取權限、作者顯示、附議門檻、期限 |
-| `config/rate-limits.config.json` | 操作限流、圖片數量、圖片壓縮限制 |
-| `.env.example` | 前端本機開發環境變數範本 |
-| GitHub Environment secrets | 正式部署用前端公開設定與後端私密設定 |
+## 產生式設定
 
-## 修改後要執行
+| 來源 | 控制內容 | 產生輸出 |
+| --- | --- | --- |
+| `config/issue-categories.config.json` | 分類、可見性、作者顯示、附議與回覆期限 | 前端與 Edge 共用設定 |
+| `config/rate-limits.config.json` | action 限流、圖片數量與壓縮 | 前端與 Edge 共用設定 |
+
+修改後執行：
 
 ```bash
 npm run generate:all
-npm run typecheck
-npm run lint
-npm run build
-npm run check:edge
-npm run test:architecture
+git diff
 ```
 
-`generate:all` 會產生前端與後端共用設定。若只改文件不需要跑產生器；若改 `config/`，一定要跑。
+產生檔是 repository 的一部分，必須與來源一起提交。`typecheck`、`lint` 與 `build` 的 pre-script 也會重新產生設定。
 
-## 提案分類設定
-
-`config/issue-categories.config.json` 的每個分類包含：
-
-| 欄位 | 說明 |
-| --- | --- |
-| `id` | 分類代號，會用於路由與資料保存。上線後不要隨意改。 |
-| `label` | 使用者看到的分類名稱。 |
-| `readAccess` | 讀取權限模型。 |
-| `authorVisible` | 作者是否對一般使用者顯示。 |
-| `support.enabled` | 是否啟用附議。 |
-| `support.goal` | 附議門檻。只有啟用附議時需要。 |
-| `support.deadlineDays` | 附議期限天數。只有啟用附議時需要。 |
-| `responseDeadlineDays` | 管理員回覆期限天數。 |
-
-目前預設分類：
-
-| 分類 | 讀取權限 | 作者顯示 | 附議 |
-| --- | --- | --- | --- |
-| 公共議題 | 審核後校內可讀 | 匿名 | 啟用，50 票，14 天 |
-| 學生權益 | 本人與管理員 | 顯示 | 不啟用 |
-| 設備 | 校內可讀 | 顯示 | 不啟用 |
-
-實際分類以 `config/issue-categories.config.json` 為準。分類從 config 移除並部署後，維護清理會刪除資料庫中已不屬於有效分類的提案與留言，並把相關 Cloudinary 圖片排入刪除工作；Notion 備份頁面會保留並標記為已刪除。
-
-## 讀取權限模型
-
-| 值 | 用途 |
-| --- | --- |
-| `school` | 已登入且符合校內網域者可讀。 |
-| `reviewed-school` | 審核通過後校內可讀；本人與管理員可看自己的審核中內容。 |
-| `owner-admin` | 只有作者本人與管理員可讀，適合權益維護或私密案件。 |
-
-實際可用值以 config schema 與產生器檢查為準。新增讀取模型屬於後端權限變更，需要同步檢查 RLS、Edge Functions 與前端顯示。
-
-## 附議設定
-
-附議只應用於 `support.enabled: true` 的分類。常見設定：
+## 提案分類 schema
 
 ```json
 {
+  "id": "public-issues",
+  "label": "公共議題",
+  "readAccess": "reviewed-school",
+  "authorVisible": false,
   "support": {
     "enabled": true,
     "goal": 50,
     "deadlineDays": 14
-  }
+  },
+  "responseDeadlineDays": 7
 }
 ```
 
-調整建議：
-
-- 門檻太低會讓管理員快速累積待處理案件。
-- 門檻太高會讓學生感覺流程難以推進。
-- 期限應與管理員實際處理節奏一致。
-- 不需要公開動員的分類，建議關閉附議。
-
-## 作者顯示與隱私
-
-`authorVisible: false` 表示一般使用者看到匿名作者。作者本人與管理員仍可在必要場景辨識案件，實際私密資料由後端與資料庫權限保護。
-
-建議：
-
-- 公共議題若可能涉及個人壓力，可設為匿名。
-- 設備與一般校務問題可顯示作者，方便補充資訊。
-- 權益維護、申訴或敏感案件建議搭配 `owner-admin`。
-
-## 限流設定
-
-`config/rate-limits.config.json` 控制常見操作上限：
-
-| 設定 | 預設用途 |
+| 欄位 | 說明 |
 | --- | --- |
-| `issueCreateDaily` | 每日提案建立上限 |
-| `commentCreateHourly` | 每小時留言上限 |
-| `imageUploadDaily` | 每日圖片上傳上限 |
-| `loginSyncHourly` | 登入同步上限 |
-| `avatarCacheDaily` | 頭像更新上限 |
-| `supportToggleHourly` | 附議 / 取消附議操作上限 |
-| `announcementLikeHourly` | 公告按讚操作上限 |
-| `pushTokenWriteHourly` | 推播 token 寫入上限 |
+| `id` | 永久且唯一的機器識別碼；上線後不要改名重用 |
+| `label` | 使用者看到的繁體中文名稱 |
+| `readAccess` | `school`、`reviewed-school` 或 `owner-admin` |
+| `authorVisible` | 是否向有權閱讀內容的使用者顯示作者 |
+| `support.enabled` | 是否啟用附議 |
+| `support.goal` | 啟用附議時的正整數門檻 |
+| `support.deadlineDays` | 啟用附議時的正整數期限天數 |
+| `responseDeadlineDays` | 管理回覆期限天數 |
 
-限流是防濫用與控成本的第一層保護。若遇到正常使用者被擋，先看 Dashboard / 後端紀錄，再微調 limit。
+### 可見性語意
 
-## 圖片限制
-
-| 設定 | 說明 |
+| 值 | 行為 |
 | --- | --- |
-| `imageUploads.issueMaxImages` | 每篇提案圖片上限 |
-| `imageUploads.announcementMaxImages` | 每篇公告圖片上限 |
-| `imageUploads.commentMaxImages` | 每則留言圖片上限 |
-| `imageCompression.maxUploadKilobytes` | 上傳後目標大小 |
-| `imageCompression.maxSourceMegabytes` | 原始檔最大大小 |
-| `imageCompression.maxDimension` | 圖片最長邊限制 |
-| `imageCompression.maxPixels` | 原始圖片最大像素 |
-| `imageCompression.webpQuality` | WebP 品質 |
-| `imageCompression.outputScales` | 壓縮失敗時逐步縮小比例 |
+| `school` | 已登入且符合校內網域的使用者可讀 |
+| `reviewed-school` | 作者與管理員可讀草稿；審核通過後校內可讀 |
+| `owner-admin` | 只有作者本人與管理員可讀 |
 
-圖片設定會直接影響 Cloudinary 成本、前端速度與使用者體驗。正式環境建議保守調整。
+`authorVisible: false` 只控制公開身分顯示，不會移除後端保存的作者關聯。真正的存取控制由後端與 RLS 執行。
 
-## 環境變數邊界
+### 常見組合與實際結果
 
-| 類型 | 範例 | 可否進前端 |
+| 設定組合 | 適合內容 | 實際行為 |
 | --- | --- | --- |
-| `VITE_*` | `VITE_FIREBASE_API_KEY`、`VITE_SUPABASE_URL` | 可以，會被打包進瀏覽器 |
-| 後端 secret | `SUPABASE_SERVICE_ROLE_KEY`、`GOOGLE_SERVICE_ACCOUNT_JSON` | 不可以 |
-| 第三方 API secret | `CLOUDINARY_API_SECRET`、`NOTION_TOKEN` | 不可以 |
-| Webhook secret | `WEBHOOK_SECRET`、`CLOUDINARY_WEBHOOK_SECRET` | 不可以 |
+| `school` + 顯示作者 + 不附議 | 設備回報 | 校內登入者可讀並看到作者，不顯示附議進度 |
+| `reviewed-school` + 隱藏作者 + 附議 | 公共議題 | 先由管理員審核；核准後全校看到匿名內容與附議期限 |
+| `owner-admin` + 顯示作者 + 不附議 | 權益案件 | 只有作者與管理員可讀，作者資訊用於案件聯繫 |
 
-完整部署 secrets 請看 [正式環境部署教學](deployment-guide.md)。
+將 `authorVisible` 從 `true` 改為 `false` 會改變之後的顯示，但不等於清除先前已被讀者看到或截圖的身分。提高 `goal` 或縮短 `deadlineDays` 會讓附議更難達標；變更既有提案採用建立當下或最新設定，必須以目前程式行為測試後再公告，不要假設會自動回溯。
 
-## 修改設定的安全檢查
+### 移除分類
 
-修改 config 前請先問：
+不要直接刪除已使用的 `id` 後就結束。先盤點既有內容、Notion 副本、搜尋與統計影響，再新增後續 migration 清理或遷移資料。已部署 migration 不可回改。
 
-1. 這會不會讓原本私密的分類變成公開？
-2. 作者顯示是否符合使用者預期？
-3. 附議門檻與期限是否會改變既有案件處理規則？
-4. 限流是否會造成正常使用者被擋，或讓濫用成本太低？
-5. 圖片上限是否會推高 Cloudinary 與頻寬成本？
+## 限流與圖片
 
-涉及權限或資料可見性的設定變更，應視為高風險變更。
+`rate-limits.config.json` 的每個 action 項目包含 `limit` 與使用者訊息。秒級限制吸收突發流量，時／日級限制控制濫用與成本。調高數值前先確認 Edge、Redis、資料庫與第三方服務額度。
 
-## 移除分類
+`imageUploads` 控制提案、公告與留言可附圖片數；`imageCompression` 控制來源大小、像素、最長邊、目標 KB、WebP 品質與降階比例。瀏覽器限制是體驗層，後端仍會驗證上傳與 Markdown 引用。
 
-移除分類時請注意：
+### 每個限流欄位的影響
 
-1. 從 `config/issue-categories.config.json` 移除分類物件。
-2. 執行 `npm run generate:all` 更新前後端分類常數。
-3. 部署 Supabase 後端，讓維護清理取得新的有效分類清單。
-4. 維護清理會刪除資料庫中該分類的提案、留言、附議與私密作者資料。
-5. 該分類提案與留言綁定的 Cloudinary 圖片會排入 deletion jobs，後續由刪除工作清理。
-6. Notion 備份頁面不會被刪除，會保留作為歷史紀錄並標記為已刪除。
+| Key | 超過後會影響 |
+| --- | --- |
+| `issueCreateDaily` | 使用者當日不能再建立提案 |
+| `commentCreateHourly` | 使用者暫時不能新增留言或回覆 |
+| `imageUploadDaily` | 當日不能再取得新的圖片上傳額度 |
+| `loginSyncHourly` | 過度重複的登入同步被拒絕 |
+| `avatarCacheDaily` | 頭像快取更新暫停，既有頭像仍可使用 |
+| `supportToggleHourly` | 暫時不能附議或取消附議 |
+| `announcementLikeHourly` | 暫時不能按讚或取消讚 |
+| `pushTokenWriteHourly` | 裝置推播註冊／更新暫停，站內通知不受影響 |
+| `backendActionReadHourly` / `Second` | 一般資料讀取受到長期／突發保護 |
+| `backendActionWriteHourly` / `Second` | 一般寫入受到長期／突發保護 |
+| `backendActionSensitiveWriteHourly` / `Second` | 刪除或其他敏感寫入採更嚴格門檻 |
+| `backendActionAdminWriteHourly` / `Second` | 管理操作受到獨立保護 |
+| `backendActionUploadResolveHourly` / `Second` | 圖片簽名網址解析暫停，可能顯示載入失敗 |
+| `backendHealthcheckMinute` / `Second` | 過度頻繁的健康檢查被拒絕 |
+| `cloudinaryWebhookMinute` / `Second` | 異常密集的圖片 callback 被拒絕或延後 |
+| `workerRunMinute` / `Second` | 過度重複觸發背景 worker 被拒絕 |
 
-移除分類會刪除正式資料，建議先確認該分類沒有需要保留或轉移的提案。
+`limit` 越小，濫用與成本風險越低，但尖峰時正常使用者更容易看到對應 `message`。訊息應說明「何時可再試」，不要透露內部門檻或安全策略。
+
+### 每個圖片欄位的影響
+
+| Key | 行為 |
+| --- | --- |
+| `issueMaxImages` | 單一提案可引用的圖片上限 |
+| `announcementMaxImages` | 單一公告可引用的圖片上限 |
+| `commentMaxImages` | 單一留言可引用的圖片上限 |
+| `maxUploadKilobytes` | 壓縮後希望不超過的目標大小；過低會增加模糊或失敗 |
+| `maxSourceMegabytes` | 選取原始檔的硬上限，超過時不進行壓縮 |
+| `maxDimension` | 輸出最長邊上限，降低會節省流量但損失細節 |
+| `maxPixels` | 原始解碼像素安全上限，保護記憶體與效能 |
+| `webpQuality` | 第一輪 WebP 品質，越高通常越清楚也越大 |
+| `outputScales` | 未達目標大小時依序縮圖的比例；必須由大到小評估 |
+
+## 前端環境變數
+
+所有欄位均可被瀏覽器使用者看到。
+
+| 名稱 | 必要 | 用途 |
+| --- | --- | --- |
+| `VITE_SCHOOL_NAME` | 否 | 啟動畫面與「我的」頁面顯示的學校名稱；留空時不顯示 |
+| `VITE_ALLOWED_DOMAIN` | 是 | 前端登入提示與預檢 |
+| `VITE_FIREBASE_API_KEY` | 是 | Firebase Web config |
+| `VITE_FIREBASE_AUTH_DOMAIN` | 是 | Firebase Auth domain |
+| `VITE_FIREBASE_PROJECT_ID` | 是 | Firebase project ID |
+| `VITE_FIREBASE_APP_ID` | 是 | Firebase Web App ID |
+| `VITE_FIREBASE_MESSAGING_SENDER_ID` | 是 | FCM sender ID |
+| `VITE_FIREBASE_VAPID_KEY` | 是 | Web Push public key |
+| `VITE_FIREBASE_APP_CHECK_ENABLED` | 否 | `true` 時啟用 App Check |
+| `VITE_RECAPTCHA_ENTERPRISE_SITE_KEY` | 條件式 | 啟用 App Check 時必要 |
+| `VITE_SUPABASE_URL` | 是 | Supabase project URL |
+| `VITE_SUPABASE_PUBLISHABLE_KEY` | 是 | Supabase publishable key |
+
+## 後端與部署 secrets
+
+| 群組 | 名稱 |
+| --- | --- |
+| Supabase 部署 | `SUPABASE_ACCESS_TOKEN`, `SUPABASE_PROJECT_REF`, `SUPABASE_DB_PASSWORD`, `SUPABASE_SERVICE_ROLE_KEY` |
+| Firebase 驗證 | `FIREBASE_PROJECT_ID`, `FIREBASE_WEB_API_KEY`, `GOOGLE_SERVICE_ACCOUNT_JSON` |
+| 存取控制 | `ALLOWED_DOMAIN`, `ADMIN_EMAILS` |
+| Cloudinary | `CLOUDINARY_CLOUD_NAME`, `CLOUDINARY_API_KEY`, `CLOUDINARY_API_SECRET`, `CLOUDINARY_WEBHOOK_SECRET` |
+| 內部觸發 | `WEBHOOK_SECRET` |
+| Notion | `NOTION_TOKEN`, `NOTION_DATABASE_ID`, `NOTION_VERSION`（選用，預設 `2022-06-28`） |
+| Upstash | `UPSTASH_REDIS_REST_URL`, `UPSTASH_REDIS_REST_TOKEN` |
+| Vercel 部署 | `VERCEL_TOKEN`, `VERCEL_ORG_ID`, `VERCEL_PROJECT_ID` |
+
+正式與開發環境必須使用不同資源與 secrets。`VITE_ALLOWED_DOMAIN` 應與後端 `ALLOWED_DOMAIN` 相同；管理員 email 使用部署流程所接受的清單格式，且帳號本身仍須符合允許網域。
+
+## 變更檢查清單
+
+- 執行 `npm run generate:all` 並檢查產生差異。
+- 若 schema 或後端契約受影響，執行 `npm run check:edge` 與 `npm run test:architecture`。
+- 不把 secret、真實使用者資料或正式環境 ID 寫入 Git。
+- 將規則變更同步到中英文文件。
+- 分類移除或資料模型變更使用新的 migration。
