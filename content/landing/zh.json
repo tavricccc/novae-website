@@ -6,9 +6,15 @@
   "skip": "跳到主要內容",
   "nav": {
     "home": "首頁",
-    "features": "產品特色",
-    "schools": "校園導入",
     "docs": "文件"
+  },
+  "sectionNav": {
+    "overview": "總覽",
+    "features": "產品亮點",
+    "custom": "彈性自訂",
+    "experience": "跨裝置",
+    "schools": "校園導入",
+    "roles": "使用情境"
   },
   "brand": {
     "tagline": "讓改變匯聚成星系"
@@ -233,18 +239,6 @@
     ],
     "footnote": "從單一校園開始，依自己的分類、流程與品牌逐步打造專屬參與平台。"
   },
-  "explore": {
-    "number": "03 / 深入了解",
-    "title": "想看更多？<br><em>從你在意的地方開始。</em>",
-    "lede": "首頁先說清楚價值，完整產品體驗、校園導入方式與技術文件分開整理，閱讀更輕鬆。",
-    "featuresTitle": "探索產品特色",
-    "featuresBody": "看看自訂分類、跨裝置體驗、通知、公告與管理工具如何一起運作。",
-    "schoolsTitle": "規劃校園導入",
-    "schoolsBody": "從學生自治到行政回應，了解 Novae 如何融入校園日常。",
-    "docsTitle": "查看完整文件",
-    "docsBody": "需要設定、部署與維運細節時，再進入完整雙語文件。",
-    "cta": "前往了解"
-  },
   "cta": {
     "eyebrow": "MIT LICENSE · 自己部署 · 自由改造",
     "title": "把校園的聲音，<br><em>變成真正的進度。</em>",
@@ -261,8 +255,6 @@
   },
   "links": {
     "github": "https://github.com/tavricccc/novae",
-    "features": "./product.html",
-    "schools": "./schools.html",
     "docsHome": "./docs/",
     "docsDeploy": "./docs/deployment-guide.html",
     "docsConfig": "./docs/configuration.html",

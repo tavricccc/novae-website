@@ -6,9 +6,15 @@
   "skip": "Skip to content",
   "nav": {
     "home": "Home",
-    "features": "Features",
-    "schools": "For schools",
     "docs": "Docs"
+  },
+  "sectionNav": {
+    "overview": "Overview",
+    "features": "Highlights",
+    "custom": "Customization",
+    "experience": "Every device",
+    "schools": "Campus adoption",
+    "roles": "Use cases"
   },
   "brand": {
     "tagline": "Ideas that form a constellation"
@@ -233,18 +239,6 @@
     ],
     "footnote": "Start with one campus, then shape categories, workflows, and branding around the community you serve."
   },
-  "explore": {
-    "number": "03 / EXPLORE",
-    "title": "Want to see more?<br><em>Start with what matters to you.</em>",
-    "lede": "The home page stays focused on value. Product details, campus adoption, and technical documentation each have room to breathe.",
-    "featuresTitle": "Explore product features",
-    "featuresBody": "See how customizable categories, every-device access, notifications, announcements, and team tools work together.",
-    "schoolsTitle": "Plan for your campus",
-    "schoolsBody": "See how Novae supports student organizations and school response teams in everyday work.",
-    "docsTitle": "Read the documentation",
-    "docsBody": "When you need setup, deployment, and operations details, move into the complete bilingual docs.",
-    "cta": "Explore"
-  },
   "cta": {
     "eyebrow": "MIT LICENSE · SELF-HOST · MAKE IT YOURS",
     "title": "Turn campus voices<br><em>into visible progress.</em>",
@@ -261,8 +255,6 @@
   },
   "links": {
     "github": "https://github.com/tavricccc/novae",
-    "features": "./product.html",
-    "schools": "./schools.html",
     "docsHome": "./docs/en/",
     "docsDeploy": "./docs/en/deployment-guide.html",
     "docsConfig": "./docs/en/configuration.html",

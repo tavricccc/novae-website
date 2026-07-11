@@ -20,6 +20,14 @@
 /* Marketing + chrome */
 .ti-external-link:before{content:'\ea99'}
 .ti-arrow-right:before{content:'\ea1f'}
+.ti-menu-2:before{content:'\ec42'}
+.ti-home:before{content:'\eac1'}
+.ti-sparkles:before{content:'\f6d7'}
+.ti-school:before{content:'\ecf7'}
+.ti-users:before{content:'\ebf2'}
+.ti-book-2:before{content:'\efc5'}
+.ti-bulb:before{content:'\ea51'}
+.ti-progress-check:before{content:'\fa09'}
 .ti-shield-lock:before{content:'\ed58'}
 .ti-adjustments-horizontal:before{content:'\ec38'}
 .ti-trending-up:before{content:'\eb43'}

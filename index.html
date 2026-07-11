@@ -52,8 +52,6 @@
       </a>
       <nav aria-label="primary">
         <a href="#top" class="is-active" data-i18n="nav.home">首頁</a>
-        <a href="./product.html" data-i18n="nav.features" data-i18n-href="links.features">產品特色</a>
-        <a href="./schools.html" data-i18n="nav.schools" data-i18n-href="links.schools">校園導入</a>
         <a href="./docs/" data-i18n="nav.docs" data-i18n-href="links.docsHome">文件</a>
       </nav>
       <div class="header-actions">
@@ -61,6 +59,18 @@
         <a class="button button-small button-dark" data-i18n-href="links.github" href="https://github.com/tavricccc/novae" target="_blank" rel="noreferrer">GitHub <i class="ti ti-external-link" aria-hidden="true"></i></a>
       </div>
     </header>
+
+    <nav class="section-float-nav" aria-label="page sections" data-section-nav>
+      <button class="section-float-nav__toggle" type="button" aria-expanded="false" aria-label="開啟頁面導覽" data-section-nav-toggle><i class="ti ti-menu-2" aria-hidden="true"></i></button>
+      <div class="section-float-nav__links">
+        <a href="#top" class="is-active"><i class="ti ti-home" aria-hidden="true"></i><span data-i18n="sectionNav.overview">總覽</span></a>
+        <a href="#features"><i class="ti ti-sparkles" aria-hidden="true"></i><span data-i18n="sectionNav.features">產品亮點</span></a>
+        <a href="#custom"><i class="ti ti-adjustments-horizontal" aria-hidden="true"></i><span data-i18n="sectionNav.custom">彈性自訂</span></a>
+        <a href="#experience"><i class="ti ti-devices" aria-hidden="true"></i><span data-i18n="sectionNav.experience">跨裝置</span></a>
+        <a href="#workflow"><i class="ti ti-school" aria-hidden="true"></i><span data-i18n="sectionNav.schools">校園導入</span></a>
+        <a href="#roles"><i class="ti ti-users" aria-hidden="true"></i><span data-i18n="sectionNav.roles">使用情境</span></a>
+      </div>
+    </nav>
 
     <main id="main">
       <section class="hero" id="top">
@@ -105,6 +115,11 @@
         <div class="capability-grid" data-render="features"></div>
       </section>
 
+      <section class="section config-section product-config" id="custom">
+        <div class="config-copy"><p class="section-number" data-i18n="config.number"></p><h2 data-i18n="config.title"></h2><p data-i18n="config.lede"></p><ul class="config-points" data-render="config-points"></ul></div>
+        <div class="config-panel"><div class="access-grid" data-render="config-access"></div></div>
+      </section>
+
       <section class="section experience-section" id="experience">
         <div class="section-heading horizontal">
           <div>
@@ -119,32 +134,21 @@
         </div>
       </section>
 
-      <section class="section explore-section" id="explore">
-        <div class="section-heading">
-          <p class="section-number" data-i18n="explore.number"></p>
-          <h2 data-i18n="explore.title"></h2>
-          <p data-i18n="explore.lede"></p>
-        </div>
-        <div class="explore-grid">
-          <a class="explore-card explore-card--accent" href="./product.html" data-i18n-href="links.features">
-            <i class="ti ti-sparkles" aria-hidden="true"></i>
-            <h3 data-i18n="explore.featuresTitle"></h3>
-            <p data-i18n="explore.featuresBody"></p>
-            <span><span data-i18n="explore.cta"></span><i class="ti ti-arrow-right" aria-hidden="true"></i></span>
-          </a>
-          <a class="explore-card" href="./schools.html" data-i18n-href="links.schools">
-            <i class="ti ti-school" aria-hidden="true"></i>
-            <h3 data-i18n="explore.schoolsTitle"></h3>
-            <p data-i18n="explore.schoolsBody"></p>
-            <span><span data-i18n="explore.cta"></span><i class="ti ti-arrow-right" aria-hidden="true"></i></span>
-          </a>
-          <a class="explore-card" href="./docs/" data-i18n-href="links.docsHome">
-            <i class="ti ti-book-2" aria-hidden="true"></i>
-            <h3 data-i18n="explore.docsTitle"></h3>
-            <p data-i18n="explore.docsBody"></p>
-            <span><span data-i18n="explore.cta"></span><i class="ti ti-arrow-right" aria-hidden="true"></i></span>
-          </a>
-        </div>
+      <section class="section workflow-section" id="workflow">
+        <div class="section-heading horizontal"><div><p class="section-number" data-i18n="workflow.number"></p><h2 data-i18n="workflow.title"></h2></div><p data-i18n="workflow.lede"></p></div>
+        <ol class="timeline" data-render="workflow-steps"></ol><div class="status-strip" data-render="workflow-statuses" aria-label="statuses"></div>
+      </section>
+
+      <section class="section pwa-section" id="pwa"><div class="pwa-copy"><p class="section-number" data-i18n="pwa.number"></p><h2 data-i18n="pwa.title"></h2><p data-i18n="pwa.lede"></p></div><div class="pwa-grid" data-render="pwa-cards"></div></section>
+
+      <section class="section roles-section" id="roles">
+        <div class="section-heading horizontal"><div><p class="section-number" data-i18n="roles.number"></p><h2 data-i18n="roles.title"></h2></div><p data-i18n="roles.lede"></p></div>
+        <div class="roles-grid" data-render="roles"></div><div class="more-features" data-render="more-features"></div>
+      </section>
+
+      <section class="section fit-section" id="fit">
+        <div class="section-heading horizontal"><div><p class="section-number" data-i18n="fit.number"></p><h2 data-i18n="fit.title"></h2></div><p data-i18n="fit.lede"></p></div>
+        <div class="fit-grid"><article class="fit-yes"><h3 data-i18n="fit.yesTitle"></h3><ul data-render="fit-yes"></ul></article><article class="fit-no fit-benefits"><h3 data-i18n="fit.noTitle"></h3><ul data-render="fit-no"></ul></article></div><p class="fit-footnote" data-i18n="fit.footnote"></p>
       </section>
 
       <section class="cta-section">
