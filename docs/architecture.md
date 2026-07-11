@@ -71,6 +71,7 @@ flowchart LR
 - Trigger / outbox：內容異動與副作用事件在同一交易中建立，降低同步漏失。
 - RPC：提供清理、維護、聚合統計與受控資料操作。
 - Realtime：通知使用共享訂閱與 recipient 過濾；內容事件依公開、作者或管理員受眾授權，並以計數增量更新避免重讀整頁。
+- Dashboard：分類、使用者與活動時間由交易內 counter 維護，避免開啟統計頁時掃描主要內容表。
 
 ## 圖片流程
 
@@ -86,10 +87,10 @@ flowchart LR
 
 ## 通知流程
 
-1. 提案、公告、留言、附議達標或狀態變更建立 outbox event；一般附議計數只走 Realtime，不逐次啟動背景同步。
+1. 提案、公告、留言、附議達標或狀態變更建立 outbox event；一般附議計數只走 Realtime，並每兩小時聚合更新 Notion。
 2. `outboxWorker` claim pending events。
 3. 依事件類型建立 App 內通知。
-4. 依使用者推播偏好送出 FCM Web Push。
+4. 全校公告與管理員待辦優先透過 FCM Topic 傳送，未完成 Topic 訂閱的裝置與個人通知使用 token 補送。
 5. 同步 Notion 或建立外部清理工作。
 6. 成功事件採短期保留或不落地；失敗只回寫追蹤碼，完整錯誤留在 Function logs 供 Dashboard 追查。
 
