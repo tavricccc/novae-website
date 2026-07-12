@@ -31,8 +31,7 @@ main>.cta-section{
 main>#features,
 main>#config,
 main>#architecture,
-main>#roles,
-main>.trust-strip{
+main>#roles{
   scroll-snap-align:none;
   scroll-snap-stop:normal;
   min-height:0
@@ -74,6 +73,7 @@ main>#experience{display:flex;flex-direction:column;justify-content:center}
     scroll-margin-top:56px
   }
   main>.hero{min-height:calc(100svh - 56px)}
+  main>#story{min-height:calc(100svh - 56px)}
   #story .section-heading{display:block;max-width:36rem}
   #story .section-heading>p:last-child{margin-top:2rem}
   .story-orbit--one{width:120vw;right:-62vw;top:10vh}.story-orbit--two{width:75vw;right:-20vw;top:25vh}
@@ -155,7 +155,7 @@ html.is-i18n-switching .access-grid article{
 .access-grid article{
   border:1px solid #ddddd3;border-radius:18px;background:#f7f7f5;padding:18px 16px
 }
-.access-grid code{
+.access-grid .access-label{
   display:inline-block;font:11px/1 var(--mono);color:#065f46;background:#d1fae5;
   border-radius:999px;padding:5px 10px;margin-bottom:10px
 }

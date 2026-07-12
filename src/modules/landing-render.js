@@ -49,7 +49,7 @@ function renderConfig(catalog) {
     access.innerHTML = catalog.config.access
       .map(
         (item) => `<article>
-        <code>${item.code}</code>
+        <span class="access-label">${item.label}</span>
         <strong>${item.title}</strong>
         <p>${item.body}</p>
       </article>`
@@ -168,16 +168,9 @@ function renderHeroFacts(catalog) {
     .join('');
 }
 
-function renderTrust(catalog) {
-  const root = document.querySelector('[data-render="trust"]');
-  if (!root) return;
-  root.innerHTML = catalog.trust.map((item) => `<span>${item}</span>`).join('');
-}
-
 export function renderLandingLists() {
   const catalog = getCatalog(getLanguage());
   renderHeroFacts(catalog);
-  renderTrust(catalog);
   renderFeatures(catalog);
   renderWorkflow(catalog);
   renderConfig(catalog);

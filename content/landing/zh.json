@@ -32,7 +32,6 @@
       { "label": "守護", "text": "尊重敏感聲音" }
     ]
   },
-  "trust": ["學生發聲", "共同參與", "透明進度", "隱私尊重"],
   "story": {
     "number": "00 / 名字的故事",
     "title": "一顆新星是開始，<br><em>一片星系是改變。</em>",
@@ -106,27 +105,28 @@
   },
   "config": {
     "number": "03 / 分類規則",
-    "title": "不同議題，<br><em>都有剛剛好的參與方式。</em>",
-    "lede": "公開範圍、審核方式、作者顯示、附議門檻與期限都能自訂，讓平台貼合每所學校的文化與節奏。",
+    "title": "規則不是寫死，<br><em>每所學校都能自己定義。</em>",
+    "lede": "從是否開放附議、附議門檻與期限，到管理回覆期限和 Rate Limit，所有關鍵規則都能依校園規模與治理節奏調整。",
     "points": [
-      "公開倡議：校內可見，可開附議門檻",
-      "審核後公開：先內部把關，再給全校參與",
-      "私密案件：僅作者與管理員，可關閉附議"
+      "附議機制：依分類開啟或關閉，門檻自由設定",
+      "附議期限：為不同議題設定合理的參與天數",
+      "回覆期限：明確定義管理端的回應目標",
+      "Rate Limit：發文、留言、附議與敏感操作皆可調整"
     ],
     "cta": "深入了解自訂體驗",
     "access": [
       {
-        "code": "school",
+        "label": "全校登入者可見",
         "title": "校內公開",
         "body": "已登入的校內使用者可依列表與狀態瀏覽。"
       },
       {
-        "code": "reviewed-school",
+        "label": "審核通過後公開",
         "title": "審核後公開",
         "body": "核准前僅作者與管理員；通過後進入校內視野。"
       },
       {
-        "code": "owner-admin",
+        "label": "僅本人與管理員",
         "title": "僅當事人",
         "body": "敏感權益與個人處境，不進全校列表。"
       }
@@ -135,17 +135,20 @@
       "tabs": [
         { "key": "public", "label": "公開倡議" },
         { "key": "private", "label": "私密案件" },
-        { "key": "facility", "label": "設備回報" }
+        { "key": "facility", "label": "設備回報" },
+        { "key": "limits", "label": "流量防護" }
       ],
       "snippets": {
-        "public": "readAccess: school\nauthorVisible: true\nsupport:\n  enabled: true\n  goal: 50\n  deadlineDays: 14",
-        "private": "readAccess: owner-admin\nauthorVisible: false\nsupport:\n  enabled: false",
-        "facility": "readAccess: school\nauthorVisible: true\nsupport:\n  enabled: false"
+        "public": "readAccess: school\nauthorVisible: true\nsupport:\n  enabled: true\n  goal: 50\n  deadlineDays: 14\nresponseDeadlineDays: 7",
+        "private": "readAccess: owner-admin\nauthorVisible: false\nsupport:\n  enabled: false\nresponseDeadlineDays: 7",
+        "facility": "readAccess: school\nauthorVisible: true\nsupport:\n  enabled: false\nresponseDeadlineDays: 7",
+        "limits": "issueCreateDaily:\n  limit: 30\ncommentCreateHourly:\n  limit: 200\nsupportToggleHourly:\n  limit: 600"
       },
       "results": {
         "public": { "title": "全校可附議", "body": "達標後進入處理流程，進度即時可見。" },
         "private": { "title": "不進公開列表", "body": "僅作者與管理員可讀；管理端仍保留作者關聯。" },
-        "facility": { "title": "快速回報、不需連署", "body": "關閉附議，專心狀態與現場圖片。" }
+        "facility": { "title": "快速回報、不需連署", "body": "關閉附議，專心狀態與現場圖片。" },
+        "limits": { "title": "防止濫用，也保留校園彈性", "body": "依使用規模調整發文、留言與附議頻率，兼顧參與體驗、服務穩定與成本。" }
       }
     }
   },
