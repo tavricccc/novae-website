@@ -104,14 +104,14 @@
     ]
   },
   "config": {
-    "number": "03 / CATEGORY RULES",
-    "title": "Rules that are not hard-coded.<br><em>Each school defines its own.</em>",
-    "lede": "From enabling support and setting its goal and deadline to response targets and rate limits, every critical rule can adapt to campus scale and governance rhythm.",
+    "number": "03 / WAYS TO PARTICIPATE",
+    "title": "Different campus needs,<br><em>different ways to participate safely.</em>",
+    "lede": "Public campaigns can gather support, sensitive cases stay between the student and administrators, and facility problems go straight to handling. Schools choose the experience without reading configuration code.",
     "points": [
-      "Support: enable per category and set the goal",
-      "Support deadline: choose a participation window for each topic",
-      "Response deadline: define a clear management response target",
-      "Rate limits: tune posting, comments, support, and sensitive actions"
+      "Public campaigns: visible, supportable, and trackable campus-wide",
+      "Sensitive cases: visible only to the student and administrators",
+      "Facility reports: handled directly without a petition",
+      "Usage frequency: prevent flooding and abuse at each school's scale"
     ],
     "cta": "Explore customizable experiences",
     "access": [
@@ -138,11 +138,27 @@
         { "key": "facility", "label": "Facility report" },
         { "key": "limits", "label": "Rate limits" }
       ],
-      "snippets": {
-        "public": "readAccess: school\nauthorVisible: true\nsupport:\n  enabled: true\n  goal: 50\n  deadlineDays: 14\nresponseDeadlineDays: 7",
-        "private": "readAccess: owner-admin\nauthorVisible: false\nsupport:\n  enabled: false\nresponseDeadlineDays: 7",
-        "facility": "readAccess: school\nauthorVisible: true\nsupport:\n  enabled: false\nresponseDeadlineDays: 7",
-        "limits": "issueCreateDaily:\n  limit: 30\ncommentCreateHourly:\n  limit: 200\nsupportToggleHourly:\n  limit: 600"
+      "details": {
+        "public": [
+          { "label": "Visible to", "value": "All signed-in school users" },
+          { "label": "Support", "value": "50 people within 14 days" },
+          { "label": "School response", "value": "Within 7 days" }
+        ],
+        "private": [
+          { "label": "Visible to", "value": "The student and administrators" },
+          { "label": "Support", "value": "Not enabled" },
+          { "label": "School response", "value": "Within 7 days" }
+        ],
+        "facility": [
+          { "label": "Visible to", "value": "All signed-in school users" },
+          { "label": "Handling", "value": "Direct report, no petition" },
+          { "label": "Tracks", "value": "Status, photos, and outcome" }
+        ],
+        "limits": [
+          { "label": "Posting", "value": "Up to 30 per person each day" },
+          { "label": "Comments", "value": "Up to 200 per person each hour" },
+          { "label": "Support actions", "value": "Up to 600 per person each hour" }
+        ]
       },
       "results": {
         "public": { "title": "Campus can support", "body": "Hitting the goal starts the configured process with live progress." },

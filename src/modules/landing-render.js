@@ -32,13 +32,6 @@ function renderWorkflow(catalog) {
   }
 }
 
-function escapeHtml(value) {
-  return String(value)
-    .replaceAll('&', '&amp;')
-    .replaceAll('<', '&lt;')
-    .replaceAll('>', '&gt;');
-}
-
 function renderConfig(catalog) {
   const points = document.querySelector('[data-render="config-points"]');
   if (points) {
@@ -60,7 +53,7 @@ function renderConfig(catalog) {
   const consoleRoot = document.querySelector('[data-config-console]');
   if (!consoleRoot) return;
   const tabs = catalog.config.console.tabs;
-  const snippets = catalog.config.console.snippets;
+  const details = catalog.config.console.details;
   const results = catalog.config.console.results;
   const tabBar = consoleRoot.querySelector('[data-render="config-tabs"]');
   const codeHost = consoleRoot.querySelector('[data-render="config-codes"]');
@@ -77,7 +70,9 @@ function renderConfig(catalog) {
     codeHost.innerHTML = tabs
       .map(
         (tab, index) =>
-          `<pre data-config-code="${tab.key}" ${index === 0 ? '' : 'hidden'}><code>${escapeHtml(snippets[tab.key] || '')}</code></pre>`
+          `<dl class="config-summary" data-config-code="${tab.key}" ${index === 0 ? '' : 'hidden'}>${(details[tab.key] || [])
+            .map((item) => `<div><dt>${item.label}</dt><dd>${item.value}</dd></div>`)
+            .join('')}</dl>`
       )
       .join('');
   }

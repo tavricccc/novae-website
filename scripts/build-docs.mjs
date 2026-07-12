@@ -230,8 +230,12 @@ function renderShell({ lang, id, title, bodyHtml, outRel }) {
   const altLangHref = languageAlternate(lang, id, outRel);
   const isEn = lang === 'en';
   const docsRootPrefix = '../'.repeat(Math.max(0, outputDepth - (isEn ? 2 : 1)));
+  const docsHomeHref = `${docsRootPrefix}index.html`;
   const deploymentNav = isEn ? DEPLOYMENT_NAV_EN : DEPLOYMENT_NAV_ZH;
   const showDeploymentLessons = id === 'deployment-guide' || id.startsWith('deployment/');
+  const contextLink = id.startsWith('deployment/')
+    ? `<a class="docs-context-link" href="${docsRootPrefix}deployment-guide.html">${isEn ? '← Deployment overview' : '← 返回部署指南總覽'}</a>`
+    : '';
 
   const sidebar = nav
     .map((item) => {
@@ -296,7 +300,7 @@ function renderShell({ lang, id, title, bodyHtml, outRel }) {
       </a>
       <nav aria-label="primary">
         <a href="${assetPrefix}">${isEn ? 'Home' : '首頁'}</a>
-        <a class="is-active" href="${isEn ? './' : './'}">${isEn ? 'Docs' : '文件'}</a>
+        <a class="is-active" href="${docsHomeHref}">${isEn ? 'Docs' : '文件'}</a>
       </nav>
       <div class="header-actions">
         <a class="language-toggle" href="${altLangHref}" aria-label="${isEn ? 'Switch to Chinese' : 'Switch to English'}">${isEn ? '中' : 'EN'}</a>
@@ -309,6 +313,7 @@ function renderShell({ lang, id, title, bodyHtml, outRel }) {
         ${sidebar}
       </aside>
       <main id="docs-main" class="docs-main">
+        ${contextLink}
         <article class="docs-prose">
           ${bodyHtml}
         </article>
