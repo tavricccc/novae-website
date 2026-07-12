@@ -57,7 +57,7 @@ Comments support Markdown and limited images. Do not copy private-case details i
 
 ## Announcements and notifications
 
-School users can read, like, and comment on announcements. Administrators create, edit, and delete them. Publishing may trigger in-app and Web Push delivery, so verify audience, dates, links, and title first.
+School users can read, like, and comment on announcements. Administrators create or delete them; published announcements cannot be edited. Publishing may trigger in-app and Web Push delivery, so verify audience, dates, links, and title first.
 
 The notification page stores in-app items and unread state. Opening an item rechecks target access. Web Push additionally requires browser support, OS permission, site permission, and a valid device token. Disabling Push does not disable in-app notifications.
 

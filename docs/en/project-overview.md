@@ -16,7 +16,7 @@ Forms and social posts are easy to publish but hard to track. Novae adds configu
 | Proposals | Categories, search, comments, sharing, review, status, and deadlines |
 | Privacy | School-wide, reviewed school-wide, or owner-and-admin access per category |
 | Support | Optional category-specific thresholds, deadlines, cancellation, and live progress |
-| Announcements | Admin publishing and editing; user likes and comments |
+| Announcements | Admin publishing and deletion; published posts are immutable; user likes and comments |
 | Notifications | In-app notifications and personal or topic-based Web Push |
 | Media | Browser WebP compression, signed upload, and expiring signed delivery URLs |
 | Operations | Admin dashboard, background jobs, retention, failure tracking, and automated deployment |
