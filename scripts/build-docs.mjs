@@ -11,6 +11,7 @@ import markdownItAnchor from 'markdown-it-anchor';
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const root = path.resolve(__dirname, '..');
 const contentDir = path.resolve(root, '..', 'docs');
+const changelogPath = path.join(root, 'content', 'changelog.md');
 const outDir = path.join(root, 'docs-site');
 
 const DOC_ORDER = [
@@ -30,6 +31,7 @@ const DOC_ORDER = [
 
 const NAV_ZH = [
   { id: 'README', title: '文件首頁', file: 'index.html' },
+  { id: 'changelog', title: '更新紀錄', file: 'changelog.html' },
   { id: 'quick-start', title: '快速開始', file: 'quick-start.html' },
   { id: 'user-guide', title: '使用手冊', file: 'user-guide.html' },
   { id: 'configuration', title: '設定參考', file: 'configuration.html' },
@@ -209,6 +211,9 @@ function sibling(lang, id) {
 }
 
 function languageAlternate(lang, id, outRel) {
+  if (id === 'changelog') {
+    return './en/';
+  }
   if (id === 'README') {
     return lang === 'zh' ? './en/' : '../';
   }
@@ -402,6 +407,23 @@ function build() {
     const outPath = path.join(outDir, meta.out);
     ensureDir(path.dirname(outPath));
     fs.writeFileSync(outPath, html, 'utf8');
+    count += 1;
+  }
+
+  if (fs.existsSync(changelogPath)) {
+    const source = fs.readFileSync(changelogPath, 'utf8');
+    const body = enhanceMermaid(md.render(source));
+    fs.writeFileSync(
+      path.join(outDir, 'changelog.html'),
+      renderShell({
+        lang: 'zh',
+        id: 'changelog',
+        title: extractTitle(source, body),
+        bodyHtml: body,
+        outRel: 'changelog.html'
+      }),
+      'utf8'
+    );
     count += 1;
   }
 

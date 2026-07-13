@@ -10,6 +10,7 @@ Top nav is shared on landing and docs: **Home / Docs** only (plus language + Git
 |-------------------------|-----------|
 | Landing copy (Chinese) | [`content/landing/zh.json`](content/landing/zh.json) |
 | Landing copy (English) | [`content/landing/en.json`](content/landing/en.json) |
+| Changelog | [`content/changelog.md`](content/changelog.md) |
 | Docs body (Chinese) | [`../docs/*.md`](../docs) — e.g. `user-guide.md` |
 | Docs body (English) | [`../docs/en/*.md`](../docs/en) |
 | Docs sidebar titles / order | [`scripts/build-docs.mjs`](scripts/build-docs.mjs) → `NAV_ZH` / `NAV_EN` / `DOC_ORDER` |
@@ -22,6 +23,7 @@ Top nav is shared on landing and docs: **Home / Docs** only (plus language + Git
 - Change a hero sentence → `content/landing/zh.json` → `hero.lede` (mirror key in `en.json`)
 - Add a feature card → append to `features.cards` in **both** locale JSON files
 - Fix a docs paragraph → matching `.md` under `../docs/` or `../docs/en/`
+- Add a release note → prepend it to `content/changelog.md` and update the total
 - Rename a page in the left docs nav → `NAV_ZH` / `NAV_EN` in `scripts/build-docs.mjs`
 
 The repository-level `docs/` directory is the single source for both GitHub-readable Markdown and the generated documentation website.
