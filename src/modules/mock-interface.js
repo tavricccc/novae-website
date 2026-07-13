@@ -32,8 +32,7 @@ function desktopRow(issue) {
   const progress = Math.min(100, Math.round((issue.count / issue.goal) * 100));
   return `<div class="novae-table-row" role="row">
     <div role="cell">${status(issue)}</div>
-    <div class="novae-author" role="cell"><span class="novae-avatar">${issue.avatar}</span><small>${issue.author}</small></div>
-    <strong class="novae-title" role="cell">${issue.title}</strong>
+    <div class="novae-title-cell" role="cell"><span class="novae-avatar">${issue.avatar}</span><span class="novae-title-copy"><strong class="novae-title">${issue.title}</strong><small>${issue.author}</small></span></div>
     <time role="cell">${issue.time}</time>
     <div class="novae-progress" role="cell"><div><span>${issue.count} / ${issue.goal}</span>${remainingLabel(issue)}</div><i><b style="width:${progress}%"></b></i></div>
     <div class="novae-actions" role="cell">${supportButton(issue)}<button type="button" aria-label="comments">${icon('message')}</button></div>
@@ -48,27 +47,31 @@ function mobileRow(issue) {
   </article>`;
 }
 
-function controls(includeAdd = true) {
-  const add = includeAdd
-    ? `<button class="novae-add" type="button" aria-label="add">${icon('plus')}</button>`
-    : '';
+function controls() {
   return `<div class="novae-controls">
     <div class="novae-segmented"><button class="is-active" type="button">${icon('list-details')}<span>${ui('active')}</span></button><button type="button" aria-label="${ui('closed')}">${icon('archive')}</button></div>
     <button type="button" aria-label="sort">${icon('sort-descending')}</button>
     <button type="button" aria-label="search">${icon('search')}</button>
-    ${add}
   </div>`;
 }
 
 function desktopDemo() {
   return `<section class="novae-demo novae-demo--desktop" aria-label="Novae desktop" inert>
-    <header class="novae-demo-header"><img src="./logo.svg" alt="Novae"/><nav><a class="is-active">${ui('proposals')}</a><a>${ui('announcements')}</a><a>${ui('myProposals')}</a></nav><div><button type="button" aria-label="notifications">${icon('bell')}</button><span class="novae-avatar novae-user-avatar">N</span></div></header>
+    <aside class="novae-demo-sidebar">
+      <div class="novae-sidebar-brand"><img src="./logo.svg" alt="Novae"/><strong>Novae</strong><span>${icon('chevron-left')}</span></div>
+      <nav>
+        <a class="is-active">${icon('message')}<span>${ui('proposals')}</span></a>
+        <a>${icon('speakerphone')}<span>${ui('announcements')}</span></a>
+        <a>${icon('plus')}<span>${ui('create')}</span></a>
+        <a>${icon('bell')}<span>${ui('alerts')}</span></a>
+      </nav>
+      <div class="novae-sidebar-profile"><span class="novae-avatar novae-user-avatar">N</span><span><strong>${ui('demoUser')}</strong><small>${ui('schoolName')}</small></span></div>
+    </aside>
     <main class="novae-demo-main">
-      <div class="novae-demo-toolbar"><div><h3>${ui('proposals')}</h3><button class="novae-category" type="button">${ui('publicIssues')}${icon('chevron-down')}</button></div>${controls(true)}</div>
+      <div class="novae-demo-toolbar"><div><h3>${ui('proposals')}</h3><button class="novae-category" type="button">${ui('publicIssues')}${icon('chevron-down')}</button></div>${controls()}</div>
       <div class="novae-table" role="table" aria-label="issues">
         <div class="novae-table-head" role="row">
           <span role="columnheader">${ui('status')}</span>
-          <span role="columnheader">${ui('author')}</span>
           <span role="columnheader">${ui('title')}</span>
           <span role="columnheader">${ui('time')}</span>
           <span role="columnheader">${ui('progress')}</span>
@@ -85,7 +88,7 @@ function mobileDemo() {
   return `<section class="novae-demo novae-demo--mobile" aria-label="Novae mobile" inert>
     <div class="novae-mobile-header"><strong>${ui('proposals')}</strong></div>
     <main class="novae-mobile-main">
-      <div class="novae-mobile-tools"><button class="novae-category" type="button">${ui('publicIssues')}${icon('chevron-down')}</button>${controls(false)}</div>
+      <div class="novae-mobile-tools"><button class="novae-category" type="button">${ui('publicIssues')}${icon('chevron-down')}</button>${controls()}</div>
       <div class="novae-mobile-list">${issues().map(mobileRow).join('')}</div>
     </main>
     <nav class="novae-bottom-nav" aria-label="mobile nav">

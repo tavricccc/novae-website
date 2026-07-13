@@ -171,7 +171,7 @@
   "experience": {
     "number": "04 / REAL INTERFACE",
     "title": "One workflow.<br><em>Clear on every screen.</em>",
-    "lede": "Desktop keeps complete columns and efficient controls. Mobile reprioritizes information and provides bottom navigation with a create entry."
+    "lede": "Desktop collects navigation and creation in an expandable sidebar, while lists switch between full and compact layouts as space changes. Mobile reprioritizes information around bottom navigation."
   },
   "architecture": {
     "number": "05 / TRUST BOUNDARY",
@@ -199,7 +199,7 @@
       {
         "icon": "devices",
         "title": "Made for mobile and desktop",
-        "body": "Full tables on desktop; bottom navigation, reprioritized rows, and a center create action on mobile."
+        "body": "Expandable desktop sidebar with adaptive lists; bottom navigation, reprioritized rows, and a center create action on mobile."
       },
       {
         "icon": "refresh",
@@ -299,6 +299,9 @@
       "news": "News",
       "alerts": "Alerts",
       "mine": "Mine",
+      "create": "Create",
+      "demoUser": "Novae user",
+      "schoolName": "National Campus Experimental School",
       "daysLeft": "{n} days left",
       "goalReached": "Goal reached"
     },

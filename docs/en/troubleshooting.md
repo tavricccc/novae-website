@@ -25,7 +25,7 @@ Do not hard-code a client role or disable backend checks.
 
 For universal 401/403 responses, verify a current ID token from the configured Firebase project, clock synchronization, and matching backend credentials. For missing records, check category access, review state, authorship, and administrator role. Distinguish RLS client results from service-role queries.
 
-If Realtime stops updating, verify the initial read, CSP/proxy connectivity, and event audience. A refresh that repairs the page usually points to subscription or patch behavior rather than lost data.
+If Realtime stops updating, verify the initial read, CSP/proxy connectivity, and event audience. Selecting the active desktop sidebar item or mobile bottom navigation item forces a list refresh. A refresh that repairs the page usually points to subscription or patch behavior rather than lost data.
 
 ## Images
 

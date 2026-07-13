@@ -40,7 +40,7 @@ The browser only receives public Firebase Web configuration and the Supabase pub
 
 ## Frontend boundaries
 
-`views/` assembles routes, `components/` renders application UI, `components/ui/` stays business-agnostic, `composables/` coordinates Vue workflows, `services/` owns remote boundaries, `lib/` contains Vue-independent utilities, and `types/` owns shared contracts. Business components do not query tables or construct sensitive actions directly.
+`views/` assembles routes, `components/` renders application UI, `components/ui/` stays business-agnostic, `composables/` coordinates Vue workflows, `services/` owns remote boundaries, `lib/` contains Vue-independent utilities, and `types/` owns shared contracts. `AppShell` owns the desktop sidebar, mobile bottom navigation, route-wide content clearance, and shared create entry. Business components do not query tables or construct sensitive actions directly.
 
 ## Backend functions
 
@@ -61,7 +61,7 @@ Supabase's built-in JWT check is disabled for these functions because they valid
 - `app_private` stores backend-only data and helpers.
 - Public proposal records are separated from private author data.
 - Transactions create outbox events alongside content changes.
-- Realtime audiences are authorized for public, author, recipient, or admin access. Lists and comments reconnect and re-fetch after channel failures and periodically reconcile while visible. Selecting the active desktop top navigation or mobile bottom navigation refreshes proposal and announcement lists manually.
+- Realtime audiences are authorized for public, author, recipient, or admin access. Lists and comments reconnect and re-fetch after channel failures and periodically reconcile while visible. Selecting the active desktop sidebar item or mobile bottom navigation item refreshes proposal and announcement lists manually.
 - Dashboard counters and aggregates avoid scanning primary content on each visit.
 
 ## Key flows

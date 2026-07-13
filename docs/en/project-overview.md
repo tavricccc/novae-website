@@ -37,6 +37,6 @@ Forms and social posts are easy to publish but hard to track. Novae adds configu
 
 ## One complete participation experience
 
-Novae provides a complete deployable application. Students can submit, support, discuss, and follow progress. Administrators can review proposals, post updates, publish announcements, and understand recent activity. The same content and status work across desktop and mobile, with installable PWA and notification support.
+Novae provides a complete deployable application. Students can submit, support, discuss, and follow progress. Administrators can review proposals, post updates, publish announcements, and understand recent activity. Desktop centralizes navigation and creation in an expandable sidebar, while mobile uses bottom navigation. Content adapts to the available width while both surfaces share the same data and status, with installable PWA and notification support.
 
 Next: [User guide](user-guide.md) · [Configuration](configuration.md) · [Quick start](quick-start.md)

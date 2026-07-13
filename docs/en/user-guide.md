@@ -19,13 +19,21 @@ Hidden UI is not authorization. Backend policy decides every protected operation
 
 Choose Google sign-in and use a verified account in the configured school domain. First sign-in synchronizes the user and role. PWA installation and Web Push permission are separate browser choices. After an administrator-role change, sign in again if the current token is stale.
 
+## Navigation and responsive layout
+
+Desktop uses a left sidebar. Its collapsed state keeps proposal, announcement, create, and notification icons visible. Expanding it reveals labels, while the profile area shows the user name and school on separate lines. Creation is shared by the whole application instead of repeated on individual pages.
+
+When the window becomes narrow or system scaling is high, AppShell reserves the sidebar width before laying out page content. Proposal and announcement lists switch to a compact row based on their actual available width. Settings, notifications, dashboard, and detail routes use the same protected content origin and are not placed beneath the sidebar.
+
+Mobile uses bottom navigation, with the center button opening the same create menu. Desktop and mobile share data and workflows and only change their presentation.
+
 ## Browse and search
 
 The board filters by category and status and searches proposal content. It only returns authorized records: `school` is school-wide, `reviewed-school` is author/admin-only until approval, and `owner-admin` always remains author/admin-only. A shared URL never bypasses these checks.
 
 ## Create a proposal
 
-1. Open the create menu and choose proposal.
+1. Open the create menu from the desktop sidebar or the center action in mobile bottom navigation, then choose proposal.
 2. Select the category after reviewing its visibility and author-display behavior.
 3. Write a title and Markdown body; add images if needed.
 4. Preview and remove unnecessary names, contact details, or identity documents.

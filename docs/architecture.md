@@ -51,7 +51,7 @@ flowchart LR
 | `types/` | 跨模組型別 |
 | `generated/` | 由 JSON 設定產生、應提交的型別化輸出 |
 
-`src/main.ts` 建立應用程式，`App.vue` 管理啟動閘門與 shell，router modules 負責路由與 session guard。業務元件不直接查表或自行拼裝 action。
+`src/main.ts` 建立應用程式，`App.vue` 管理啟動閘門，`AppShell` 統一桌機側邊導覽、手機底部導覽、跨路由內容避讓與新增入口，router modules 負責路由與 session guard。業務元件不直接查表或自行拼裝 action。
 
 ## 後端入口
 
@@ -72,7 +72,7 @@ Functions 在 Supabase 設定中關閉內建 JWT 驗證，因為它們使用 Fir
 - `app_private` 保存後端流程所需的私有資料與 helper。
 - 公開提案資料與作者私密資料分離，避免一般讀取帶出身分。
 - 內容交易同時建立 outbox event，外部副作用失敗時可重試。
-- Realtime event 依公開、作者或管理員受眾授權；列表與留言在連線中斷時自動重連並立即補抓，前景顯示期間也會定期與後端校正。再次點擊目前所在的桌機頂部或手機底部導覽可手動重新整理提案與公告列表。
+- Realtime event 依公開、作者或管理員受眾授權；列表與留言在連線中斷時自動重連並立即補抓，前景顯示期間也會定期與後端校正。再次點擊目前所在的桌機側邊或手機底部導覽可手動重新整理提案與公告列表。
 - Dashboard 使用交易內 counters 與聚合資料，避免每次掃描主要內容表。
 
 ## 主要流程
