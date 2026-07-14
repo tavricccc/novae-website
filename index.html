@@ -113,14 +113,28 @@
         <div class="capability-grid" data-render="features"></div>
       </section>
 
-      <section class="section config-section product-config" id="custom">
-        <div class="config-copy"><p class="section-number" data-i18n="config.number"></p><h2 data-i18n="config.title"></h2><p data-i18n="config.lede"></p><ul class="config-points" data-render="config-points"></ul></div>
-        <div class="config-panel">
-          <div class="access-grid" data-render="config-access"></div>
-          <div class="config-console" data-config-console>
-            <div class="console-tabs" data-render="config-tabs" role="tablist"></div>
-            <div data-render="config-codes"></div>
-            <div data-render="config-results" aria-live="polite"></div>
+      <section class="config-story" id="custom">
+        <div class="section config-studio" data-rule-studio>
+          <div class="config-studio__heading">
+            <p class="section-number" data-i18n="config.studio.number"></p>
+            <h2 data-i18n="config.studio.title"></h2>
+            <div class="config-studio__lede">
+              <p data-i18n="config.studio.lede"></p>
+              <a class="button button-dark" href="./category-builder.html">
+                <span data-i18n="config.studio.builderCta"></span>
+                <i class="ti ti-arrow-right" aria-hidden="true"></i>
+              </a>
+            </div>
+          </div>
+          <div class="config-studio__workspace">
+            <div class="config-dimensions" data-render="config-dimensions" role="tablist"></div>
+            <div class="config-stage">
+              <div class="config-stage__eyebrow">
+                <span data-i18n="config.studio.stepLabel"></span>
+                <strong data-rule-progress>01 / 05</strong>
+              </div>
+              <div data-render="config-dimension-panels" aria-live="polite"></div>
+            </div>
           </div>
         </div>
       </section>

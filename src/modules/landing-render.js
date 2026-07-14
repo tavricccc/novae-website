@@ -1,5 +1,5 @@
 import { getCatalog, getLanguage } from './i18n.js';
-import { initializeConfigConsole } from './config-console.js';
+import { initializeRuleStudio } from './rule-studio.js';
 
 function renderFeatures(catalog) {
   const root = document.querySelector('[data-render="features"]');
@@ -33,60 +33,37 @@ function renderWorkflow(catalog) {
 }
 
 function renderConfig(catalog) {
-  const points = document.querySelector('[data-render="config-points"]');
-  if (points) {
-    points.innerHTML = catalog.config.points.map((p) => `<li>${p}</li>`).join('');
-  }
-  const access = document.querySelector('[data-render="config-access"]');
-  if (access) {
-    access.innerHTML = catalog.config.access
+  const dimensions = catalog.config.studio.dimensions;
+  const dimensionList = document.querySelector('[data-render="config-dimensions"]');
+  if (dimensionList) {
+    dimensionList.innerHTML = dimensions
       .map(
-        (item) => `<article>
-        <span class="access-label">${item.label}</span>
-        <strong>${item.title}</strong>
-        <p>${item.body}</p>
-      </article>`
+        (item, index) => `<button type="button" data-rule-tab="${item.key}" role="tab"
+          aria-selected="${index === 0 ? 'true' : 'false'}" aria-controls="rule-panel-${item.key}"
+          class="${index === 0 ? 'active' : ''}">
+          <span><i class="ti ti-${item.icon}" aria-hidden="true"></i></span>
+          <strong>${item.label}</strong><small>${String(index + 1).padStart(2, '0')}</small>
+        </button>`
       )
       .join('');
   }
 
-  const consoleRoot = document.querySelector('[data-config-console]');
-  if (!consoleRoot) return;
-  const tabs = catalog.config.console.tabs;
-  const details = catalog.config.console.details;
-  const results = catalog.config.console.results;
-  const tabBar = consoleRoot.querySelector('[data-render="config-tabs"]');
-  const codeHost = consoleRoot.querySelector('[data-render="config-codes"]');
-  const resultHost = consoleRoot.querySelector('[data-render="config-results"]');
-  if (tabBar) {
-    tabBar.innerHTML = tabs
+  const panelHost = document.querySelector('[data-render="config-dimension-panels"]');
+  if (panelHost) {
+    panelHost.innerHTML = dimensions
       .map(
-        (tab, index) =>
-          `<button type="button" data-config-tab="${tab.key}" class="${index === 0 ? 'active' : ''}" role="tab" aria-selected="${index === 0 ? 'true' : 'false'}">${tab.label}</button>`
+        (item, index) => `<article id="rule-panel-${item.key}" class="config-dimension-panel"
+          data-rule-panel="${item.key}" role="tabpanel" ${index === 0 ? '' : 'hidden'}>
+          <span class="config-dimension-panel__icon"><i class="ti ti-${item.icon}" aria-hidden="true"></i></span>
+          <h3>${item.title}</h3><p>${item.body}</p>
+          <div class="config-option-grid">${item.options
+            .map((option) => `<div><i class="ti ti-check" aria-hidden="true"></i><strong>${option.title}</strong><p>${option.body}</p></div>`)
+            .join('')}</div>
+        </article>`
       )
       .join('');
   }
-  if (codeHost) {
-    codeHost.innerHTML = tabs
-      .map(
-        (tab, index) =>
-          `<dl class="config-summary" data-config-code="${tab.key}" ${index === 0 ? '' : 'hidden'}>${(details[tab.key] || [])
-            .map((item) => `<div><dt>${item.label}</dt><dd>${item.value}</dd></div>`)
-            .join('')}</dl>`
-      )
-      .join('');
-  }
-  if (resultHost) {
-    resultHost.innerHTML = tabs
-      .map((tab, index) => {
-        const r = results[tab.key] || { title: '', body: '' };
-        return `<div class="console-result" data-config-result="${tab.key}" ${index === 0 ? '' : 'hidden'}>
-          <span aria-hidden="true">●</span>
-          <p><strong>${r.title}</strong><small>${r.body}</small></p>
-        </div>`;
-      })
-      .join('');
-  }
+
 }
 
 function renderArchitecture(catalog) {
@@ -173,7 +150,7 @@ export function renderLandingLists() {
   renderPwa(catalog);
   renderRoles(catalog);
   renderFit(catalog);
-  initializeConfigConsole();
+  initializeRuleStudio();
 }
 
 export function initializeLandingRender() {

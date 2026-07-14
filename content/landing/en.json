@@ -104,68 +104,72 @@
     ]
   },
   "config": {
-    "number": "03 / WAYS TO PARTICIPATE",
-    "title": "Different campus needs,<br><em>different ways to participate safely.</em>",
-    "lede": "Public campaigns can gather support, sensitive cases stay between the student and administrators, and facility problems go straight to handling. Schools choose the experience without reading configuration code.",
-    "points": [
-      "Public campaigns: visible, supportable, and trackable campus-wide",
-      "Sensitive cases: visible only to the student and administrators",
-      "Facility reports: handled directly without a petition",
-      "Usage frequency: prevent flooding and abuse at each school's scale"
-    ],
-    "cta": "Explore customizable experiences",
-    "access": [
-      {
-        "label": "All signed-in students",
-        "title": "School-wide",
-        "body": "Signed-in school users can browse by list and status rules."
-      },
-      {
-        "label": "Public after review",
-        "title": "Reviewed, then public",
-        "body": "Author and admins until approved; then campus visibility."
-      },
-      {
-        "label": "Owner and admins only",
-        "title": "Owner & admin",
-        "body": "Sensitive rights cases stay off the public board."
-      }
-    ],
-    "console": {
-      "tabs": [
-        { "key": "public", "label": "Public campaign" },
-        { "key": "private", "label": "Private case" },
-        { "key": "facility", "label": "Facility report" },
-        { "key": "limits", "label": "Rate limits" }
-      ],
-      "details": {
-        "public": [
-          { "label": "Visible to", "value": "All signed-in school users" },
-          { "label": "Support", "value": "50 people within 14 days" },
-          { "label": "School response", "value": "Within 7 days" }
-        ],
-        "private": [
-          { "label": "Visible to", "value": "The student and administrators" },
-          { "label": "Support", "value": "Not enabled" },
-          { "label": "School response", "value": "Within 7 days" }
-        ],
-        "facility": [
-          { "label": "Visible to", "value": "All signed-in school users" },
-          { "label": "Handling", "value": "Direct report, no petition" },
-          { "label": "Tracks", "value": "Status, photos, and outcome" }
-        ],
-        "limits": [
-          { "label": "Posting", "value": "Up to 30 per person each day" },
-          { "label": "Comments", "value": "Up to 200 per person each hour" },
-          { "label": "Support actions", "value": "Up to 600 per person each hour" }
-        ]
-      },
-      "results": {
-        "public": { "title": "Campus can support", "body": "Hitting the goal starts the configured process with live progress." },
-        "private": { "title": "Off the public list", "body": "Only author and admins can read; admins still retain the author link." },
-        "facility": { "title": "Fast reports, no petition", "body": "Support off—focus on status and site photos." },
-        "limits": { "title": "Prevent abuse without losing campus flexibility", "body": "Tune posting, comments, and support frequency around participation, reliability, and operating cost." }
-      }
+    "studio": {
+      "number": "03 / ADJUSTABLE RULES",
+      "title": "Do not pick a preset.<br><em>Compose the right rules.</em>",
+      "lede": "Select a module to see the settings the current application actually supports. Attachment and comment access are derived from the reading scope so they stay aligned.",
+      "builderCta": "Open the category config builder",
+      "stepLabel": "Rule module",
+      "dimensions": [
+        {
+          "key": "visibility",
+          "icon": "eye",
+          "label": "Reading scope",
+          "title": "Choose who can read content, and when",
+          "body": "All three scopes start from an authenticated school identity. Backend authorization and database policies enforce access.",
+          "options": [
+            { "title": "School-wide", "body": "Signed-in users from the allowed school domain can read." },
+            { "title": "School-wide after review", "body": "Author and admins before approval; the school list after approval." },
+            { "title": "Owner and admins", "body": "The content stays off the school list and is handled privately." }
+          ]
+        },
+        {
+          "key": "author",
+          "icon": "user-shield",
+          "label": "Author display",
+          "title": "Choose whether authorized readers see the author",
+          "body": "The author can be shown or hidden. Hiding changes the interface only; the backend retains the author relationship for access and case handling.",
+          "options": [
+            { "title": "Show author", "body": "Readers with content access also see author information." },
+            { "title": "Hide author", "body": "School readers do not see the name; administrators retain the required relationship." }
+          ]
+        },
+        {
+          "key": "support",
+          "icon": "thumb-up",
+          "label": "Support",
+          "title": "Choose whether support is gathered and when it qualifies",
+          "body": "Support can be disabled. When enabled, both the goal and deadline must be positive integers; an unmet campaign ends according to the rule.",
+          "options": [
+            { "title": "Support off", "body": "The issue enters handling directly with no support progress." },
+            { "title": "Support on", "body": "Set a goal and deadline—for example, the current public category uses 50 people in 14 days." }
+          ]
+        },
+        {
+          "key": "response",
+          "icon": "clock-hour-4",
+          "label": "Response deadline",
+          "title": "Give administrative response a clear time boundary",
+          "body": "Set response days or leave the deadline unset. With support enabled it starts after the goal is met; otherwise it starts when the issue is created.",
+          "options": [
+            { "title": "From creation", "body": "For categories that go directly into handling." },
+            { "title": "After support goal", "body": "For categories that gather support before a response is required." },
+            { "title": "No deadline", "body": "Status remains trackable without a response countdown." }
+          ]
+        },
+        {
+          "key": "derived",
+          "icon": "route",
+          "label": "Derived access",
+          "title": "Attachments and comments follow the reading scope",
+          "body": "Sensitive categories keep attachments and comments private. School categories keep them within the school. Reviewed categories open school discussion only after publication.",
+          "options": [
+            { "title": "Attachment visibility", "body": "Owner-and-admin categories use private attachments; other categories use school attachments." },
+            { "title": "Comment visibility", "body": "Comments inherit the same scope to avoid leaking content." },
+            { "title": "Comment timing", "body": "Reviewed categories enable school comments after approval." }
+          ]
+        }
+      ]
     }
   },
   "experience": {

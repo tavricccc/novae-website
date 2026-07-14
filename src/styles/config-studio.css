@@ -1,0 +1,179 @@
+.config-story{
+  border-block:1px solid #efefea;
+  background:#fff;
+}
+
+.config-dimension-panel__icon{
+  width:52px;
+  height:52px;
+  display:grid;
+  place-items:center;
+  flex:none;
+  border-radius:16px;
+  background:#10b981;
+  color:#fff;
+  font-size:24px;
+}
+
+.config-studio{background:#fff}
+.config-studio__heading{
+  display:grid;
+  grid-template-columns:minmax(0,1.1fr) minmax(300px,.9fr);
+  align-items:end;
+  gap:36px;
+  margin-bottom:58px;
+}
+.config-studio__heading .section-number{grid-column:1/-1}
+.config-studio__heading h2{
+  max-width:850px;
+  font-size:clamp(44px,5.7vw,78px);
+}
+.config-studio__lede{
+  max-width:520px;
+  justify-self:end;
+  margin:0;
+  color:#77776c;
+  line-height:1.8;
+}
+.config-studio__lede p{margin:0 0 22px}
+.config-studio__lede .button{width:max-content}
+
+.config-studio__workspace{
+  display:grid;
+  grid-template-columns:minmax(250px,.42fr) minmax(0,1fr);
+  gap:18px;
+}
+.config-dimensions{
+  display:flex;
+  flex-direction:column;
+  gap:8px;
+}
+.config-dimensions button{
+  width:100%;
+  min-height:68px;
+  display:grid;
+  grid-template-columns:42px 1fr auto;
+  align-items:center;
+  gap:14px;
+  padding:10px 16px;
+  border:1px solid #ddddd3;
+  border-radius:18px;
+  background:#fff;
+  color:#77776c;
+  cursor:pointer;
+  text-align:left;
+  transition:border-color .22s ease,background .22s ease,color .22s ease,transform .22s ease;
+}
+.config-dimensions button:hover{transform:translateX(4px);border-color:#9e9e91;color:#171715}
+.config-dimensions button:focus-visible{outline:3px solid rgba(16,185,129,.28);outline-offset:2px}
+.config-dimensions button.active{border-color:#10b981;background:#ecfdf5;color:#065f46}
+.config-dimensions button>span{
+  width:42px;
+  height:42px;
+  display:grid;
+  place-items:center;
+  border-radius:13px;
+  background:#f7f7f5;
+  color:#43433d;
+  font-size:19px;
+}
+.config-dimensions button.active>span{background:#10b981;color:#fff}
+.config-dimensions strong{font-size:14px}
+.config-dimensions small{font:10px var(--mono);color:#9e9e91}
+
+.config-stage{
+  min-height:520px;
+  padding:clamp(24px,4vw,54px);
+  border:1px solid #ddddd3;
+  border-radius:28px;
+  background:#f7f7f5;
+  overflow:hidden;
+}
+.config-stage__eyebrow{
+  display:flex;
+  justify-content:space-between;
+  gap:20px;
+  margin-bottom:48px;
+  padding-bottom:16px;
+  border-bottom:1px solid #ddddd3;
+  color:#77776c;
+  font:500 11px var(--mono);
+  letter-spacing:.06em;
+  text-transform:uppercase;
+}
+.config-stage__eyebrow strong{color:#10b981}
+.config-dimension-panel[hidden]{display:none!important}
+.config-dimension-panel{animation:rulePanelIn .38s cubic-bezier(.16,1,.3,1)}
+.config-dimension-panel__icon{margin-bottom:24px}
+.config-dimension-panel h3{
+  max-width:760px;
+  margin:0;
+  font-size:clamp(30px,4vw,54px);
+  line-height:1.05;
+  letter-spacing:-.055em;
+}
+.config-dimension-panel>p{
+  max-width:760px;
+  margin:22px 0 34px;
+  color:#5d5d54;
+  font-size:15px;
+  line-height:1.8;
+}
+.config-option-grid{
+  display:grid;
+  grid-template-columns:repeat(3,minmax(0,1fr));
+  gap:12px;
+}
+.config-option-grid>div{
+  min-height:150px;
+  padding:20px;
+  border:1px solid #ddddd3;
+  border-radius:18px;
+  background:#fff;
+}
+.config-option-grid>div>i{color:#10b981}
+.config-option-grid strong{display:block;margin:16px 0 8px;font-size:15px}
+.config-option-grid p{margin:0;color:#77776c;font-size:12px;line-height:1.65}
+
+@keyframes rulePanelIn{
+  from{opacity:0;transform:translateY(14px)}
+  to{opacity:1;transform:translateY(0)}
+}
+
+@media(max-width:980px){
+  .config-studio__heading{grid-template-columns:1fr}
+  .config-studio__lede{justify-self:start}
+  .config-studio__workspace{grid-template-columns:1fr}
+  .config-dimensions{display:grid;grid-template-columns:repeat(5,minmax(150px,1fr));overflow-x:auto;padding-bottom:8px}
+  .config-dimensions button{min-width:150px;grid-template-columns:38px 1fr}
+  .config-dimensions button:hover{transform:translateY(-2px)}
+  .config-dimensions button small{display:none}
+}
+
+@media(max-width:700px){
+  .config-studio__heading{margin-bottom:38px}
+  .config-dimensions{margin-inline:-20px;padding-inline:20px;scrollbar-width:none}
+  .config-dimensions::-webkit-scrollbar{display:none}
+  .config-stage{min-height:0;padding:22px;border-radius:22px}
+  .config-stage__eyebrow{margin-bottom:30px}
+  .config-dimension-panel h3{font-size:34px}
+  .config-option-grid{grid-template-columns:1fr}
+  .config-option-grid>div{min-height:0}
+}
+
+@media(prefers-color-scheme:dark){
+  .config-story,.config-studio{background:#0c0c0a}
+  .config-dimensions button,.config-option-grid>div{background:#171715;border-color:#292925}
+  .config-dimensions button{color:#9e9e91}
+  .config-dimensions button:hover{border-color:#5d5d54;color:#f7f7f5}
+  .config-dimensions button.active{background:#063e2d;border-color:#10b981;color:#a7f3d0}
+  .config-dimensions button>span{background:#292925;color:#ddddd3}
+  .config-stage{background:#171715;border-color:#292925}
+  .config-stage__eyebrow,.config-option-grid>div{border-color:#292925}
+  .config-dimension-panel>p,.config-option-grid p{color:#9e9e91}
+}
+
+@media(prefers-reduced-motion:reduce){
+  .config-dimension-panel{animation:none}
+  .config-dimensions button{transition:none}
+}
