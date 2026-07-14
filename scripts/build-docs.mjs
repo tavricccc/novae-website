@@ -10,7 +10,7 @@ import markdownItAnchor from 'markdown-it-anchor';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const root = path.resolve(__dirname, '..');
-const contentDir = path.resolve(root, '..', 'docs');
+const contentDir = path.resolve(root, 'docs');
 const changelogPath = path.join(root, 'content', 'changelog.md');
 const outDir = path.join(root, 'docs-site');
 

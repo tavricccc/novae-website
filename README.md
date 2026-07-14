@@ -1,8 +1,8 @@
-# Novae Introduction Site
+# Novae Website
 
-Bilingual product site + full documentation for [Novae](https://github.com/tavricccc/novae). Built with Vite for GitHub Pages.
+Bilingual product site, documentation, changelog, and category configuration builder for [Novae](https://github.com/tavricccc/novae). Built with Vite for GitHub Pages.
 
-Top nav is shared on landing and docs: **Home / Docs** only (plus language + GitHub).
+This repository is published independently so forks of the main application do not deploy a duplicate Novae introduction site.
 
 ## Where to edit content
 
@@ -11,8 +11,8 @@ Top nav is shared on landing and docs: **Home / Docs** only (plus language + Git
 | Landing copy (Chinese) | [`content/landing/zh.json`](content/landing/zh.json) |
 | Landing copy (English) | [`content/landing/en.json`](content/landing/en.json) |
 | Changelog | [`content/changelog.md`](content/changelog.md) |
-| Docs body (Chinese) | [`../docs/*.md`](../docs) — e.g. `user-guide.md` |
-| Docs body (English) | [`../docs/en/*.md`](../docs/en) |
+| Docs body (Chinese) | [`docs/*.md`](docs) — e.g. `user-guide.md` |
+| Docs body (English) | [`docs/en/*.md`](docs/en) |
 | Docs sidebar groups / titles / order | [`scripts/build-docs.mjs`](scripts/build-docs.mjs) → `NAV_ZH` / `NAV_EN` |
 | Landing section structure only | [`index.html`](index.html) — prefer JSON for text |
 | Shared chrome / marketing styles | [`src/styles/site.css`](src/styles/site.css) |
@@ -22,11 +22,11 @@ Top nav is shared on landing and docs: **Home / Docs** only (plus language + Git
 
 - Change a hero sentence → `content/landing/zh.json` → `hero.lede` (mirror key in `en.json`)
 - Add a feature card → append to `features.cards` in **both** locale JSON files
-- Fix a docs paragraph → matching `.md` under `../docs/` or `../docs/en/`
+- Fix a docs paragraph → matching `.md` under `docs/` or `docs/en/`
 - Add a release note → prepend it to `content/changelog.md` and update the total
 - Rename a page in the left docs nav → `NAV_ZH` / `NAV_EN` in `scripts/build-docs.mjs`
 
-The repository-level `docs/` directory is the single source for both GitHub-readable Markdown and the generated documentation website.
+The `docs/` directory is the source for the generated documentation website.
 
 ## Scripts
 
@@ -40,9 +40,9 @@ npm run build:docs # markdown → docs-site/ only
 
 ## Publish to GitHub Pages
 
-1. Merge changes to `main` that affect `website/`, `docs/`, or the Pages workflow.
+1. Merge changes to `main`.
 2. **Settings → Pages → Source: GitHub Actions**.
-3. The repository workflow installs and builds from `website/`, then deploys `website/dist`.
+3. The repository workflow installs, builds, and deploys `dist/`.
 
 Relative `base: './'` works for user/org Pages and project Pages.
 
