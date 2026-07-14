@@ -7,6 +7,9 @@
     "build:docs": "node scripts/build-docs.mjs",
     "dev": "npm run build:docs && vite",
     "build": "npm run build:docs && vite build",
+    "check:content": "node scripts/validate-content.mjs",
+    "check:links": "node scripts/check-built-links.mjs",
+    "check": "npm run check:content && npm run build && npm run check:links",
     "preview": "vite preview"
   },
   "devDependencies": {

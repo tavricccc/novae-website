@@ -180,21 +180,8 @@
     "number": "04 / 實際介面",
     "title": "同一套流程，<br><em>每個螢幕都清楚。</em>"
   },
-  "architecture": {
-    "number": "05 / 信任邊界",
-    "title": "每一種聲音，<br><em>都被妥善照顧。</em>",
-    "lede": "從校內公開到敏感案件，參與者清楚知道內容會被誰看見，回應團隊也能安心處理。",
-    "nodes": [
-      { "small": "01", "title": "校內身分", "em": "Google 網域驗證" },
-      { "small": "02", "title": "分類規則", "em": "可見性 · 附議 · 作者" },
-      { "small": "03", "title": "後端授權", "em": "每次讀寫再檢查" },
-      { "small": "04", "title": "通知與推播", "em": "開啟時重驗權限" }
-    ],
-    "note": "分類選擇、校內身分與內容保護，共同守住每一次校園參與。",
-    "cta": "閱讀安全模型"
-  },
   "pwa": {
-    "number": "06 / PWA 體驗",
+    "number": "05 / PWA 體驗",
     "title": "像網站一樣開啟，<br><em>像 App 一樣常駐。</em>",
     "lede": "不必經過應用商店。支援的瀏覽器會在適當時機提示安裝；完成後可從主畫面啟動。推播仍需另行授權。",
     "cards": [
@@ -221,7 +208,7 @@
     ]
   },
   "roles": {
-    "number": "07 / 誰在使用",
+    "number": "06 / 誰在使用",
     "title": "學生發聲，<br><em>單位能回應。</em>",
     "cards": [
       {
@@ -245,7 +232,7 @@
     ]
   },
   "fit": {
-    "number": "08 / 適用範圍",
+    "number": "07 / 適用範圍",
     "title": "這很適合<br><em>想讓校園改變的你。</em>",
     "yesTitle": "如果你也想……",
     "noTitle": "導入後你會得到",
@@ -275,14 +262,6 @@
     "github": "GitHub",
     "docs": "Docs",
     "license": "MIT License"
-  },
-  "links": {
-    "github": "https://github.com/tavricccc/novae",
-    "docsHome": "./docs/",
-    "docsDeploy": "./docs/deployment-guide.html",
-    "docsConfig": "./docs/configuration.html",
-    "docsSecurity": "./docs/security.html",
-    "license": "https://github.com/tavricccc/novae/blob/main/LICENSE"
   },
   "demo": {
     "ui": {

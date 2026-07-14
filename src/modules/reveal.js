@@ -1,7 +1,6 @@
 const SELECTOR = [
   '.section-heading',
   '.capability-card',
-  '.feature-card',
   '.timeline li',
   '.status-strip > div',
   '.config-studio__heading',
@@ -13,9 +12,6 @@ const SELECTOR = [
   '.roles-grid article',
   '.more-features article',
   '.pwa-grid article',
-  '.architecture-map',
-  '.trust-map .arch-node',
-  '.security-note',
   '.fit-grid article'
 ].join(',');
 

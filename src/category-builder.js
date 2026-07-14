@@ -1,5 +1,6 @@
 import './styles/index.css';
 import './styles/category-builder.css';
+import { applySiteLinks } from './config/site.js';
 import {
   buildDownloadConfig,
   createEmptyCategory,
@@ -9,6 +10,7 @@ import {
 } from './modules/category-config.js';
 
 const root = document.querySelector('[data-category-builder]');
+applySiteLinks(document, 'zh');
 const state = {
   categories: [createEmptyCategory()],
   activeIndex: 0,

@@ -13,7 +13,8 @@ This repository is published independently so forks of the main application do n
 | Changelog | [`content/changelog.md`](content/changelog.md) |
 | Docs body (Chinese) | [`docs/*.md`](docs) — e.g. `user-guide.md` |
 | Docs body (English) | [`docs/en/*.md`](docs/en) |
-| Docs sidebar groups / titles / order | [`scripts/build-docs.mjs`](scripts/build-docs.mjs) → `NAV_ZH` / `NAV_EN` |
+| Docs sidebar groups / titles / order | [`content/docs-navigation.mjs`](content/docs-navigation.mjs) |
+| GitHub and documentation URLs | [`src/config/site.js`](src/config/site.js) |
 | Landing section structure only | [`index.html`](index.html) — prefer JSON for text |
 | Shared chrome / marketing styles | [`src/styles/site.css`](src/styles/site.css) |
 | Docs prose / sidebar styles | [`src/styles/docs.css`](src/styles/docs.css) |
@@ -24,7 +25,7 @@ This repository is published independently so forks of the main application do n
 - Add a feature card → append to `features.cards` in **both** locale JSON files
 - Fix a docs paragraph → matching `.md` under `docs/` or `docs/en/`
 - Add a release note → prepend it to `content/changelog.md` and update the total
-- Rename a page in the left docs nav → `NAV_ZH` / `NAV_EN` in `scripts/build-docs.mjs`
+- Rename a page in the left docs nav → `content/docs-navigation.mjs`
 
 The `docs/` directory is the source for the generated documentation website.
 
@@ -34,6 +35,7 @@ The `docs/` directory is the source for the generated documentation website.
 npm ci
 npm run dev        # build docs HTML, then Vite dev server
 npm run build      # production build → dist/
+npm run check      # validate content + build + check internal links
 npm run preview    # preview dist/
 npm run build:docs # markdown → docs-site/ only
 ```

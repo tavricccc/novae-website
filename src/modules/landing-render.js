@@ -66,20 +66,6 @@ function renderConfig(catalog) {
 
 }
 
-function renderArchitecture(catalog) {
-  const nodes = document.querySelector('[data-render="arch-nodes"]');
-  if (!nodes) return;
-  nodes.innerHTML = catalog.architecture.nodes
-    .map(
-      (node) => `<article class="arch-node">
-      <small>${node.small}</small>
-      <strong>${node.title}</strong>
-      <em>${node.em}</em>
-    </article>`
-    )
-    .join('');
-}
-
 function renderPwa(catalog) {
   const root = document.querySelector('[data-render="pwa-cards"]');
   if (!root) return;
@@ -146,7 +132,6 @@ export function renderLandingLists() {
   renderFeatures(catalog);
   renderWorkflow(catalog);
   renderConfig(catalog);
-  renderArchitecture(catalog);
   renderPwa(catalog);
   renderRoles(catalog);
   renderFit(catalog);

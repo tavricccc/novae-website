@@ -7,91 +7,20 @@ import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import MarkdownIt from 'markdown-it';
 import markdownItAnchor from 'markdown-it-anchor';
+import {
+  DEPLOYMENT_NAV_EN,
+  DEPLOYMENT_NAV_ZH,
+  NAV_EN,
+  NAV_ZH,
+  flattenNav,
+} from '../content/docs-navigation.mjs';
+import { SITE_LINKS } from '../src/config/site.js';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const root = path.resolve(__dirname, '..');
 const contentDir = path.resolve(root, 'docs');
 const changelogPath = path.join(root, 'content', 'changelog.md');
 const outDir = path.join(root, 'docs-site');
-
-const NAV_ZH = [
-  { group: '開始了解', items: [
-    { id: 'README', title: '文件首頁', file: 'index.html' },
-    { id: 'changelog', title: '更新紀錄', file: 'changelog.html' },
-    { id: 'project-overview', title: '產品亮點', file: 'project-overview.html' }
-  ] },
-  { group: '使用平台', items: [
-    { id: 'quick-start', title: '快速開始', file: 'quick-start.html' },
-    { id: 'user-guide', title: '使用者操作', file: 'user-guide.html' },
-    { id: 'admin-guide', title: '管理員操作', file: 'admin-guide.html' }
-  ] },
-  { group: '自訂與部署', items: [
-    { id: 'configuration', title: '產品規則設定', file: 'configuration.html' },
-    { id: 'environment-configuration', title: '環境與憑證', file: 'environment-configuration.html' },
-    { id: 'deployment-guide', title: '部署指南', file: 'deployment-guide.html' }
-  ] },
-  { group: '維運與安全', items: [
-    { id: 'troubleshooting', title: '故障排除', file: 'troubleshooting.html' },
-    { id: 'operations', title: '維運手冊', file: 'operations.html' },
-    { id: 'security', title: '安全模型', file: 'security.html' },
-    { id: 'costs', title: '成本指南', file: 'costs.html' }
-  ] },
-  { group: '深入了解', items: [
-    { id: 'architecture', title: '系統架構', file: 'architecture.html' },
-    { id: 'contributing', title: '貢獻指南', file: 'contributing.html' }
-  ] }
-];
-
-const NAV_EN = [
-  { group: 'Get started', items: [
-    { id: 'README', title: 'Docs home', file: 'index.html' },
-    { id: 'project-overview', title: 'Product highlights', file: 'project-overview.html' }
-  ] },
-  { group: 'Use Novae', items: [
-    { id: 'quick-start', title: 'Quick start', file: 'quick-start.html' },
-    { id: 'user-guide', title: 'User workflows', file: 'user-guide.html' },
-    { id: 'admin-guide', title: 'Administrator workflows', file: 'admin-guide.html' }
-  ] },
-  { group: 'Customize and deploy', items: [
-    { id: 'configuration', title: 'Product rules', file: 'configuration.html' },
-    { id: 'environment-configuration', title: 'Environment and credentials', file: 'environment-configuration.html' },
-    { id: 'deployment-guide', title: 'Deployment', file: 'deployment-guide.html' }
-  ] },
-  { group: 'Operate and secure', items: [
-    { id: 'troubleshooting', title: 'Troubleshooting', file: 'troubleshooting.html' },
-    { id: 'operations', title: 'Operations', file: 'operations.html' },
-    { id: 'security', title: 'Security', file: 'security.html' },
-    { id: 'costs', title: 'Costs', file: 'costs.html' }
-  ] },
-  { group: 'Go deeper', items: [
-    { id: 'architecture', title: 'Architecture', file: 'architecture.html' },
-    { id: 'contributing', title: 'Contributing', file: 'contributing.html' }
-  ] }
-];
-
-function flattenNav(nav) {
-  return nav.flatMap((section) => section.items);
-}
-
-const DEPLOYMENT_NAV_ZH = [
-  { id: 'deployment/github', title: '1. GitHub 與 Environment', file: 'deployment/github.html' },
-  { id: 'deployment/firebase', title: '2. Firebase', file: 'deployment/firebase.html' },
-  { id: 'deployment/supabase', title: '3. Supabase', file: 'deployment/supabase.html' },
-  { id: 'deployment/cloudinary', title: '4. Cloudinary', file: 'deployment/cloudinary.html' },
-  { id: 'deployment/notion', title: '5. Notion', file: 'deployment/notion.html' },
-  { id: 'deployment/upstash', title: '6. Upstash', file: 'deployment/upstash.html' },
-  { id: 'deployment/vercel-github', title: '7. Vercel 與首次部署', file: 'deployment/vercel-github.html' }
-];
-
-const DEPLOYMENT_NAV_EN = [
-  { id: 'deployment/github', title: '1. GitHub and Environments', file: 'deployment/github.html' },
-  { id: 'deployment/firebase', title: '2. Firebase', file: 'deployment/firebase.html' },
-  { id: 'deployment/supabase', title: '3. Supabase', file: 'deployment/supabase.html' },
-  { id: 'deployment/cloudinary', title: '4. Cloudinary', file: 'deployment/cloudinary.html' },
-  { id: 'deployment/notion', title: '5. Notion', file: 'deployment/notion.html' },
-  { id: 'deployment/upstash', title: '6. Upstash', file: 'deployment/upstash.html' },
-  { id: 'deployment/vercel-github', title: '7. Vercel and first release', file: 'deployment/vercel-github.html' }
-];
 
 const md = new MarkdownIt({
   html: true,
@@ -130,6 +59,10 @@ function listMarkdownFiles(dir, base = '') {
 }
 
 function rewriteMarkdownLinks(html, { lang }) {
+  html = html.replace(
+    /href="(?:\.\.\/)+LICENSE(?:#[^"]*)?"/g,
+    `href="${SITE_LINKS.license}"`
+  );
   // foo.md / ./foo.md / ../structure.md / en/foo.md → html counterparts
   return html.replace(
     /href="([^"]+\.md)(#[^"]*)?"/g,
@@ -158,7 +91,7 @@ function rewriteMarkdownLinks(html, { lang }) {
         if (next === 'README.html') next = 'index.html';
         // structure.md lives only in main repo — link to GitHub
         if (next === 'structure.html') {
-          return `href="https://github.com/tavricccc/novae/blob/main/structure.md${hash || ''}"`;
+          return `href="${SITE_LINKS.github}/blob/main/structure.md${hash || ''}"`;
         }
         return `href="../${next}${hash || ''}"`;
       }
@@ -174,7 +107,7 @@ function rewriteMarkdownLinks(html, { lang }) {
       next = next.replace(/\.md$/, '.html');
       if (next === 'README.html') next = 'index.html';
       if (next === 'structure.html' || next.endsWith('/structure.html')) {
-        return `href="https://github.com/tavricccc/novae/blob/main/structure.md${hash || ''}"`;
+        return `href="${SITE_LINKS.github}/blob/main/structure.md${hash || ''}"`;
       }
       return `href="${next}${hash || ''}"`;
     }
@@ -332,7 +265,7 @@ function renderShell({ lang, id, title, bodyHtml, outRel }) {
       </nav>
       <div class="header-actions">
         <a class="language-toggle" href="${altLangHref}" aria-label="${isEn ? 'Switch to Chinese' : 'Switch to English'}">${isEn ? '中' : 'EN'}</a>
-        <a class="button button-small button-dark" href="https://github.com/tavricccc/novae" target="_blank" rel="noreferrer">GitHub</a>
+        <a class="button button-small button-dark" href="${SITE_LINKS.github}" target="_blank" rel="noreferrer">GitHub</a>
       </div>
     </header>
     <div class="docs-layout">
@@ -361,8 +294,8 @@ function renderShell({ lang, id, title, bodyHtml, outRel }) {
       <p>${isEn ? 'Open source for transparent campus participation.' : '為更透明、可追蹤的校園參與而開源。'}</p>
       <div>
         <a href="${assetPrefix}">${isEn ? 'Home' : '首頁'}</a>
-        <a href="https://github.com/tavricccc/novae" target="_blank" rel="noreferrer">GitHub</a>
-        <a href="https://github.com/tavricccc/novae/blob/main/LICENSE" target="_blank" rel="noreferrer">MIT License</a>
+        <a href="${SITE_LINKS.github}" target="_blank" rel="noreferrer">GitHub</a>
+        <a href="${SITE_LINKS.license}" target="_blank" rel="noreferrer">MIT License</a>
       </div>
     </footer>
   </body>

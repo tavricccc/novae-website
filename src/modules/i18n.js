@@ -1,5 +1,6 @@
 import zh from '../../content/landing/zh.json';
 import en from '../../content/landing/en.json';
+import { applySiteLinks } from '../config/site.js';
 
 const LANGUAGE_KEY = 'novae-site-language';
 const catalogs = { zh, en };
@@ -43,10 +44,7 @@ function applyTextNodes(root = document) {
 }
 
 function applyAttrs(root = document) {
-  root.querySelectorAll('[data-i18n-href]').forEach((node) => {
-    const value = t(node.dataset.i18nHref);
-    if (value) node.setAttribute('href', value);
-  });
+  applySiteLinks(root, currentLanguage);
   root.querySelectorAll('[data-i18n-aria]').forEach((node) => {
     const value = t(node.dataset.i18nAria);
     if (value) node.setAttribute('aria-label', value);

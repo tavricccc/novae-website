@@ -180,21 +180,8 @@
     "number": "04 / REAL INTERFACE",
     "title": "One workflow.<br><em>Clear on every screen.</em>"
   },
-  "architecture": {
-    "number": "05 / TRUST BOUNDARY",
-    "title": "Every kind of voice.<br><em>Handled with care.</em>",
-    "lede": "From school-wide ideas to sensitive cases, participants understand who can see their content and response teams can act with confidence.",
-    "nodes": [
-      { "small": "01", "title": "School identity", "em": "Verified Google domain" },
-      { "small": "02", "title": "Category rules", "em": "Visibility · support · author" },
-      { "small": "03", "title": "Server authorization", "em": "Rechecked on every access" },
-      { "small": "04", "title": "Notifications", "em": "Access revalidated on open" }
-    ],
-    "note": "Category choices, trusted school identity, and protected content work together throughout the experience.",
-    "cta": "Read the security model"
-  },
   "pwa": {
-    "number": "06 / PWA EXPERIENCE",
+    "number": "05 / PWA EXPERIENCE",
     "title": "Open like a website.<br><em>Keep it like an app.</em>",
     "lede": "No app store required. Supported browsers offer installation at the right moment, then launch from the home screen. Push still needs a separate permission.",
     "cards": [
@@ -221,7 +208,7 @@
     ]
   },
   "roles": {
-    "number": "07 / WHO USES IT",
+    "number": "06 / WHO USES IT",
     "title": "Students speak.<br><em>Teams can respond.</em>",
     "cards": [
       {
@@ -245,7 +232,7 @@
     ]
   },
   "fit": {
-    "number": "08 / FIT",
+    "number": "07 / FIT",
     "title": "Made for anyone who wants<br><em>to change their campus.</em>",
     "yesTitle": "If you want to…",
     "noTitle": "What your campus gains",
@@ -275,14 +262,6 @@
     "github": "GitHub",
     "docs": "Docs",
     "license": "MIT License"
-  },
-  "links": {
-    "github": "https://github.com/tavricccc/novae",
-    "docsHome": "./docs/en/",
-    "docsDeploy": "./docs/en/deployment-guide.html",
-    "docsConfig": "./docs/en/configuration.html",
-    "docsSecurity": "./docs/en/security.html",
-    "license": "https://github.com/tavricccc/novae/blob/main/LICENSE"
   },
   "demo": {
     "ui": {
