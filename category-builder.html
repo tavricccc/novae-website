@@ -16,45 +16,50 @@
       <a class="button button-small button-dark" href="./docs/configuration.html">設定文件 <i class="ti ti-arrow-right" aria-hidden="true"></i></a>
     </header>
 
-    <main id="builder-main">
-      <section class="builder-hero">
-        <div>
-          <p class="section-number">VISUAL CONFIG BUILDER</p>
-          <h1>把分類規則，<br /><em>直接組成設定檔。</em></h1>
+    <main id="builder-main" class="builder-app" data-category-builder>
+      <header class="builder-commandbar">
+        <div class="builder-commandbar__title">
+          <a href="./#custom"><i class="ti ti-arrow-left" aria-hidden="true"></i><span>返回介紹</span></a>
+          <div><h1>分類設定產生器</h1><code>config/issue-categories.config.json</code></div>
+          <span class="builder-status" data-validity-badge>草稿</span>
         </div>
-        <div class="builder-hero__copy">
-          <p>依主程式實際支援的 schema 編輯分類、閱讀範圍、作者顯示、附議與回應期限；完成後下載檔案，覆蓋專案中的 <code>config/issue-categories.config.json</code>。</p>
-          <div><span>校內登入固定必要</span><span>純前端處理</span><span>不會上傳設定</span></div>
+        <div class="builder-commandbar__actions">
+          <label class="button button-secondary builder-import"><i class="ti ti-file-upload" aria-hidden="true"></i>開啟 JSON<input type="file" accept="application/json,.json" data-import-config /></label>
+          <button class="button button-dark" type="button" data-download-config><i class="ti ti-download" aria-hidden="true"></i>下載 JSON</button>
         </div>
-      </section>
+      </header>
+      <p class="builder-message" data-builder-message>設定只在目前瀏覽器中處理，不會自動寫入專案。</p>
 
-      <section class="builder-shell" data-category-builder>
-        <div class="builder-toolbar">
-          <div>
-            <button class="button button-primary" type="button" data-add-category><i class="ti ti-plus" aria-hidden="true"></i>新增分類</button>
-            <label class="button button-secondary builder-import">匯入 JSON<input type="file" accept="application/json,.json" data-import-config /></label>
+      <div class="builder-layout">
+        <aside class="builder-sidebar" aria-label="分類清單">
+          <div class="builder-sidebar__head"><div><h2>分類</h2><span data-category-count>1</span></div><button type="button" data-add-category aria-label="新增分類"><i class="ti ti-plus" aria-hidden="true"></i></button></div>
+          <div class="builder-category-list" data-category-list></div>
+          <div class="builder-sidebar__help">
+            <strong><i class="ti ti-lock" aria-hidden="true"></i>固定規則</strong>
+            <p>所有分類都需要校內 Google 帳號登入；附件與留言權限會依閱讀範圍自動套用。</p>
+            <a href="./docs/configuration.html">查看設定文件 <i class="ti ti-arrow-right" aria-hidden="true"></i></a>
           </div>
-          <button class="button button-dark" type="button" data-download-config>下載設定檔</button>
-        </div>
+        </aside>
 
-        <div class="builder-workspace">
-          <aside class="builder-categories" aria-label="分類清單">
-            <div class="builder-categories__head"><span>分類</span><strong data-category-count>1</strong></div>
-            <div data-category-list></div>
-          </aside>
+        <section class="builder-detail">
+          <nav class="builder-view-tabs" aria-label="編輯模式">
+            <button class="active" type="button" data-editor-tab="form" aria-selected="true"><i class="ti ti-adjustments-horizontal" aria-hidden="true"></i>視覺化設定</button>
+            <button type="button" data-editor-tab="source" aria-selected="false"><i class="ti ti-code" aria-hidden="true"></i>JSON 預覽</button>
+          </nav>
 
-          <section class="builder-editor" data-category-editor aria-live="polite"></section>
+          <div data-editor-panel="form">
+            <section class="builder-editor" data-category-editor aria-live="polite"></section>
+          </div>
 
-          <aside class="builder-preview">
-            <div class="builder-preview__head"><div><small>即時預覽</small><h2>產生結果</h2></div><span data-validity-badge>尚未完成</span></div>
-            <div data-derived-preview></div>
-            <pre><code data-json-preview></code></pre>
-            <p data-builder-message>所有處理都留在瀏覽器中。</p>
-          </aside>
-        </div>
-      </section>
+          <div data-editor-panel="source" hidden>
+            <div class="builder-source">
+              <header><div><p>GENERATED SOURCE</p><h2>issue-categories.config.json</h2></div><span data-file-status>1 個分類</span></header>
+              <section class="builder-validation" data-validation-summary hidden><h3>設定還不能下載</h3><p>請先修正以下項目：</p><div data-error-list></div></section>
+              <pre><code data-json-preview></code></pre>
+            </div>
+          </div>
+        </section>
+      </div>
     </main>
-
-    <footer class="site-footer"><a class="brand" href="./"><span class="brand-mark"><img src="./logo.svg" alt="" /></span></a><p>依真實 schema 產生可提交的分類設定。</p><div><a href="./docs/configuration.html">設定文件</a><a href="https://github.com/tavricccc/novae">GitHub</a></div></footer>
   </body>
 </html>
