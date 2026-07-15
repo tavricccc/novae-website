@@ -1,109 +1,77 @@
 # 系統架構
 
-[English](en/architecture.md) · [文件首頁](README.md)
+本頁先用一條請求解釋系統，再列模組邊界。部署者不需要理解每個檔案；只有開發、資安審查或事故定位時才需要深入。
 
-本頁解釋元件責任、信任邊界與主要資料流。檔案級模組地圖請看 repository 根目錄的 [`structure.md`](../structure.md)。
-
-## 系統概觀
+## 一次操作經過哪裡
 
 ```mermaid
 flowchart LR
-  Browser["瀏覽器 / PWA"] --> Vercel["Vercel 靜態前端"]
-  Browser --> Firebase["Firebase Auth / App Check / FCM"]
-  Browser --> Gateway["Supabase backendAction"]
-  Gateway --> Postgres["Postgres + RLS + RPC"]
-  Gateway --> Redis["Upstash 限流"]
-  Gateway --> Images["Cloudinary"]
-  Postgres --> Worker["Outbox / Cron"]
-  Worker --> Firebase
-  Worker --> Notion["Notion 副本"]
-  Worker --> Images
-  Images --> Webhook["Cloudinary webhook"]
-  Webhook --> Postgres
+  U[瀏覽器 PWA] -->|Google 登入| F[Firebase Auth]
+  U -->|Firebase token + action| E[Supabase Edge Functions]
+  E -->|驗證、角色、限流| R[Upstash Redis]
+  E -->|RPC／交易| P[Postgres + RLS]
+  U -->|簽名圖片上傳| C[Cloudinary]
+  C -->|簽章 callback| E
+  P --> O[Outbox]
+  O --> W[outboxWorker]
+  W --> N[站內通知／FCM／Notion]
+  G[GitHub Actions] --> E
+  G --> V[Vercel 前端]
 ```
 
-瀏覽器只持有可公開的 Firebase Web 設定與 Supabase publishable key。所有寫入、私密讀取、角色判斷、上傳簽名與外部副作用都在後端完成。
+重要原則：瀏覽器不被信任；UI 顯示條件只改善體驗，真正權限由 Edge 驗證、Postgres RLS、RPC 與資料約束執行。
 
-## 技術棧與責任
+## 前端層級
 
-| 層 | 技術 | 責任 |
-| --- | --- | --- |
-| Web | Vue 3、TypeScript、Vite、Vue Router、Workbox | UI、路由、PWA、前端流程 |
-| 身分 | Firebase Auth、App Check | Google 登入、token 與來源驗證 |
-| 推播 | Firebase Cloud Messaging | 個人與 topic Web Push |
-| API | Supabase Edge Functions、Deno | 驗證、授權、限流、冪等與 action 分派 |
-| 資料 | Postgres、RLS、RPC、Realtime、Cron | 主要資料、交易、權限與排程 |
-| 媒體 | Cloudinary | authenticated image 儲存與 delivery |
-| 外部副本 | Notion API | 提案與公告的營運副本 |
-| 限流 | Upstash Redis REST | 跨執行個體的速率限制 |
-| 發布 | GitHub Actions、Vercel、Supabase CLI | 驗證、migration 與部署 |
-
-## 前端模組
-
-| 目錄 | 邊界 |
+| 目錄 | 責任 |
 | --- | --- |
-| `views/` | 路由頁組裝與頁面級狀態；不直接讀寫資料 |
+| `views/` | 路由頁組裝與頁面級狀態，不直接存取資料 |
 | `components/` | 應用 UI 與事件轉發 |
-| `components/ui/` | 無業務資料、service 或 session 相依的共用 UI |
+| `components/ui/` | 無業務資料、service、session 相依的共用 UI |
 | `composables/` | Vue 狀態、生命週期與跨元件流程 |
-| `services/` | Edge Function 與 Supabase client 邊界 |
-| `lib/` | 不依賴 Vue 的純函式 |
+| `services/` | `backendAction` 與 Supabase client 邊界 |
+| `lib/` | 無 Vue 相依的純工具 |
 | `types/` | 跨模組型別 |
-| `generated/` | 由 JSON 設定產生、應提交的型別化輸出 |
+| `generated/` | 由 JSON config 產生、前端使用的型別化規則 |
 
-`src/main.ts` 建立應用程式，`App.vue` 管理啟動閘門，`AppShell` 統一桌機側邊導覽、手機底部導覽、跨路由內容避讓與新增入口，router modules 負責路由與 session guard。業務元件不直接查表或自行拼裝 action。
+主要路由是提案列表／詳情、公告列表／詳情、通知、設定與管理 Dashboard。桌面與手機共用資料流，只切換 layout。
 
 ## 後端入口
 
-| Function | 呼叫者 | 責任 |
-| --- | --- | --- |
-| `backendAction` | Web App、健康檢查 | 統一驗證、角色、限流、冪等與領域 action |
-| `syncUser` | 登入流程 | 同步允許網域使用者與角色 claim |
-| `cloudinaryWebhook` | Cloudinary | 驗證 webhook 並更新上傳狀態 |
-| `outboxWorker` | Cron／受控觸發 | 通知、FCM、Notion 與外部副作用 |
-| `processDeletionJobs` | Cron／受控觸發 | 清除 Cloudinary 資源與同步刪除狀態 |
-| `maintenanceCleanup` | 部署／維護者 | 執行資料保留與維護 RPC |
+| Function | 真實責任 |
+| --- | --- |
+| `backendAction` | 統一 action 閘道：CORS、Firebase token、角色、限流、冪等、驗證與領域分派 |
+| `syncUser` | 登入後同步允許網域使用者與角色 claim |
+| `cloudinaryWebhook` | 驗證 Cloudinary callback 並更新上傳狀態 |
+| `outboxWorker` | 處理通知、FCM、選用的 Notion 同步與外部副作用 |
+| `processDeletionJobs` | 清除 Cloudinary 資源並同步刪除狀態 |
+| `maintenanceCleanup` | 執行保留期、維護 RPC，並觸發 deletion/outbox workers |
 
-Functions 在 Supabase 設定中關閉內建 JWT 驗證，因為它們使用 Firebase token、webhook signature 或專用 secret 自行驗證。這不是公開匿名存取的意思。
+## 分類設定如何生效
 
-## 資料與授權
+```mermaid
+flowchart LR
+  J[config/issue-categories.config.json] --> S[scripts/issue-category-config.mjs 驗證與推導]
+  S --> A[src/generated/issue-categories.ts]
+  S --> B[supabase/functions/_shared/issue-categories.ts]
+  A --> UI[前端分類、期限、顯示]
+  B --> API[Edge 權限與流程]
+```
 
-- `app_api` 是可由 client 使用的 schema，仍受 RLS 與受控 RPC 保護。
-- `app_private` 保存後端流程所需的私有資料與 helper。
-- 公開提案資料與作者私密資料分離，避免一般讀取帶出身分。
-- 內容交易同時建立 outbox event，外部副作用失敗時可重試。
-- Realtime event 依公開、作者或管理員受眾授權；列表與留言在連線中斷時自動重連並立即補抓，前景顯示期間也會定期與後端校正。再次點擊目前所在的桌機側邊或手機底部導覽可手動重新整理提案與公告列表。
-- Dashboard 使用交易內 counters 與聚合資料，避免每次掃描主要內容表。
+原始 JSON 只要求人能理解的欄位。產生器會推導作者儲存、附件／留言可見性、留言開放時機、附議未達標自動結束，以及回應期限從建立或附議達標開始。前端與 Edge 共享同一來源，避免各自寫一套規則。
 
-## 主要流程
+## 資料與副作用
 
-### 登入
+Postgres 是 source of truth。需要通知、Push、Notion 或其他外部服務的交易，先在同一資料庫交易寫入 outbox，再由 worker 執行。這讓主要資料成功不依賴第三方當下是否在線，也讓失敗可以重試與追蹤。
 
-1. 瀏覽器透過 Firebase Google provider 登入。
-2. 前端取得 Firebase ID token 並呼叫 `syncUser`。
-3. 後端驗證 token、email 驗證狀態與允許網域。
-4. 後端同步使用者與角色；後續 action 再次驗證，不信任前端角色。
-
-### 圖片
-
-1. 瀏覽器驗證尺寸並壓縮為 WebP。
-2. `backendAction` 驗證權限與額度，建立簽名上傳 session。
-3. 瀏覽器直傳 Cloudinary authenticated resource。
-4. Webhook 將 metadata 標記為 ready 或 failed。
-5. Markdown 只儲存 `srp-upload://<id>`；讀取時批次換成短效 signed URL。
-6. 未使用、失敗或已刪除資源由 deletion job 清理。
-
-### 通知與外部同步
-
-1. 內容交易建立 outbox event。
-2. Worker claim 待處理事件，避免多個 worker 重複處理。
-3. 事件建立站內通知、FCM 訊息或 Notion 更新。
-4. 可重試失敗保留追蹤資訊；完整錯誤只留在 Function logs。
+圖片採兩段式流程：取得受權限控制的上傳簽名、上傳至 Cloudinary、驗證 callback、保存狀態；讀取時再依內容權限取得短效簽名 URL。
 
 ## 部署拓樸
 
-`main` 對應 GitHub `production` Environment，`dev` 對應 `development`。後端 workflow 先推 migrations、設定 secrets、部署 Functions 並 smoke test；前端 workflow 建置並部署 Vercel artifacts。若同一 commit 同時改到後端與前端，前端工作會等待相符的後端部署完成。
+- `main` → GitHub `production` Environment → Supabase production + Vercel production。
+- `dev` → `development` Environment → 只有維護測試站時才建立的另一套資源。
+- config 或 Supabase 變更會觸發後端；前端若同時變更會等待同 commit 後端成功。
+- backend workflow 套 migration、設定 Edge secrets、部署 Functions、健康檢查。
+- frontend workflow 由 Vercel CLI build 並 deploy prebuilt artifacts。
 
-## 架構約束
-
-`tests/architecture.test.mjs` 防止私密設定進入前端、敏感資料繞過後端、分頁不穩定、圖片未驗證、通知越權及部署責任混雜。修改資料流時，除了單元行為也要更新這些靜態約束與本文件。
+完整檔案位置以主程式 repository 的 `structure.md` 為準。

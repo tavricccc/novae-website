@@ -1,81 +1,48 @@
-# Quick start
+# Preparation and service setup
 
-[繁體中文](../quick-start.md) · [Documentation home](../README.md)
+This is not a local-development tutorial, and it does not release the app yet. Decide campus policy first, then create each service in order. Only after all seven steps should you enter credentials, configure categories, and run the final release.
 
-This tutorial starts the frontend locally and verifies the codebase. A working Firebase and Supabase project is required for full behavior. Notifications, images, and Notion can be configured later.
+## 1. Decide campus policy
 
-## Prerequisites
+Write down the school display name, allowed Google email domain, initial administrator emails, categories, visibility, author display, support goals, support windows, and response deadlines.
 
-- Node.js 24, matching CI
-- npm and Git
-- A Firebase Web App with Google sign-in enabled
-- A Supabase project with this repository's migrations and Edge Functions
+## 2. Create the seven service setups in order
 
-Docker is also required if you run the local Supabase stack.
+| Service | Purpose |
+| --- | --- |
+| GitHub | Fork, production secrets, and deployment workflows |
+| Firebase | Google sign-in, App Check, and Web Push |
+| Supabase | Database, RLS, Realtime, and Edge Functions |
+| Cloudinary | Signed image storage and delivery |
+| Upstash | Distributed rate limiting |
+| Vercel | Production PWA hosting |
 
-## 1. Clone and install
+Notion is an optional operations copy. Create it only when needed; omitting it does not affect proposals, announcements, notifications, or other core features.
 
-```bash
-git clone https://github.com/tavricccc/novae.git
-cd novae
-npm ci
-```
+Complete these pages in order. Each page only creates that service and collects its credentials:
 
-## 2. Configure the frontend
+1. [Create the GitHub fork and production Environment](deployment/github.md)
+2. [Create Firebase](deployment/firebase.md)
+3. [Create Supabase](deployment/supabase.md)
+4. [Create Cloudinary](deployment/cloudinary.md)
+5. [Configure optional Notion](deployment/notion.md)
+6. [Create Upstash](deployment/upstash.md)
+7. [Create Vercel](deployment/vercel-github.md)
 
-```bash
-cp .env.example .env
-```
+## 3. Confirm ownership
 
-PowerShell:
+You need permission to manage GitHub Settings and Actions, create each vendor project, manage the school domain and administrator list, and own the institution's privacy, moderation, retention, and incident-response decisions.
 
-```powershell
-Copy-Item .env.example .env
-```
+## 4. Store values safely
 
-For local development, fill only the frontend `VITE_*` section and leave backend/deployment entries blank. At minimum, provide Firebase, Supabase, and the allowed domain. Every `VITE_*` value is bundled for browsers; never put service-role keys, database passwords, or third-party secrets there. See [environment and credentials](environment-configuration.md#frontend-environment-variables).
+Use a password manager or protected worksheet based on the [credential worksheet](environment-configuration.md). Never put service roles, service accounts, API secrets, database passwords, or tokens in Git, public issues, or shared chat.
 
-## 3. Start development
+## Ready when
 
-```bash
-npm run dev
-```
+- [ ] The school domain and administrator emails are final.
+- [ ] Category and deadline rules are decided.
+- [ ] GitHub, Firebase, Supabase, Cloudinary, Upstash, and Vercel are ready; optional Notion is ready when needed.
+- [ ] You understand that production values belong in GitHub `production` Environment secrets.
+- [ ] You understand that local `.env` setup is not required for deployment.
 
-Open the URL printed by Vite. The sign-in email must match `VITE_ALLOWED_DOMAIN`, and the backend `ALLOWED_DOMAIN` must use the same value.
-
-## 4. Verify the project
-
-For routine changes:
-
-```bash
-npm run typecheck
-npm run lint
-npm run build
-```
-
-Before a pull request:
-
-```bash
-npm run verify:local
-```
-
-The full command checks types, unused declarations, lint, the production build, Edge Functions, architecture rules, and an offline production-dependency audit.
-
-## 5. Optional local Supabase
-
-```bash
-npm run db:start
-npm run db:reset:local
-npm run db:lint:local
-```
-
-The local stack does not replace Firebase, Cloudinary, Notion, Upstash, or FCM. Use isolated development resources to test those integrations.
-
-## Completion checklist
-
-- The dev server starts without configuration errors.
-- An account in the allowed domain completes sign-in and user sync.
-- `npm run verify:local` passes.
-- `.env` and all private credentials remain untracked.
-
-If you do not have cloud accounts yet, follow the [from-scratch deployment guide](deployment-guide.md), which explains registration and every value. See [troubleshooting](troubleshooting.md) for failures.
+Next, complete the [credential worksheet](environment-configuration.md), then define [category and platform policy](configuration.md). Only after both are complete should you follow [final release and acceptance](deployment-guide.md).

@@ -15,14 +15,28 @@
     "previous": "上一個章節",
     "next": "下一個章節",
     "overview": "總覽",
-    "features": "產品亮點",
-    "custom": "彈性自訂",
-    "experience": "跨裝置",
-    "schools": "校園導入",
-    "roles": "使用情境"
+    "features": "提案與參與",
+    "custom": "規則設定",
+    "experience": "公告通知",
+    "schools": "審核回應",
+    "roles": "管理端"
   },
   "brand": {
     "tagline": "讓改變匯聚成星系"
+  },
+  "landing": {
+    "brandNote": "Novae 是 Nova 的複數，讓每個想法匯聚成改變。",
+    "proposalsNumber": "01 / 提案與參與",
+    "proposalsLede": "公開倡議與私密案件，都有合適的入口；提案、附議與狀態留在同一張真實介面裡。",
+    "updatesNumber": "03 / 公告與通知",
+    "updatesTitle": "公告、留言與通知，<br><em>不漏接重要進度。</em>",
+    "updatesLede": "公告能廣播也能討論；狀態更新、附議與留言都會回到站內通知。",
+    "managementNumber": "04 / 管理與回應",
+    "managementTitle": "學生發聲，<br><em>單位能清楚回應。</em>",
+    "managementLede": "審核、回覆期限、平台維運與分類概況集中呈現，讓需要處理的事情不被遺漏。",
+    "configNumber": "05 / 可調規則",
+    "configLede": "閱讀範圍、作者顯示、附議與回覆期限，都能依校園文化設定。",
+    "interfaceNumber": "06 / 實際介面"
   },
   "hero": {
     "eyebrow": "每一個聲音，都可能成為改變的起點",

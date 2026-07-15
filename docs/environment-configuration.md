@@ -1,59 +1,76 @@
-# 環境與憑證
+# 憑證填寫表
 
-[English](en/environment-configuration.md) · [文件首頁](README.md) · [產品規則設定](configuration.md)
+正式部署時，請把下列值放進 GitHub repository 的 `production` Environment secrets。workflow 只會從這裡讀取；後端 workflow 會再把執行時需要的值同步到 Supabase Edge secrets。
 
-本頁區分會進入瀏覽器的公開環境變數，以及只存在部署平台的後端憑證。逐項取得方式見[從零部署指南](deployment-guide.md)。
+## 先理解可見性
 
-## 放置位置
+- `VITE_*` 會進入瀏覽器 bundle，不能當成密碼。
+- token、service role、service account、API secret、DB password 只放 GitHub Environment secrets。
+- `SUPABASE_URL` 由 hosted Edge Functions 自動提供，不需要建立 GitHub secret。
+- 本機 `.env` 只供程式開發者使用，不是正式部署的一部分。
 
-| 類型 | 本機 | 正式與開發環境 | 可見性 |
-| --- | --- | --- | --- |
-| `VITE_*` | 未追蹤的 `.env` | GitHub Environment secrets | 瀏覽器使用者可見 |
-| 後端與部署憑證 | 不提交到 Git | GitHub／Supabase／供應商 secret 設定 | 只限受控後端與部署流程 |
+## 前端與 Vercel
 
-正式與開發環境必須使用不同資源與憑證。不要把 service role key、資料庫密碼或第三方 secret 放入任何 `VITE_*` 欄位。
-
-## 前端環境變數
-
-| 名稱 | 必要 | 用途 |
+| Secret | 必要 | 來源／填法 |
 | --- | --- | --- |
-| `VITE_SCHOOL_NAME` | 否 | 啟動畫面與「我的」頁面顯示的學校名稱；留空時不顯示 |
-| `VITE_ALLOWED_DOMAIN` | 是 | 前端登入提示與預檢 |
-| `VITE_FIREBASE_API_KEY` | 是 | Firebase Web config |
-| `VITE_FIREBASE_AUTH_DOMAIN` | 是 | Firebase Auth domain |
-| `VITE_FIREBASE_PROJECT_ID` | 是 | Firebase project ID |
-| `VITE_FIREBASE_APP_ID` | 是 | Firebase Web App ID |
-| `VITE_FIREBASE_MESSAGING_SENDER_ID` | 是 | FCM sender ID |
-| `VITE_FIREBASE_VAPID_KEY` | 是 | Web Push public key |
-| `VITE_FIREBASE_APP_CHECK_ENABLED` | 否 | `true` 時啟用 App Check |
-| `VITE_RECAPTCHA_ENTERPRISE_SITE_KEY` | 條件式 | 啟用 App Check 時必要 |
-| `VITE_SUPABASE_URL` | 是 | Supabase project URL |
-| `VITE_SUPABASE_PUBLISHABLE_KEY` | 是 | Supabase publishable key |
+| `VITE_SCHOOL_NAME` | 建議 | 要顯示的學校名稱 |
+| `VITE_ALLOWED_DOMAIN` | 是 | 學校信箱網域，不含 `@` |
+| `VITE_FIREBASE_API_KEY` | 是 | Firebase Web App `apiKey` |
+| `VITE_FIREBASE_AUTH_DOMAIN` | 是 | Firebase Web App `authDomain` |
+| `VITE_FIREBASE_PROJECT_ID` | 是 | Firebase Web App `projectId` |
+| `VITE_FIREBASE_APP_ID` | 是 | Firebase Web App `appId` |
+| `VITE_FIREBASE_MESSAGING_SENDER_ID` | 是 | Firebase Web App `messagingSenderId` |
+| `VITE_FIREBASE_VAPID_KEY` | 是 | Firebase Cloud Messaging Web Push public key |
+| `VITE_FIREBASE_APP_CHECK_ENABLED` | 否 | 初次部署填 `false`；完成 App Check 後改 `true` |
+| `VITE_RECAPTCHA_ENTERPRISE_SITE_KEY` | 條件 | 啟用 App Check 時填入 |
+| `VITE_SUPABASE_URL` | 是 | Supabase Project URL |
+| `VITE_SUPABASE_PUBLISHABLE_KEY` | 是 | Supabase publishable key，不是 service role |
+| `VERCEL_TOKEN` | 是 | Vercel account token |
+| `VERCEL_ORG_ID` | 是 | Vercel team／account ID |
+| `VERCEL_PROJECT_ID` | 是 | Vercel project ID |
 
-## 後端與部署憑證
+## 後端與部署
 
-| 群組 | 名稱 |
-| --- | --- |
-| Supabase 部署 | `SUPABASE_ACCESS_TOKEN`, `SUPABASE_PROJECT_REF`, `SUPABASE_DB_PASSWORD`, `SUPABASE_SERVICE_ROLE_KEY` |
-| Firebase 驗證 | `FIREBASE_PROJECT_ID`, `FIREBASE_WEB_API_KEY`, `GOOGLE_SERVICE_ACCOUNT_JSON` |
-| 存取控制 | `ALLOWED_DOMAIN`, `ADMIN_EMAILS` |
-| Cloudinary | `CLOUDINARY_CLOUD_NAME`, `CLOUDINARY_API_KEY`, `CLOUDINARY_API_SECRET`, `CLOUDINARY_WEBHOOK_SECRET` |
-| 內部觸發 | `WEBHOOK_SECRET` |
-| Notion | `NOTION_TOKEN`, `NOTION_DATABASE_ID`, `NOTION_VERSION`（選用，預設 `2022-06-28`） |
-| Upstash | `UPSTASH_REDIS_REST_URL`, `UPSTASH_REDIS_REST_TOKEN` |
-| Vercel 部署 | `VERCEL_TOKEN`, `VERCEL_ORG_ID`, `VERCEL_PROJECT_ID` |
+| Secret | 必要 | 來源／填法 |
+| --- | --- | --- |
+| `SUPABASE_ACCESS_TOKEN` | 是 | Supabase account access token |
+| `SUPABASE_PROJECT_REF` | 是 | Supabase project reference ID |
+| `SUPABASE_DB_PASSWORD` | 是 | 該 project 的 database password |
+| `SUPABASE_SERVICE_ROLE_KEY` | 是 | Supabase legacy `service_role` key |
+| `FIREBASE_PROJECT_ID` | 是 | 與 `VITE_FIREBASE_PROJECT_ID` 相同 |
+| `FIREBASE_WEB_API_KEY` | 是 | 與 `VITE_FIREBASE_API_KEY` 相同 |
+| `GOOGLE_SERVICE_ACCOUNT_JSON` | 是 | Firebase 下載檔的完整 JSON 內容，不是路徑 |
+| `ALLOWED_DOMAIN` | 是 | 與 `VITE_ALLOWED_DOMAIN` 完全相同 |
+| `ADMIN_EMAILS` | 是 | 完整 Email；多人以半形逗號分隔 |
+| `CLOUDINARY_CLOUD_NAME` | 是 | Cloudinary product environment cloud name |
+| `CLOUDINARY_API_KEY` | 是 | 同一 environment 的 API key |
+| `CLOUDINARY_API_SECRET` | 是 | 同一 environment 的 API secret |
+| `CLOUDINARY_WEBHOOK_SECRET` | 是 | 標準 Cloudinary HMAC 驗證時填同一 API secret |
+| `WEBHOOK_SECRET` | 是 | 自行產生、獨立的 32-byte 隨機值 |
+| `NOTION_TOKEN` | 選用 | 啟用 Notion 時的 internal integration secret |
+| `NOTION_DATABASE_ID` | 選用 | 啟用 Notion 時、已分享給 integration 的原始 database ID |
+| `NOTION_VERSION` | 選用 | 啟用時可省略；程式預設 `2022-06-28` |
+| `UPSTASH_REDIS_REST_URL` | 是 | Upstash HTTPS REST URL |
+| `UPSTASH_REDIS_REST_TOKEN` | 是 | Upstash Standard REST token，不是 Read-only token |
 
-## 相依欄位
+## 產生 WEBHOOK_SECRET
 
-`ADMIN_EMAILS` 是必填的完整信箱清單，以半形逗號分隔。`VITE_ALLOWED_DOMAIN` 與 `ALLOWED_DOMAIN` 必須完全相同，只填 `@` 後面的網域；管理員帳號也必須屬於該網域。
+可在自己信任的 PowerShell 執行：
 
-`FIREBASE_PROJECT_ID` 與 `FIREBASE_WEB_API_KEY` 通常重用前端對應值。`CLOUDINARY_WEBHOOK_SECRET` 在目前標準 HMAC 驗證中重用 `CLOUDINARY_API_SECRET`；`WEBHOOK_SECRET` 必須另外產生隨機值。`GOOGLE_SERVICE_ACCOUNT_JSON` 填完整 JSON，不是檔案路徑。
+```powershell
+[Convert]::ToBase64String((1..32 | ForEach-Object { Get-Random -Maximum 256 }))
+```
 
-Supabase 託管的 Edge Functions 自動提供 `SUPABASE_URL`，不需建立 GitHub secret。發布流程會把 `SUPABASE_SERVICE_ROLE_KEY` 以 `APP_SUPABASE_SERVICE_ROLE_KEY` 名稱寫入 Edge secrets。
+每個正式環境使用不同值。不要拿 Cloudinary、Firebase 或 Supabase 的既有 secret 代替。
 
-## 完成檢查
+## 填完後核對
 
-- `.env` 與憑證沒有被提交到 Git。
-- `VITE_ALLOWED_DOMAIN` 與 `ALLOWED_DOMAIN` 完全一致。
-- 正式與開發環境沒有共用資料庫、專案或憑證。
-- 依[快速開始](quick-start.md)或[部署指南](deployment-guide.md)完成對應驗證。
+- [ ] 所有值都建在 `production` 的 Environment secrets，不是錯放到 Variables。
+- [ ] 沒有 secret 名稱拼錯或值前後多空白。
+- [ ] 三組 Firebase 值來自同一個 Firebase project／Web App。
+- [ ] 四組 Supabase 值屬於同一個 project。
+- [ ] 四組 Cloudinary 值屬於同一個 product environment。
+- [ ] `GOOGLE_SERVICE_ACCOUNT_JSON` 是完整 JSON，沒有只貼檔名。
+- [ ] `ADMIN_EMAILS` 中每個帳號都屬於允許網域。
+
+Notion 的 token 與 database ID 必須「兩個都填」或「兩個都不填」。兩個都不填時，workflow 會寫入 `NOTION_ENABLED=false`，Edge Functions 會安全略過所有 Notion 同步；只填一個時部署會明確失敗，避免產生半套設定。

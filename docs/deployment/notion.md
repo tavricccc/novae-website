@@ -1,54 +1,34 @@
-# Notion：建立營運副本
+# 5. 選用：建立 Notion 副本
 
-[English](../en/deployment/notion.md) · [回到部署總覽](../deployment-guide.md)
+Novae 可以透過 outbox worker 把提案與公告同步成營運副本。這項功能完全選用；Supabase 才是主要資料來源，Notion 不是授權或交易資料庫。
 
-Novae 把提案、公告與處理狀態同步到 Notion，方便校方瀏覽。Notion 是營運副本，不是唯一資料庫，也不能代替 Supabase 備份。
+## 不需要 Notion
 
-## 1. 註冊與準備 workspace
+直接略過本頁，不要在 GitHub 建立 `NOTION_TOKEN`、`NOTION_DATABASE_ID` 或 `NOTION_VERSION`。部署 workflow 會自動設定 `NOTION_ENABLED=false`，其他功能照常運作。
 
-1. 到 [Notion](https://www.notion.so/signup) 建立帳號與 workspace。
-2. 建議使用由學校可接手的帳號，不要只綁即將畢業學生的私人信箱。
-3. 在 workspace 建立一個新的完整頁面，輸入 `/database`，選擇 **Table – Full page**，命名 `Novae 營運副本`。
-4. 保留預設 title 欄即可；Novae 會在同步時建立需要的日期／選項欄位。不要使用 linked database 或 wiki database。
+## 1. 建立 integration
 
-## 2. 建立 internal integration
+在 [Notion integrations](https://www.notion.so/my-integrations) 建立 internal integration，限制在專用 workspace，複製 secret 到 `NOTION_TOKEN`。
 
-1. 開啟 [Notion integrations](https://www.notion.so/profile/integrations)；若介面導向 Developer portal，選相同 workspace。
-2. 按 **New integration / New connection**，名稱填 `Novae production`。
-3. Type 選 Internal，只給需要的 content read、insert、update 能力，不需要公開 OAuth。
-4. 建立後複製 Internal Integration Secret／token 到 `NOTION_TOKEN`。token 儲存後可能不再完整顯示。
+## 2. 建立原始 database
 
-官方參考：[Notion authentication](https://developers.notion.com/reference/authentication)。
+在 Notion 建立一個完整頁面的 database，專供 Novae 同步。將該 database 分享給剛才的 integration；只建立 token 但沒有分享頁面，API 仍看不到資料庫。
 
-## 3. 把原始 database 分享給 integration
+## 3. 取得 database ID
 
-1. 回到 `Novae 營運副本` 的「原始 database」頁面。
-2. 右上角 **Share** 或 `•••` → **Connections / Add connections**。
-3. 搜尋並選 `Novae production`，確認授權。
+從 database URL 取出識別碼，填入 `NOTION_DATABASE_ID`。請使用原始 database 的 ID，不是某個 view 的名稱或分享頁標題。
 
-只建立 integration 不代表它能讀任何頁面；漏掉這步通常會得到 `object_not_found`。若你看到的是 linked view，先開啟它指向的原始 database 再分享。官方參考：[Working with databases](https://developers.notion.com/guides/data-apis/working-with-databases)。
+## 4. API 版本
 
-## 4. 找到 database ID
-
-1. 在瀏覽器開啟原始 database，複製網址。
-2. URL 中資料庫名稱後、`?` 前會有 32 個十六進位字元，例如：
-
-```text
-https://www.notion.so/workspace/Novae-0123456789abcdef0123456789abcdef?v=...
-                                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-```
-
-3. 將這 32 字元（有沒有連字號都可）填 `NOTION_DATABASE_ID`。不要填 view ID、整個 URL 或一般頁面 ID。
-
-## 5. Notion-Version
-
-目前 workflow 在未建立 `NOTION_VERSION` secret 時使用 `2022-06-28`，最穩妥做法是先不要建立這個 optional secret。版本升級需要配合程式相容性測試，不要因官方文件顯示較新日期就單獨改值。
+`NOTION_VERSION` 可不建立；workflow 會使用目前程式鎖定的 `2022-06-28`。只有在程式與資料模型一起升級後才調整版本。
 
 ## 完成檢查
 
-- token 與 database 位於同一 workspace。
-- 原始 database 已明確加入 connection。
-- database ID 是 32 字元 ID，不是整個 URL。
-- 了解刪除 Notion 資料不會刪除 Supabase 主資料，反之 Notion 也不是備份。
+- [ ] integration 是 internal integration。
+- [ ] 原始 database 已分享給 integration。
+- [ ] token 與 database ID 屬於同一 workspace。
+- [ ] 了解 Notion 是營運副本，不能取代 Supabase 備份。
 
-下一步：[設定 Upstash](upstash.md)。
+若啟用，`NOTION_TOKEN` 與 `NOTION_DATABASE_ID` 必須一起填；只填其中一個會被 workflow 拒絕。
+
+下一步：[建立 Upstash](upstash.md)。

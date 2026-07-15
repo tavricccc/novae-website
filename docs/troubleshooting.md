@@ -1,78 +1,65 @@
-# 故障排除
+# 一步一步排錯
 
-[English](en/troubleshooting.md) · [文件首頁](README.md)
+先找「第一個失敗的階段」。不要看到網頁錯誤就同時重設 Firebase、Supabase 與 Vercel；那會讓問題更難追。
 
-先取得第一個失敗訊息、request ID、環境、commit SHA 與發生時間。不要只看最後一連串衍生錯誤，也不要把 token 或個資貼到公開 issue。
+## 1. GitHub workflow 失敗
 
-## 安裝或驗證失敗
+1. 打開該 run。
+2. 找第一個紅色 step，不要只看最後的 cancelled step。
+3. 若訊息是 `Missing deployment secrets` 或 `Missing Supabase backend secrets`，回到 `production` Environment 對照[憑證填寫表](environment-configuration.md)。
+4. 若是 Supabase link／db push，確認 token、project ref、DB password 屬於同一 project。
+5. 若是 generated config diff，確認 JSON 符合[真實 schema](configuration.md#真實-schema)，並提交產生檔。
+6. 修正後重新執行失敗的 workflow。
 
-### `npm ci` 失敗
+## 2. 網頁打不開或空白
 
-- 使用 Node.js 24，並確認 `package-lock.json` 未被舊 npm 改寫。
-- 清除 npm 自身的損壞 cache 後重試；不要手動修改 lockfile。
-- 若是 registry 或代理問題，先確認組織網路設定。
+1. 確認 frontend workflow 成功並取得 deployment URL。
+2. 檢查 Vercel project、org ID、project ID 是否相符。
+3. 檢查 build log 是否缺少必要 `VITE_*`。
+4. 若自訂路徑重新整理 404，確認 repository 的 `vercel.json` rewrites 沒被移除。
+5. 若只有舊畫面，強制重新載入並確認 service worker 更新；不要立刻清除所有資料庫。
 
-### 產生檔出現差異
+## 3. 無法登入
 
-執行 `npm run generate:all`，檢查 `config/` 與產生檔是否同步。產生結果應提交；CI 會以 `git diff --exit-code` 驗證。
+1. Firebase Google provider 是否啟用。
+2. 正式網域是否加入 authorized domains。
+3. `VITE_ALLOWED_DOMAIN` 與 `ALLOWED_DOMAIN` 是否完全相同。
+4. Web App config、`FIREBASE_PROJECT_ID`、`FIREBASE_WEB_API_KEY`、service account 是否來自同一 project。
+5. 若剛啟用 App Check，暫時確認 site key 與網域是否正確；不要用關閉所有後端驗證當永久修法。
 
-### Edge check 找不到 Deno
+## 4. 登入成功但資料操作失敗
 
-先完成 `npm ci`，再以 `npm run check:edge` 使用專案固定的 `deno-bin`。不要依賴任意全域版本。
+1. 先看 Network 中 `backendAction` 的 HTTP status 與 request ID。
+2. 全部 401／403：檢查 Firebase token、允許網域、service account 與使用者是否重新登入。
+3. 只有管理操作 403：檢查 `ADMIN_EMAILS` 並重新登入刷新角色。
+4. 只有特定分類看不到：比對 `readAccess`、狀態與使用者是否作者；這可能是正確權限。
+5. 429：查看 Upstash 與 `rate-limits.config.json`，先判斷是正常保護還是設定過低。
 
-## 登入
+## 5. 附議人數或天數不對
 
-| 症狀 | 檢查 |
-| --- | --- |
-| Google popup 被拒絕 | Firebase Google provider、authorized domain、瀏覽器 popup 政策 |
-| 顯示網域不允許 | `VITE_ALLOWED_DOMAIN` 與後端 `ALLOWED_DOMAIN` 是否一致 |
-| 登入成功但同步失敗 | `FIREBASE_PROJECT_ID`、Web API key、service account JSON、email verified |
-| 管理員仍是一般使用者 | `ADMIN_EMAILS`、允許網域、重新登入／token 更新 |
+1. 打開目前部署 commit 的 `config/issue-categories.config.json`。
+2. 確認該分類的 `support.enabled`、`support.goal`、`support.deadlineDays`。
+3. 確認 config commit 同時觸發且成功完成 backend 與 frontend workflow。
+4. 不要把 landing mockup 或文件範例值當成執行時設定；真正來源只有 config。
+5. 既有提案若在規則變更前建立，先查資料與 migration 設計，不要直接改歷史資料。
 
-不要用前端硬編角色或關閉後端驗證來修復登入。
+## 6. 圖片卡住
 
-## API 與資料
+1. 確認四個 Cloudinary 值來自同一 Product Environment。
+2. `CLOUDINARY_WEBHOOK_SECRET` 是否等於 API secret。
+3. 檢查 `cloudinaryWebhook` log 是否簽章失敗。
+4. 檢查圖片是否超過來源大小、張數或每日限額。
+5. 不要為了測試把私密資源改成公開。
 
-### 全部 action 回傳 401/403
+## 7. 通知或 Notion 沒有更新
 
-確認請求使用目前 Firebase project 的有效 ID token、時間同步正常、Edge secret 指向相同 project，並查看 Function log 中的匿名化原因碼。
+1. 先確認站內通知資料是否已建立。
+2. 查看 outbox backlog 與最舊事件。
+3. 檢查 `outboxWorker` log。
+4. Push：確認 VAPID key、瀏覽器權限、FCM token 與 service account。
+5. Notion：確認 database 已分享給 integration，token 與 database ID 同 workspace。
+6. 修正後讓 worker 重試；不要手動重送大量事件造成重複副作用。
 
-### 只有特定資料看不到
+## 8. 還是無法解決
 
-確認分類 `readAccess`、審核狀態、作者身分與管理員角色。直接查 database 時也要分辨 `app_api` RLS 結果與 service role 結果。
-
-### Realtime 不更新
-
-確認初始讀取成功、連線未被 CSP／代理阻擋、event audience 與目前使用者相符。提案、公告列表與留言會自動重連、連線失敗後補抓，並在前景定期校正；也可再次點擊目前所在的桌機側邊或手機底部導覽立即強制讀取列表。若強制讀取能恢復但自動更新仍持續失敗，應檢查 `realtime_events` publication、RLS 與瀏覽器 WebSocket 連線。
-
-## 圖片
-
-1. 確認來源大小、壓縮後尺寸與圖片數符合 `rate-limits.config.json`。
-2. 查看取得 upload session 的 action 是否成功。
-3. 在 Cloudinary 確認 authenticated resource 是否存在。
-4. 檢查 webhook URL、secret 與 Function log。
-5. 若上傳 ready 但無法顯示，檢查 resolve action、signed URL 到期與 CSP。
-
-不要把 delivery 改成永久公開或把 API secret 放到前端。
-
-## 通知與背景工作
-
-- 站內通知正常、Push 失敗：檢查瀏覽器權限、service worker、VAPID、FCM service account 與 token/topic 狀態。
-- outbox 持續增加：檢查 worker 觸發、`WEBHOOK_SECRET`、Upstash 與外部供應商狀態。
-- Notion 失敗：確認 integration 仍可存取 database，欄位沒有被改名或刪除。
-- 重試前先確認事件 handler 的冪等性，避免重複通知或外部更新。
-
-## 部署
-
-| 階段 | 常見原因 |
-| --- | --- |
-| Validate secrets | Environment 選錯、名稱錯誤、空值 |
-| Supabase link/push | access token、project ref、DB password、migration history |
-| Function deploy | Deno type error、import 或 secret 缺漏 |
-| Healthcheck | `WEBHOOK_SECRET` 不一致或 Function 尚未就緒 |
-| Vercel pull/build | token scope、org/project ID、公開環境變數 |
-| 前端等待後端逾時 | 同 commit 的 backend workflow 失敗或未觸發 |
-
-## 仍無法解決
-
-依[貢獻指南](contributing.md)建立最小重現 issue，附上作業系統、Node 版本、commit SHA、執行指令、已遮罩的第一個錯誤與預期／實際結果。安全問題改用[私下回報](security.md#回報安全問題)。
+建立 GitHub issue 時附上：部署 commit、發生時間與時區、角色、分類、狀態、操作步驟、第一個錯誤、HTTP status、request ID、已檢查項目。移除所有 token、Email、service account、資料庫內容與 private URL。

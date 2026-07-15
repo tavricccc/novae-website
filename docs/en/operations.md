@@ -1,66 +1,31 @@
-# Operations runbook
+# Post-launch operations
 
-[繁體中文](../operations.md) · [Documentation home](../README.md)
+## After every release
 
-This runbook covers routine checks, incidents, and recovery. Provider logs may contain personal data or sensitive metadata; redact them before sharing.
-
-## Service objectives
-
-Track sign-in success, action errors and response time, pending notifications, push and image outcomes, synchronization delay, database capacity, and vendor usage to understand platform health.
-
-## After every deployment
-
-1. Confirm both GitHub Actions workflows succeeded.
-2. Check the backend smoke test and maintenance response.
-3. Test protected reads as a normal user and an administrator.
-4. Create low-risk test content and verify write, Realtime, image, and notification paths.
-5. Inspect the dashboard, Function logs, database health, and Vercel logs.
-6. Observe at least one worker cycle and confirm the outbox is not accumulating.
+1. Confirm backend success before frontend success.
+2. Sign in on the production URL.
+3. Read proposal, announcement, notification, and settings pages.
+4. Create a test proposal and verify images, support, comments, and feedback.
+5. Complete one admin review or status update.
+6. Check Dashboard and Supabase Function logs for new errors.
 
 ## Routine cadence
 
 | Frequency | Review |
 | --- | --- |
-| Daily | Sign-in/action errors, outbox backlog, Function failures, vendor incidents |
-| Weekly | Image/Notion/FCM failures, database capacity, Redis usage, admin list |
-| Monthly | Billing, credential use, dependency updates, retention, restore exercise |
-| Each term | Domain, categories, thresholds, deadlines, owners, privacy notice |
+| Daily | Pending review, awaiting response, Dashboard errors, outbox backlog, Function failures |
+| Weekly | Pending/deletion images, Notion/FCM failures, Redis and database usage |
+| Monthly | Vendor billing, tokens, backups, and restore exercise |
+| Each term | Domain, admins, categories, support goals/days, response deadlines, privacy notice |
 
-## Incident response
+## Incident method
 
-1. Record scope, start time, environment, affected actions, and recent releases.
-2. Preserve workflow runs, request IDs, redacted errors, and vendor status.
-3. Stop the faulty release or trigger; do not reset data as a first response.
-4. Isolate browser/Vercel, Firebase, Edge, Postgres, Redis, Cloudinary, Notion, or FCM.
-5. Apply the smallest fix, run proportionate checks, and smoke-test.
-6. Reprocess backlog only after confirming idempotency.
-7. Record timeline, cause, impact, remediation, and prevention; follow organizational notification rules for data or credential incidents.
+1. Scope affected users, categories, states, and operations.
+2. Find the first failing boundary: browser, Firebase, Edge, Postgres, Cloudinary, Notion, Upstash, or Vercel.
+3. Preserve time, request ID, HTTP status, first error, and workflow run.
+4. Reduce impact without disabling authentication or RLS.
+5. Fix one layer, rerun the full workflow, and record prevention.
 
-## Symptom guide
+Supabase is the source of truth; Notion is only an operations copy. Images live in Cloudinary with database references and state. Never edit deployed migrations or manually delete one side of a cross-service record.
 
-| Symptom | First check | Avoid |
-| --- | --- | --- |
-| All actions return 401/403 | Firebase project, domain, service account | Disabling authentication |
-| Migration failure | First SQL error and migration history | Editing deployed migrations |
-| Outbox stalled | Worker trigger, secret, provider, oldest event | Unlimited retries |
-| Images stay pending | Webhook URL/secret, Cloudinary quota | Making resources public |
-| Cost spike | Requests, storage, egress, retries, retention | Upgrading every service blindly |
-
-See [troubleshooting](troubleshooting.md) for detailed checks.
-
-## Retention, backup, and recovery
-
-Cron and `maintenanceCleanup` apply retention to transient and failure data. Deletion can span Postgres, Cloudinary, and Notion state; do not delete from only one provider. Change retention with a new migration and updated privacy notice.
-
-Use Supabase database backups appropriate to the plan. Treat Notion only as an operational copy. Account for Cloudinary assets with their database metadata. Exercise restore in an isolated environment monthly, record RPO/RTO gaps, rotate temporary credentials, run smoke tests, and prevent duplicate side effects when workers resume.
-
-## Local maintenance commands
-
-```bash
-npm run verify:local
-npm run db:start
-npm run db:reset:local
-npm run db:lint:local
-```
-
-These commands validate code or operate locally; they do not verify production vendor integrations.
+For symptoms, use [step-by-step troubleshooting](troubleshooting.md).

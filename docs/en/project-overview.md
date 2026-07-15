@@ -1,42 +1,39 @@
-# Project overview
+# Product and workflows
 
-[繁體中文](../project-overview.md) · [Documentation home](../README.md)
+Novae is a campus PWA for proposals, support, review, responses, announcements, and notifications. It replaces disconnected forms and posts with a permission-aware, stateful, time-bound workflow.
 
-The Novae (Novae) is a self-hosted web application for submitting, discussing, supporting, and tracking issues within a school community. It combines public proposals, private rights cases, facility reports, announcements, and notifications while keeping identities and sensitive data behind controlled boundaries.
+## The proposal lifecycle
 
-## Why this project exists
+```mermaid
+flowchart LR
+  A[User submits in a category] --> B{Review required}
+  B -->|Yes| C[Pending review]
+  C -->|Rejected| D[Review rejected]
+  C -->|Approved| E{Support enabled}
+  B -->|No| E
+  E -->|Yes| F[Collect category-specific goal within category-specific days]
+  F -->|Missed| G[Did not pass]
+  F -->|Met| H[Awaiting response / processing]
+  E -->|No| H
+  H --> I[Completed or infeasible]
+```
 
-Forms and social posts are easy to publish but hard to track. Novae adds configurable categories, review, status, response deadlines, support thresholds, notifications, operational copies, and administrative visibility so students and administrators can work from the same traceable record.
+The real statuses are pending review, awaiting response, review rejected, processing, did not pass, infeasible, and completed.
 
-## Core capabilities
+## What each category controls
 
-| Area | Capability |
-| --- | --- |
-| Identity | Google sign-in restricted to a verified school domain; server-managed admin roles |
-| Proposals | Categories, search, comments, sharing, review, status, and deadlines |
-| Privacy | School-wide, reviewed school-wide, or owner-and-admin access per category |
-| Support | Optional category-specific thresholds, deadlines, cancellation, and live progress |
-| Announcements | Admin publishing and deletion; published posts are immutable; user likes and comments |
-| Notifications | In-app notifications and personal or topic-based Web Push |
-| Media | Browser WebP compression, signed upload, and expiring signed delivery URLs |
-| Operations | Admin dashboard, background jobs, retention, failure tracking, and automated deployment |
+Each category independently sets who may read, whether the author is shown, whether support is enabled, the support goal, the support window in days, and the response deadline. The repository's 50 supporters in 14 days is an example configuration, not a hard-coded product rule.
 
-## Good fit
+Use the [category builder](../../category-builder.html) to create rules for your institution.
 
-- Student unions or school organizations that need proposals and support thresholds.
-- Teams handling both public issues and confidential student-rights cases.
-- Small teams willing to operate a managed-cloud deployment.
-- Developers studying a production-oriented Vue, Supabase, and Firebase Auth integration.
+## Real product capabilities
 
-## Shape it for your campus
+- Google sign-in restricted to an allowed school domain.
+- Public-after-review and owner/admin-only privacy models.
+- Proposal search, comments, sharing, support, review, status, and deadlines.
+- Separate announcement, notification, settings, and admin Dashboard pages.
+- Signed Cloudinary image upload and expiring signed delivery.
+- Supabase Postgres, RLS, RPC, Realtime, Edge Functions, and outbox processing.
+- In-app notifications, Firebase Cloud Messaging Web Push, and a Notion operations copy.
 
-- Choose school-wide, reviewed, or owner-and-admin visibility per category.
-- Configure author display, support targets, support windows, and response deadlines.
-- Apply your school name, allowed domain, administrator list, and notification preferences.
-- Keep students and response teams on the same status from submission through resolution.
-
-## One complete participation experience
-
-Novae provides a complete deployable application. Students can submit, support, discuss, and follow progress. Administrators can review proposals, post updates, publish announcements, and understand recent activity. Desktop centralizes navigation and creation in an expandable sidebar, while mobile uses bottom navigation. Content adapts to the available width while both surfaces share the same data and status, with installable PWA and notification support.
-
-Next: [User guide](user-guide.md) · [Configuration](configuration.md) · [Quick start](quick-start.md)
+Next: begin [preparation and service setup](quick-start.md).

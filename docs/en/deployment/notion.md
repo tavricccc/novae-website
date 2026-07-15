@@ -1,18 +1,21 @@
-# Notion setup
+# 5. Optional: create the Notion operations copy
 
-[繁體中文](../../deployment/notion.md) · [Deployment overview](../deployment-guide.md)
+This entire service is optional. Supabase remains the source of truth, and omitting Notion does not disable any core Novae workflow.
 
-Novae writes an operational copy to Notion. It is not the primary database and is not a disaster-recovery backup.
+## Skip Notion
 
-1. Create a [Notion](https://www.notion.so/signup) workspace owned by an account the school can retain.
-2. Create a full-page table database named `Novae operations`. Keep its default title property; Novae adds required date and select properties during synchronization. Do not use a linked or wiki database.
-3. Open [Notion integrations](https://www.notion.so/profile/integrations), create an internal `Novae production` integration in the same workspace, and grant only content read/insert/update capabilities.
-4. Copy its internal integration secret to `NOTION_TOKEN`.
-5. Open the original database, choose **Share / Connections / Add connections**, and add the integration. Creating an integration alone does not grant page access.
-6. From the original database URL, copy the 32 hexadecimal characters after the page name and before `?` into `NOTION_DATABASE_ID`. Do not paste the full URL, a view ID, or a normal page ID.
+Do not create `NOTION_TOKEN`, `NOTION_DATABASE_ID`, or `NOTION_VERSION` in GitHub. The workflow sets `NOTION_ENABLED=false`, and the Edge Functions safely skip every Notion operation.
 
-See [Notion authentication](https://developers.notion.com/reference/authentication) and [working with databases](https://developers.notion.com/guides/data-apis/working-with-databases).
+## Enable Notion
 
-`NOTION_VERSION` is optional. Omit it so the current workflow uses its tested `2022-06-28` default; do not independently switch API versions without compatibility testing.
+1. Create an internal integration at [Notion integrations](https://www.notion.so/my-integrations) and store its secret as `NOTION_TOKEN`.
+2. Create a dedicated full-page database for Novae operations.
+3. Share the original database with the integration; a token alone cannot access it.
+4. Copy the original database ID from its URL into `NOTION_DATABASE_ID`.
+5. `NOTION_VERSION` is optional; the workflow defaults to `2022-06-28`.
 
-Next: [Upstash](upstash.md).
+Supabase remains the source of truth. Notion is an operations copy, not an authorization database or backup replacement.
+
+`NOTION_TOKEN` and `NOTION_DATABASE_ID` must be supplied together. A partial pair is rejected during deployment.
+
+Next: [create Upstash](upstash.md).

@@ -142,14 +142,26 @@ function sibling(lang, id) {
     return {
       prev: deploymentIndex > 0
         ? deploymentNav[deploymentIndex - 1]
-        : nav.find((item) => item.id === 'deployment-guide'),
+        : nav.find((item) => item.id === 'quick-start'),
       next: deploymentIndex < deploymentNav.length - 1
         ? deploymentNav[deploymentIndex + 1]
-        : null
+        : nav.find((item) => item.id === 'environment-configuration')
     };
   }
   const idx = nav.findIndex((item) => item.id === id);
   if (idx < 0) return { prev: null, next: null };
+  if (id === 'quick-start') {
+    return {
+      prev: idx > 0 ? nav[idx - 1] : null,
+      next: deploymentNav[0] ?? null,
+    };
+  }
+  if (id === 'environment-configuration') {
+    return {
+      prev: deploymentNav.at(-1) ?? null,
+      next: idx < nav.length - 1 ? nav[idx + 1] : null,
+    };
+  }
   return {
     prev: idx > 0 ? nav[idx - 1] : null,
     next: idx < nav.length - 1 ? nav[idx + 1] : null
@@ -183,18 +195,18 @@ function renderShell({ lang, id, title, bodyHtml, outRel }) {
   const docsRootPrefix = '../'.repeat(Math.max(0, outputDepth - (isEn ? 2 : 1)));
   const docsHomeHref = `${docsRootPrefix}index.html`;
   const deploymentNav = isEn ? DEPLOYMENT_NAV_EN : DEPLOYMENT_NAV_ZH;
-  const showDeploymentLessons = id === 'deployment-guide' || id.startsWith('deployment/');
+  const showDeploymentLessons = id === 'quick-start' || id.startsWith('deployment/');
   const contextLink = id.startsWith('deployment/')
-    ? `<a class="docs-context-link" href="${docsRootPrefix}deployment-guide.html">${isEn ? '← Deployment overview' : '← 返回部署指南總覽'}</a>`
+    ? `<a class="docs-context-link" href="${docsRootPrefix}quick-start.html">${isEn ? '← Service setup overview' : '← 返回服務設定總覽'}</a>`
     : '';
 
   const renderNavItem = (item) => {
       const href = `${docsRootPrefix}${item.file}`;
-      const active = item.id === id || (item.id === 'deployment-guide' && id.startsWith('deployment/'))
+      const active = item.id === id || (item.id === 'quick-start' && id.startsWith('deployment/'))
         ? ' is-active'
         : '';
       const current = item.id === id ? ' aria-current="page"' : '';
-      const lessons = item.id === 'deployment-guide' && showDeploymentLessons
+      const lessons = item.id === 'quick-start' && showDeploymentLessons
         ? `<div class="docs-subnav">${deploymentNav.map((lesson) => {
             const lessonActive = lesson.id === id ? ' is-active' : '';
             const lessonCurrent = lesson.id === id ? ' aria-current="page"' : '';
@@ -208,7 +220,7 @@ function renderShell({ lang, id, title, bodyHtml, outRel }) {
     .join('');
   const mobileOptions = nav
     .map((section) => `<optgroup label="${section.group}">${section.items.map((item) => {
-      const selected = item.id === id || (item.id === 'deployment-guide' && id.startsWith('deployment/')) ? ' selected' : '';
+      const selected = item.id === id || (item.id === 'quick-start' && id.startsWith('deployment/')) ? ' selected' : '';
       return `<option value="${docsRootPrefix}${item.file}"${selected}>${item.title}</option>`;
     }).join('')}</optgroup>`)
     .join('');
@@ -262,6 +274,7 @@ function renderShell({ lang, id, title, bodyHtml, outRel }) {
       <nav aria-label="primary">
         <a href="${assetPrefix}">${isEn ? 'Home' : '首頁'}</a>
         <a class="is-active" href="${docsHomeHref}">${isEn ? 'Docs' : '文件'}</a>
+        <a href="${assetPrefix}category-builder.html">${isEn ? 'Category builder' : '設定產生器'}</a>
       </nav>
       <div class="header-actions">
         <a class="language-toggle" href="${altLangHref}" aria-label="${isEn ? 'Switch to Chinese' : 'Switch to English'}">${isEn ? '中' : 'EN'}</a>
@@ -409,7 +422,7 @@ function build() {
       .map((item) => `<li><a href="${item.file}">${item.title}</a></li>`)
       .join('');
     const body = `<h1>Novae documentation</h1>
-<p>Start with the <a href="quick-start.html">quick start</a>. Before a production launch, follow the <a href="configuration.html">configuration reference</a> and <a href="deployment-guide.html">deployment guide</a>.</p>
+<p>These docs follow one production path. Learn the <a href="project-overview.html">product workflows</a>, use <a href="quick-start.html">preparation and service setup</a> to create the seven service accounts, complete the credential worksheet and category policy, then finish with <a href="deployment-guide.html">release and acceptance</a>. Local setup is only required for contributors.</p>
 <ul>${list}</ul>`;
     fs.writeFileSync(
       enIndexPath,

@@ -122,7 +122,7 @@ function renderHeroFacts(catalog) {
   const root = document.querySelector('[data-render="hero-facts"]');
   if (!root) return;
   root.innerHTML = catalog.hero.facts
-    .map((fact) => `<li><strong>${fact.label}</strong><span>${fact.text}</span></li>`)
+    .map((fact) => `<span><strong>${fact.label}</strong><small>${fact.text}</small></span>`)
     .join('');
 }
 

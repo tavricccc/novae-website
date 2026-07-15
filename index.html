@@ -9,17 +9,13 @@
     <meta property="og:description" content="從提出想法、凝聚支持到看見回應，讓校園改變有清楚的下一步。" />
     <meta property="og:type" content="website" />
     <title>Novae｜讓校園裡的每顆新星被看見</title>
-    <!-- Critical paint + prevent EN users from seeing ZH flash -->
     <script>
       (function () {
         try {
           var stored = localStorage.getItem('novae-site-language');
-          var lang =
-            stored === 'zh' || stored === 'en'
-              ? stored
-              : navigator.language.toLowerCase().indexOf('zh') === 0
-                ? 'zh'
-                : 'en';
+          var lang = stored === 'zh' || stored === 'en'
+            ? stored
+            : navigator.language.toLowerCase().indexOf('zh') === 0 ? 'zh' : 'en';
           document.documentElement.lang = lang === 'zh' ? 'zh-Hant' : 'en';
           document.documentElement.dataset.lang = lang;
           if (lang === 'en') document.documentElement.classList.add('lang-boot-hide');
@@ -27,24 +23,15 @@
       })();
     </script>
     <style>
-      html{background:#fff;color:#171715}
-      @media(prefers-color-scheme:dark){html{background:#0c0c0a;color:#f7f7f5}}
-      body{margin:0;min-height:100vh}
-      /* Only hide when preferred language is EN (HTML defaults to ZH copy) */
-      html.lang-boot-hide body{opacity:0}
-      html.is-ready body{opacity:1;transition:opacity .14s ease}
-      @media(prefers-reduced-motion:reduce){
-        html.is-ready body{transition:none}
-      }
-      @view-transition{navigation:auto}
-      ::view-transition-old(root),
-      ::view-transition-new(root){animation-duration:.16s;animation-timing-function:ease}
-      @media(prefers-reduced-motion:reduce){@view-transition{navigation:none}}
+      html{background:#fff;color:#282623}body{margin:0;min-height:100vh}
+      html.lang-boot-hide body{opacity:0}html.is-ready body{opacity:1;transition:opacity .14s ease}
+      @media(prefers-reduced-motion:reduce){html.is-ready body{transition:none}}
     </style>
     <script type="module" src="/src/main.js"></script>
   </head>
   <body>
     <a class="skip-link" href="#main" data-i18n="skip">跳到主要內容</a>
+
     <header class="site-header">
       <a class="brand" href="#top" aria-label="Novae">
         <span class="brand-mark" aria-hidden="true"><img src="./logo.svg" alt="" /></span>
@@ -61,135 +48,139 @@
       </div>
     </header>
 
-    <nav class="chapter-nav" aria-label="頁面章節" data-i18n-aria="sectionNav.label" data-section-nav>
-      <button class="chapter-nav__step" type="button" data-section-nav-prev data-i18n-aria="sectionNav.previous" aria-label="上一個章節"><i class="ti ti-arrow-left" aria-hidden="true"></i></button>
-      <button class="chapter-nav__current" type="button" aria-expanded="false" data-section-nav-toggle data-i18n-aria="sectionNav.open" aria-label="開啟章節導覽">
-        <span data-section-nav-index>01 / 06</span>
-        <strong data-section-nav-current>總覽</strong>
-        <i class="ti ti-chevron-up" aria-hidden="true"></i>
-      </button>
-      <div class="chapter-nav__menu">
-        <a href="#top" class="is-active"><i class="ti ti-home" aria-hidden="true"></i><span data-i18n="sectionNav.overview">總覽</span></a>
-        <a href="#features"><i class="ti ti-sparkles" aria-hidden="true"></i><span data-i18n="sectionNav.features">產品亮點</span></a>
-        <a href="#custom"><i class="ti ti-adjustments-horizontal" aria-hidden="true"></i><span data-i18n="sectionNav.custom">彈性自訂</span></a>
-        <a href="#experience"><i class="ti ti-devices" aria-hidden="true"></i><span data-i18n="sectionNav.experience">跨裝置</span></a>
-        <a href="#workflow"><i class="ti ti-school" aria-hidden="true"></i><span data-i18n="sectionNav.schools">校園導入</span></a>
-        <a href="#roles"><i class="ti ti-users" aria-hidden="true"></i><span data-i18n="sectionNav.roles">使用情境</span></a>
-      </div>
-      <button class="chapter-nav__step" type="button" data-section-nav-next data-i18n-aria="sectionNav.next" aria-label="下一個章節"><i class="ti ti-arrow-right" aria-hidden="true"></i></button>
-    </nav>
-
     <main id="main">
       <section class="hero" id="top">
         <div class="hero-copy">
-          <p class="eyebrow"><span class="pulse"></span><span data-i18n="hero.eyebrow">每一個聲音，都可能成為改變的起點</span></p>
+          <p class="eyebrow"><span class="eyebrow-line"></span><span data-i18n="hero.eyebrow">每一個聲音，都可能成為改變的起點</span></p>
           <h1 data-i18n="hero.title">讓校園裡的每顆新星，<em>被看見。</em></h1>
           <p class="hero-lede" data-i18n="hero.lede"></p>
           <div class="hero-actions">
             <a class="button button-primary" data-site-href="github" href="https://github.com/tavricccc/novae" target="_blank" rel="noreferrer"><span data-i18n="hero.ctaPrimary">查看開源專案</span><i class="ti ti-arrow-right" aria-hidden="true"></i></a>
-            <a class="text-link" data-site-href="docsHome" href="./docs/"><span data-i18n="hero.ctaDocs">閱讀完整文件</span><i class="ti ti-arrow-right" aria-hidden="true"></i></a>
+            <a class="button button-secondary" data-site-href="docsHome" href="./docs/"><span data-i18n="hero.ctaDocs">閱讀完整文件</span></a>
           </div>
-          <ul class="hero-facts" data-render="hero-facts" aria-label="highlights"></ul>
+          <div class="hero-compact-facts" data-render="hero-facts"></div>
         </div>
-        <div class="hero-interface" data-novae-demo="desktop" data-compact="true"></div>
+
+        <div class="hero-stage" data-parallax-stage>
+          <img class="hero-sculpture" src="./assets/novae-sculpture-transparent.png" alt="" data-parallax-depth="0.45" />
+          <div class="product-frame product-frame--hero" data-novae-demo="hero" data-parallax-depth="1"></div>
+        </div>
+
       </section>
 
-      <section class="section" id="story">
-        <div class="story-sky" aria-hidden="true">
-          <span class="story-orbit story-orbit--one"></span>
-          <span class="story-orbit story-orbit--two"></span>
-          <span class="story-star story-star--one"></span>
-          <span class="story-star story-star--two"></span>
-          <span class="story-star story-star--three"></span>
-          <span class="story-star story-star--four"></span>
-          <strong>NOVAE</strong>
+      <section class="name-story" id="story">
+        <div class="name-story__word" aria-hidden="true">
+          <span>Nova</span>
+          <strong>Novae</strong>
         </div>
-        <div class="section-heading">
+        <div class="name-story__copy">
           <p class="section-number" data-i18n="story.number">00 / 名字的故事</p>
-          <h2 data-i18n="story.title"></h2>
-          <p data-i18n="story.body"></p>
+          <h2 data-i18n="story.title">一顆新星是開始，<br><em>一片星系是改變。</em></h2>
+          <p data-i18n="story.body">Novae 源自 Nova（新星）的複數形。每一個學生的提案與倡議，都像夜空中突然亮起的新星；當彼此看見、互相支持，便能匯聚成改變學校的星系。</p>
         </div>
       </section>
 
-      <section class="section" id="features">
-        <div class="section-heading">
-          <p class="section-number" data-i18n="features.number"></p>
-          <h2 data-i18n="features.title"></h2>
+      <section class="landing-chapter landing-chapter--blue" id="features">
+        <div class="chapter-copy">
+          <p class="section-number" data-i18n="landing.proposalsNumber">01 / 提案與參與</p>
+          <h2 data-i18n="features.title">讓每個想法，<br><em>都有被推進的一步。</em></h2>
+          <p data-i18n="landing.proposalsLede">公開倡議與私密案件，都有合適的入口；提案、附議與狀態留在同一張真實介面裡。</p>
         </div>
-        <div class="capability-grid" data-render="features"></div>
+        <div class="chapter-visual chapter-visual--tilt-right">
+          <span class="color-plane color-plane--blue" aria-hidden="true"></span>
+          <div class="product-frame" data-novae-demo="board"></div>
+        </div>
+        <div class="capability-ledger" data-render="features"></div>
       </section>
 
-      <section class="config-story" id="custom">
-        <div class="section config-studio" data-rule-studio>
-          <div class="config-studio__heading">
-            <p class="section-number" data-i18n="config.studio.number"></p>
-            <h2 data-i18n="config.studio.title"></h2>
-            <div class="config-studio__lede">
-              <p data-i18n="config.studio.lede"></p>
-              <a class="button button-dark" href="./category-builder.html">
-                <span data-i18n="config.studio.builderCta"></span>
-                <i class="ti ti-arrow-right" aria-hidden="true"></i>
-              </a>
-            </div>
+      <section class="landing-chapter landing-chapter--lavender" id="workflow">
+        <div class="chapter-copy">
+          <p class="section-number" data-i18n="workflow.number">02 / 使用流程</p>
+          <h2 data-i18n="workflow.title">從聲音，到<em>可追蹤的結果。</em></h2>
+          <p data-i18n="workflow.lede">學生知道現在走到哪；管理員知道下一個該處理什麼。</p>
+        </div>
+        <div class="chapter-visual chapter-visual--wide">
+          <span class="color-plane color-plane--lavender" aria-hidden="true"></span>
+          <div class="product-frame" data-novae-demo="detail"></div>
+        </div>
+        <ol class="workflow-rail" data-render="workflow-steps"></ol>
+        <div class="status-ledger" data-render="workflow-statuses" aria-label="statuses"></div>
+      </section>
+
+      <section class="landing-chapter landing-chapter--rose" id="updates">
+        <div class="chapter-copy">
+          <p class="section-number" data-i18n="landing.updatesNumber">03 / 公告與通知</p>
+          <h2 data-i18n="landing.updatesTitle">公告、留言與通知，<br><em>不漏接重要進度。</em></h2>
+          <p data-i18n="landing.updatesLede">公告能廣播也能討論；狀態更新、附議與留言都會回到站內通知。</p>
+        </div>
+        <div class="chapter-visual chapter-visual--stacked">
+          <span class="color-plane color-plane--rose" aria-hidden="true"></span>
+          <div class="communications-showcase">
+            <div class="product-frame" data-novae-demo="announcements"></div>
+            <div class="product-frame" data-novae-demo="notifications"></div>
           </div>
+        </div>
+        <div class="pwa-ledger" data-render="pwa-cards"></div>
+      </section>
+
+      <section class="landing-chapter landing-chapter--sage" id="management">
+        <div class="chapter-copy">
+          <p class="section-number" data-i18n="landing.managementNumber">04 / 管理與回應</p>
+          <h2 data-i18n="landing.managementTitle">學生發聲，<br><em>單位能清楚回應。</em></h2>
+          <p data-i18n="landing.managementLede">審核、回覆期限、平台維運與分類概況集中呈現，讓需要處理的事情不被遺漏。</p>
+        </div>
+        <div class="chapter-visual chapter-visual--tilt-left">
+          <span class="color-plane color-plane--sage" aria-hidden="true"></span>
+          <div class="product-frame" data-novae-demo="moderation"></div>
+        </div>
+        <div class="roles-ledger" data-render="roles"></div>
+      </section>
+
+      <section class="landing-chapter landing-chapter--taupe config-story" id="custom">
+        <div class="chapter-copy">
+          <p class="section-number" data-i18n="landing.configNumber">05 / 可調規則</p>
+          <h2 data-i18n="config.studio.title">不是選預設，<br><em>是組合適合的規則。</em></h2>
+          <p data-i18n="landing.configLede">閱讀範圍、作者顯示、附議與回覆期限，都能依校園文化設定。</p>
+          <a class="button button-secondary" href="./category-builder.html"><span data-i18n="config.studio.builderCta">前往分類設定產生器</span><i class="ti ti-arrow-right" aria-hidden="true"></i></a>
+        </div>
+        <div class="config-studio" data-rule-studio>
           <div class="config-studio__workspace">
             <div class="config-dimensions" data-render="config-dimensions" role="tablist"></div>
             <div class="config-stage">
-              <div class="config-stage__eyebrow">
-                <span data-i18n="config.studio.stepLabel"></span>
-                <strong data-rule-progress>01 / 05</strong>
-              </div>
+              <div class="config-stage__eyebrow"><span data-i18n="config.studio.stepLabel">設定模組</span><strong data-rule-progress>01 / 05</strong></div>
               <div data-render="config-dimension-panels" aria-live="polite"></div>
             </div>
           </div>
         </div>
       </section>
 
-      <section class="section experience-section" id="experience">
-        <div class="section-heading horizontal">
-          <div>
-            <p class="section-number" data-i18n="experience.number"></p>
-            <h2 data-i18n="experience.title"></h2>
-          </div>
+      <section class="landing-chapter landing-chapter--devices" id="experience">
+        <div class="chapter-copy">
+          <p class="section-number" data-i18n="landing.interfaceNumber">06 / 實際介面</p>
+          <h2 data-i18n="experience.title">同一套流程，<br><em>每個螢幕都清楚。</em></h2>
+          <p data-i18n="pwa.lede">不必經過應用商店，支援的瀏覽器可安裝並接收重要通知。</p>
         </div>
-        <div class="reference-stage">
-          <div class="reference-desktop" data-novae-demo="desktop"></div>
-          <div class="reference-mobile" data-novae-demo="mobile"></div>
+        <div class="device-stage">
+          <div class="product-frame device-stage__desktop" data-novae-demo="board"></div>
+          <div class="product-frame device-stage__mobile" data-novae-demo="mobile"></div>
         </div>
-      </section>
-
-      <section class="section workflow-section" id="workflow">
-        <div class="section-heading horizontal"><div><p class="section-number" data-i18n="workflow.number"></p><h2 data-i18n="workflow.title"></h2></div><p data-i18n="workflow.lede"></p></div>
-        <ol class="timeline" data-render="workflow-steps"></ol><div class="status-strip" data-render="workflow-statuses" aria-label="statuses"></div>
-      </section>
-
-      <section class="section pwa-section" id="pwa"><div class="pwa-copy"><p class="section-number" data-i18n="pwa.number"></p><h2 data-i18n="pwa.title"></h2><p data-i18n="pwa.lede"></p></div><div class="pwa-grid" data-render="pwa-cards"></div></section>
-
-      <section class="section roles-section" id="roles">
-        <div class="section-heading horizontal"><div><p class="section-number" data-i18n="roles.number"></p><h2 data-i18n="roles.title"></h2></div></div>
-        <div class="roles-grid" data-render="roles"></div><div class="more-features" data-render="more-features"></div>
-      </section>
-
-      <section class="section fit-section" id="fit">
-        <div class="section-heading horizontal"><div><p class="section-number" data-i18n="fit.number"></p><h2 data-i18n="fit.title"></h2></div></div>
-        <div class="fit-grid"><article class="fit-yes"><h3 data-i18n="fit.yesTitle"></h3><ul data-render="fit-yes"></ul></article><article class="fit-no fit-benefits"><h3 data-i18n="fit.noTitle"></h3><ul data-render="fit-no"></ul></article></div>
       </section>
 
       <section class="cta-section">
-        <p class="section-number" data-i18n="cta.eyebrow"></p>
-        <h2 data-i18n="cta.title"></h2>
-        <p data-i18n="cta.body"></p>
+        <p class="section-number" data-i18n="cta.eyebrow">MIT LICENSE · 自己部署 · 自由改造</p>
+        <h2 data-i18n="cta.title">把校園的聲音，<br><em>變成真正的進度。</em></h2>
+        <p data-i18n="cta.body">從文件開始了解，或直接 fork 專案，用你自己的分類規則建立學生參與平台。</p>
         <div>
-          <a class="button button-light" data-site-href="github" href="https://github.com/tavricccc/novae" target="_blank" rel="noreferrer"><span data-i18n="cta.github"></span><i class="ti ti-arrow-right" aria-hidden="true"></i></a>
-          <a class="button button-outline" data-site-href="docsDeploy" href="./docs/deployment-guide.html"><span data-i18n="cta.deploy"></span></a>
-          <a class="button button-outline" data-site-href="docsConfig" href="./docs/configuration.html"><span data-i18n="cta.config"></span></a>
+          <a class="button button-primary" data-site-href="github" href="https://github.com/tavricccc/novae" target="_blank" rel="noreferrer"><span data-i18n="cta.github">前往 GitHub</span><i class="ti ti-arrow-right" aria-hidden="true"></i></a>
+          <a class="button button-secondary" data-site-href="docsDeploy" href="./docs/deployment-guide.html"><span data-i18n="cta.deploy">部署指南</span></a>
+          <a class="button button-secondary" href="./category-builder.html"><span data-i18n="cta.config">分類設定</span></a>
         </div>
       </section>
     </main>
 
     <footer class="site-footer">
       <a class="brand" href="#top"><span class="brand-mark"><img src="./logo.svg" alt="" /></span><span><strong>Novae</strong><small>Novae</small></span></a>
-      <p data-i18n="footer.tagline"></p>
+      <p data-i18n="footer.tagline">為更透明、可追蹤的校園參與而開源。</p>
       <div>
         <a data-i18n="footer.github" data-site-href="github" href="https://github.com/tavricccc/novae" target="_blank" rel="noreferrer">GitHub</a>
         <a data-i18n="footer.docs" data-site-href="docsHome" href="./docs/">Docs</a>

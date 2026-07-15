@@ -1,27 +1,9 @@
-# Cloudinary setup
+# 4. Create Cloudinary
 
-[繁體中文](../../deployment/cloudinary.md) · [Deployment overview](../deployment-guide.md)
+1. Create or select a Novae-only Product Environment in the [Cloudinary Console](https://console.cloudinary.com/).
+2. Record cloud name, API key, and API secret as `CLOUDINARY_CLOUD_NAME`, `CLOUDINARY_API_KEY`, and `CLOUDINARY_API_SECRET`.
+3. For the current standard HMAC callback flow, set `CLOUDINARY_WEBHOOK_SECRET` to the same API secret. Do not invent a separate random value.
+4. Do not add a duplicate global notification URL; the signed upload flow supplies its callback.
+5. Keep resources permission controlled. Novae resolves short-lived signed delivery URLs after checking content access.
 
-Register at [Cloudinary](https://cloudinary.com/users/register_free), verify email, and open or create a dedicated `novae-production` Product Environment. Production and development should not share one environment.
-
-Under **Settings → API Keys**, collect values from that same Product Environment:
-
-| Cloudinary value | GitHub secret |
-| --- | --- |
-| Cloud name | `CLOUDINARY_CLOUD_NAME` |
-| API key | `CLOUDINARY_API_KEY` |
-| API secret | `CLOUDINARY_API_SECRET` |
-
-See [finding Cloudinary credentials](https://cloudinary.com/documentation/developer_onboarding_faq_find_credentials).
-
-Novae currently verifies the legacy `X-Cld-Signature` HMAC-SHA1 header. Standard Cloudinary notifications sign with the Product Environment API secret, so set:
-
-```text
-CLOUDINARY_WEBHOOK_SECRET = CLOUDINARY_API_SECRET
-```
-
-Do not generate an unrelated random value or every callback will fail with 401. A dedicated signing key applies only when separately provisioned and supported. See [signature verification](https://cloudinary.com/documentation/notifications#verifying_notification_signatures).
-
-Do not create a global upload webhook trigger. Each Novae upload already supplies `https://<SUPABASE_PROJECT_REF>.supabase.co/functions/v1/cloudinaryWebhook` as its operation-specific `notification_url`; an extra trigger can duplicate delivery. See [operation-specific notification URLs](https://cloudinary.com/documentation/notifications#notification_urls_for_specific_api_calls).
-
-Next: [Notion](notion.md).
+All four values must belong to the same Product Environment. Next: decide whether to [create the optional Notion copy](notion.md).

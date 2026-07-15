@@ -1,21 +1,13 @@
-# Supabase setup
+# 3. Create Supabase
 
-[繁體中文](../../deployment/supabase.md) · [Deployment overview](../deployment-guide.md)
+Supabase hosts Postgres, RLS, RPC, Realtime, Cron, and six Edge Functions.
 
-## Create a project
+1. Create a project in the [Supabase Dashboard](https://supabase.com/dashboard), choose an appropriate region, and save the database password.
+2. Record Project URL as `VITE_SUPABASE_URL` and the publishable key as `VITE_SUPABASE_PUBLISHABLE_KEY`.
+3. Record the project reference as `SUPABASE_PROJECT_REF`, database password as `SUPABASE_DB_PASSWORD`, legacy `service_role` as `SUPABASE_SERVICE_ROLE_KEY`, and an account access token as `SUPABASE_ACCESS_TOKEN`.
+4. Never put the service role into a `VITE_*` value.
+5. Do not paste migrations manually. The backend workflow links the project, runs `supabase db push`, configures secrets, and deploys all Functions.
 
-Sign in at [Supabase Dashboard](https://supabase.com/dashboard), create an organization and a `novae-production` project, choose an appropriate region, and generate a strong database password. Save that password in a password manager. Do not create application tables manually; the backend workflow applies repository migrations.
+Hosted Edge Functions provide `SUPABASE_URL`; no GitHub secret is needed. Supabase documents link, migration history, and remote push in the [official CLI reference](https://supabase.com/docs/reference/cli/supabase-db).
 
-## Values to collect
-
-- From **Connect** or **Settings → API Keys**, copy Project URL to `VITE_SUPABASE_URL` and the publishable `sb_publishable_...` key to `VITE_SUPABASE_PUBLISHABLE_KEY`.
-- From **Settings → General**, copy Reference ID to `SUPABASE_PROJECT_REF`.
-- Put the project database password in `SUPABASE_DB_PASSWORD`. If lost, reset it under Database settings and update the secret.
-- From **Settings → API Keys → Legacy API Keys**, reveal `service_role` and put it in `SUPABASE_SERVICE_ROLE_KEY`. Do not use `anon`, publishable, or `sb_secret_...` for this current workflow.
-- From [Account Access Tokens](https://supabase.com/dashboard/account/tokens), generate a token named `novae-github-production` and put it in `SUPABASE_ACCESS_TOKEN`.
-
-Publishable keys are browser-safe only when backed by correct RLS. The service-role key bypasses RLS and must never enter a `VITE_*` value. See [Supabase API keys](https://supabase.com/docs/guides/getting-started/api-keys).
-
-Hosted Edge Functions automatically receive `SUPABASE_URL`; do not create it as a GitHub secret. The `.env.example` entry only documents unusual manual hosting outside Supabase. See [default Edge secrets](https://supabase.com/docs/guides/functions/secrets#default-secrets).
-
-Next: [Cloudinary](cloudinary.md).
+Next: [create Cloudinary](cloudinary.md).

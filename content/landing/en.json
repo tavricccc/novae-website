@@ -15,14 +15,28 @@
     "previous": "Previous chapter",
     "next": "Next chapter",
     "overview": "Overview",
-    "features": "Highlights",
-    "custom": "Customization",
-    "experience": "Every device",
-    "schools": "Campus adoption",
-    "roles": "Use cases"
+    "features": "Proposals & support",
+    "custom": "Rule settings",
+    "experience": "Updates",
+    "schools": "Review & response",
+    "roles": "Management"
   },
   "brand": {
     "tagline": "Ideas that form a constellation"
+  },
+  "landing": {
+    "brandNote": "Novae is the plural of nova—ideas gathering into change.",
+    "proposalsNumber": "01 / PROPOSALS & SUPPORT",
+    "proposalsLede": "Public initiatives and private cases each have the right place, while proposals, support and status stay in one real interface.",
+    "updatesNumber": "03 / ANNOUNCEMENTS & NOTIFICATIONS",
+    "updatesTitle": "Announcements, discussion and updates—<br><em>without losing the thread.</em>",
+    "updatesLede": "Announcements can broadcast and invite discussion; status changes, support and comments return to in-app notifications.",
+    "managementNumber": "04 / MANAGEMENT & RESPONSE",
+    "managementTitle": "Students speak up.<br><em>Schools can respond clearly.</em>",
+    "managementLede": "Reviews, response deadlines, operations and category usage stay together so important work is not missed.",
+    "configNumber": "05 / ADAPTABLE RULES",
+    "configLede": "Set reading scope, author visibility, support and response deadlines around the way your campus works.",
+    "interfaceNumber": "06 / REAL INTERFACE"
   },
   "hero": {
     "eyebrow": "Every voice can become the start of change",

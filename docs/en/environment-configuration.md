@@ -1,59 +1,58 @@
-# Environment and credentials
+# Credential worksheet
 
-[繁體中文](../environment-configuration.md) · [Documentation home](../README.md) · [Product rules](configuration.md)
+Create these as GitHub `production` Environment secrets. The backend workflow copies runtime values into Supabase Edge secrets. `VITE_*` values are browser-visible; every other credential stays server-side.
 
-This page separates public environment variables bundled for browsers from private backend and deployment credentials. See the [from-scratch deployment guide](deployment-guide.md) for exact acquisition steps.
+## Frontend and Vercel
 
-## Where values belong
-
-| Type | Local development | Production and development | Exposure |
-| --- | --- | --- | --- |
-| `VITE_*` | Untracked `.env` | GitHub Environment secrets | Visible to browser users |
-| Backend and deployment credentials | Never committed | GitHub, Supabase, or vendor secret settings | Controlled backend and deployment only |
-
-Production and development must use separate resources and credentials. Never place a service-role key, database password, or third-party secret in a `VITE_*` value.
-
-## Frontend environment variables
-
-| Name | Required | Purpose |
-| --- | --- | --- |
-| `VITE_SCHOOL_NAME` | No | School name shown on startup and account screens; hidden when empty |
-| `VITE_ALLOWED_DOMAIN` | Yes | Sign-in hint and client precheck |
-| `VITE_FIREBASE_API_KEY` | Yes | Firebase Web configuration |
-| `VITE_FIREBASE_AUTH_DOMAIN` | Yes | Firebase Auth domain |
-| `VITE_FIREBASE_PROJECT_ID` | Yes | Firebase project ID |
-| `VITE_FIREBASE_APP_ID` | Yes | Firebase Web App ID |
-| `VITE_FIREBASE_MESSAGING_SENDER_ID` | Yes | FCM sender ID |
-| `VITE_FIREBASE_VAPID_KEY` | Yes | Web Push public key |
-| `VITE_FIREBASE_APP_CHECK_ENABLED` | No | Enables App Check when `true` |
-| `VITE_RECAPTCHA_ENTERPRISE_SITE_KEY` | Conditional | Required with App Check |
-| `VITE_SUPABASE_URL` | Yes | Supabase project URL |
-| `VITE_SUPABASE_PUBLISHABLE_KEY` | Yes | Supabase publishable key |
-
-## Backend and deployment credentials
-
-| Group | Names |
+| Secret | Source |
 | --- | --- |
-| Supabase | `SUPABASE_ACCESS_TOKEN`, `SUPABASE_PROJECT_REF`, `SUPABASE_DB_PASSWORD`, `SUPABASE_SERVICE_ROLE_KEY` |
-| Firebase | `FIREBASE_PROJECT_ID`, `FIREBASE_WEB_API_KEY`, `GOOGLE_SERVICE_ACCOUNT_JSON` |
-| Access | `ALLOWED_DOMAIN`, `ADMIN_EMAILS` |
-| Cloudinary | `CLOUDINARY_CLOUD_NAME`, `CLOUDINARY_API_KEY`, `CLOUDINARY_API_SECRET`, `CLOUDINARY_WEBHOOK_SECRET` |
-| Internal | `WEBHOOK_SECRET` |
-| Notion | `NOTION_TOKEN`, `NOTION_DATABASE_ID`, optional `NOTION_VERSION` |
-| Upstash | `UPSTASH_REDIS_REST_URL`, `UPSTASH_REDIS_REST_TOKEN` |
-| Vercel | `VERCEL_TOKEN`, `VERCEL_ORG_ID`, `VERCEL_PROJECT_ID` |
+| `VITE_SCHOOL_NAME` | School display name; recommended |
+| `VITE_ALLOWED_DOMAIN` | Email domain without `@` |
+| `VITE_FIREBASE_API_KEY` | Firebase Web App `apiKey` |
+| `VITE_FIREBASE_AUTH_DOMAIN` | Firebase `authDomain` |
+| `VITE_FIREBASE_PROJECT_ID` | Firebase `projectId` |
+| `VITE_FIREBASE_APP_ID` | Firebase `appId` |
+| `VITE_FIREBASE_MESSAGING_SENDER_ID` | Firebase `messagingSenderId` |
+| `VITE_FIREBASE_VAPID_KEY` | FCM Web Push public VAPID key |
+| `VITE_FIREBASE_APP_CHECK_ENABLED` | `false` initially; `true` after App Check setup |
+| `VITE_RECAPTCHA_ENTERPRISE_SITE_KEY` | Required when App Check is enabled |
+| `VITE_SUPABASE_URL` | Supabase Project URL |
+| `VITE_SUPABASE_PUBLISHABLE_KEY` | Supabase publishable key, never service role |
+| `VERCEL_TOKEN` | Vercel account token |
+| `VERCEL_ORG_ID` | Vercel team/account ID |
+| `VERCEL_PROJECT_ID` | Vercel project ID |
 
-## Related values
+## Backend and deployment
 
-`ADMIN_EMAILS` contains full addresses separated by ASCII commas. Keep `VITE_ALLOWED_DOMAIN` and `ALLOWED_DOMAIN` identical and enter only the text after `@`; administrators must belong to that domain.
+| Secret | Source |
+| --- | --- |
+| `SUPABASE_ACCESS_TOKEN` | Supabase account access token |
+| `SUPABASE_PROJECT_REF` | Project reference ID |
+| `SUPABASE_DB_PASSWORD` | Project database password |
+| `SUPABASE_SERVICE_ROLE_KEY` | Legacy `service_role` key |
+| `FIREBASE_PROJECT_ID` | Same as `VITE_FIREBASE_PROJECT_ID` |
+| `FIREBASE_WEB_API_KEY` | Same as `VITE_FIREBASE_API_KEY` |
+| `GOOGLE_SERVICE_ACCOUNT_JSON` | Entire Firebase service-account JSON, not a file path |
+| `ALLOWED_DOMAIN` | Exactly the same as `VITE_ALLOWED_DOMAIN` |
+| `ADMIN_EMAILS` | Full emails separated by ASCII commas |
+| `CLOUDINARY_CLOUD_NAME` | Cloudinary product environment |
+| `CLOUDINARY_API_KEY` | Same environment API key |
+| `CLOUDINARY_API_SECRET` | Same environment API secret |
+| `CLOUDINARY_WEBHOOK_SECRET` | Same API secret for the standard HMAC flow |
+| `WEBHOOK_SECRET` | Independently generated random 32-byte value |
+| `NOTION_TOKEN` | Optional internal integration secret |
+| `NOTION_DATABASE_ID` | Optional original database shared with the integration |
+| `NOTION_VERSION` | Optional API version; code defaults to `2022-06-28` |
+| `UPSTASH_REDIS_REST_URL` | HTTPS REST URL |
+| `UPSTASH_REDIS_REST_TOKEN` | Writable Standard REST token |
 
-`FIREBASE_PROJECT_ID` and `FIREBASE_WEB_API_KEY` normally reuse their frontend counterparts. `CLOUDINARY_WEBHOOK_SECRET` reuses `CLOUDINARY_API_SECRET` for the current standard HMAC verification, while `WEBHOOK_SECRET` must be independently random. `GOOGLE_SERVICE_ACCOUNT_JSON` contains the complete JSON, not a file path.
+Hosted Edge Functions provide `SUPABASE_URL` automatically; do not create it as a GitHub secret. Local `.env` is only for contributors and is not part of production deployment.
 
-Hosted Supabase Edge Functions inject `SUPABASE_URL`, so no GitHub secret is required. The release workflow writes `SUPABASE_SERVICE_ROLE_KEY` to Edge as `APP_SUPABASE_SERVICE_ROLE_KEY`.
+## Final check
 
-## Completion checklist
+- [ ] Every value is an Environment secret in `production`, not a public variable.
+- [ ] Firebase, Supabase, and Cloudinary values each come from one matching project/environment.
+- [ ] No service role, service account, API secret, password, or token appears in Git.
+- [ ] All administrator emails belong to the allowed domain.
 
-- `.env` and credentials are not committed to Git.
-- `VITE_ALLOWED_DOMAIN` and `ALLOWED_DOMAIN` match exactly.
-- Production and development do not share databases, projects, or credentials.
-- Complete the relevant checks in [quick start](quick-start.md) or [deployment](deployment-guide.md).
+`NOTION_TOKEN` and `NOTION_DATABASE_ID` must either both be set or both be omitted. When both are omitted, the workflow writes `NOTION_ENABLED=false` and Edge Functions safely skip Notion synchronization. A partial pair fails deployment with a clear error.

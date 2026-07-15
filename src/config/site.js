@@ -3,8 +3,8 @@ export const SITE_LINKS = Object.freeze({
   license: 'https://github.com/tavricccc/novae/blob/main/LICENSE',
   docsHome: Object.freeze({ zh: './docs/', en: './docs/en/' }),
   docsDeploy: Object.freeze({
-    zh: './docs/deployment-guide.html',
-    en: './docs/en/deployment-guide.html',
+    zh: './docs/quick-start.html',
+    en: './docs/en/quick-start.html',
   }),
   docsConfig: Object.freeze({
     zh: './docs/configuration.html',

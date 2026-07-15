@@ -1,82 +1,59 @@
-# 快速開始
+# 部署準備與服務設定
 
-[English](en/quick-start.md) · [文件首頁](README.md)
+這不是本機開發教學，也還不會開始發布。先決定校園規則，再依本頁順序建立部署需要的服務。七項服務都準備好之後，才填寫憑證、設定分類並執行最後發布。
 
-本教學讓你在本機啟動前端並完成程式碼驗證。完整功能仍需要可用的 Firebase 與 Supabase 專案；第三方通知、圖片與備份整合可在之後設定。
+## 1. 決定校園規則
 
-## 前置需求
+先寫下以下答案：
 
-- Node.js 24（CI 使用的版本）
-- npm（隨 Node.js 安裝）
-- Git
-- 一個 Firebase Web App 與啟用的 Google 登入
-- 一個已套用本專案 migrations 與 Edge Functions 的 Supabase 專案
+- 學校顯示名稱。
+- 允許登入的 Google 信箱網域，例如 `school.edu.tw`，不要包含 `@` 或 `https://`。
+- 第一批管理員的完整 Email；多人用半形逗號分隔。
+- 哪些分類要公開、先審核或保持私密。
+- 每個分類是否顯示作者、是否附議、附議人數、附議天數與回應天數。
 
-需要本機資料庫時，另安裝 Supabase CLI 所需的 Docker 環境。本專案也在 `devDependencies` 固定 Supabase 與 Deno 工具版本。
+## 2. 依序建立七項服務
 
-## 1. 取得並安裝
+| 服務 | 用途 | 你最後會拿到 |
+| --- | --- | --- |
+| GitHub | 保存你的 fork、secrets 與自動部署 | repository、`production` Environment |
+| Firebase | Google 登入、App Check、Web Push | Web App config、VAPID key、service account JSON |
+| Supabase | 資料庫、RLS、Edge Functions、Realtime | URL、publishable key、project ref、部署憑證 |
+| Cloudinary | 簽名圖片儲存與讀取 | cloud name、API key、API secret |
+| Upstash | 跨 Edge 執行個體的限流 | REST URL、Standard REST token |
+| Vercel | 發布 PWA 前端 | token、org ID、project ID |
 
-```bash
-git clone https://github.com/tavricccc/novae.git
-cd novae
-npm ci
-```
+Notion 是選用的營運副本。需要時才建立 integration 與 database；不需要就完全略過，不會影響提案、公告、通知或其他主要功能。
 
-## 2. 建立前端環境設定
+請照下列順序完成。每一頁都只處理該服務的建立與憑證取得，不會提前發布：
 
-```bash
-cp .env.example .env
-```
+1. [建立 GitHub fork 與 production Environment](deployment/github.md)
+2. [建立 Firebase](deployment/firebase.md)
+3. [建立 Supabase](deployment/supabase.md)
+4. [建立 Cloudinary](deployment/cloudinary.md)
+5. [設定 Notion（選用）](deployment/notion.md)
+6. [建立 Upstash](deployment/upstash.md)
+7. [建立 Vercel](deployment/vercel-github.md)
 
-Windows PowerShell 可使用：
+## 3. 確認你有權限
 
-```powershell
-Copy-Item .env.example .env
-```
+部署者需要能：
 
-本機 `.env` 只需要填前端 `VITE_*` 區塊。至少填入 Firebase、Supabase 與允許網域欄位；檔案後半的部署／後端值留空即可。所有 `VITE_*` 值都會進入瀏覽器 bundle，不可放入 service role key、資料庫密碼或第三方 API secret。欄位說明見[環境與憑證](environment-configuration.md#前端環境變數)。
+- 管理 GitHub repository 的 Settings、Actions 與 Environments。
+- 建立 Firebase、Supabase、Cloudinary、Upstash、Vercel 專案；Notion 只在選用時需要。
+- 管理學校網域與首批管理員名單。
+- 在正式上線前確認隱私告知、內容管理與資料保留責任。
 
-## 3. 啟動開發伺服器
+## 4. 建立一份安全的暫存表
 
-```bash
-npm run dev
-```
+使用密碼管理器或安全的暫存文件記錄[憑證填寫表](environment-configuration.md)中的值。不要把 service role、service account、API secret 或 token 貼到 issue、聊天、試算表公開連結或 Git commit。
 
-終端機會顯示本機網址。登入帳號的網域必須符合 `VITE_ALLOWED_DOMAIN`，而後端 `ALLOWED_DOMAIN` 必須使用相同值。
+## 5. 完成條件
 
-## 4. 驗證變更
+- [ ] 已確定學校網域與管理員 Email。
+- [ ] 已決定分類與期限規則。
+- [ ] 已完成 GitHub、Firebase、Supabase、Cloudinary、Upstash 與 Vercel；需要時也已完成 Notion。
+- [ ] 知道所有敏感值最後要放進 GitHub `production` Environment secrets。
+- [ ] 知道本機 `.env` 不是正式部署必要步驟。
 
-日常修改至少執行：
-
-```bash
-npm run typecheck
-npm run lint
-npm run build
-```
-
-送出 pull request 前執行完整驗證：
-
-```bash
-npm run verify:local
-```
-
-`verify:local` 會依序檢查型別、未使用宣告、lint、production build、Edge Functions、架構規則及離線 dependency audit。
-
-## 5. 選用：本機 Supabase
-
-```bash
-npm run db:start
-npm run db:reset:local
-npm run db:lint:local
-```
-
-本機堆疊不能自動代替 Firebase、Cloudinary、Notion、Upstash 或 FCM。若要測試完整整合，仍須設定對應 secrets 或使用隔離的開發資源。
-
-## 完成條件
-
-- 開發伺服器可啟動且沒有設定錯誤。
-- 指定校內網域帳號能完成登入與使用者同步。
-- `npm run verify:local` 成功。
-- 沒有把 `.env` 或任何私密值加入 Git。
-
-若還沒有任何雲端帳號，可先閱讀[從零部署指南](deployment-guide.md)，裡面逐一說明註冊與取得每個值。遇到問題則查看[故障排除](troubleshooting.md)。
+全部完成後，先開啟[憑證填寫表](environment-configuration.md)，集中核對並填入 GitHub `production` Environment secrets；接著設定[分類與平台規則](configuration.md)。這兩步完成後，才進入[最後發布與驗收](deployment-guide.md)。

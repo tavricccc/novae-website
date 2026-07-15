@@ -1,26 +1,29 @@
 # Novae 文件
 
-從實際操作開始認識 Novae。想先體驗功能請看[使用者操作](user-guide.md)，管理平台請看[管理員操作](admin-guide.md)；準備自己的版本則從[快速開始](quick-start.md)與[產品規則設定](configuration.md)著手。
+這份文件以「把 Novae 正式部署給一所學校使用」為主線。你不需要先懂 Vue、資料庫或雲端平台；照順序完成帳號、憑證、平台規則與發布即可。
 
-| 我想要… | 文件 |
+## 第一次部署的閱讀順序
+
+1. 先讀[產品與流程](project-overview.md)，確認 Novae 適合你的校園情境。
+2. 按[部署準備與服務設定](quick-start.md)依序建立 GitHub、Firebase、Supabase、Cloudinary、Upstash 與 Vercel；需要營運副本時再加 Notion。
+3. 用[憑證填寫表](environment-configuration.md)逐項核對 GitHub `production` Environment secrets。
+4. 用[分類設定產生器](../category-builder.html)決定分類、可見範圍、作者、附議門檻、附議天數與回應期限，並將檔案提交及推送到 fork。
+5. 所有前置項目完成後，才執行[最後發布與驗收](deployment-guide.md)。
+6. 發布後照[使用者流程](user-guide.md)與[管理員流程](admin-guide.md)完成操作驗收。
+7. 上線後依[維運手冊](operations.md)定期檢查，出錯時從[一步一步排錯](troubleshooting.md)開始。
+
+## 只想找一件事
+
+| 需求 | 前往 |
 | --- | --- |
-| 快速認識產品亮點 | [專案總覽](project-overview.md) |
-| 在本機啟動專案 | [快速開始](quick-start.md) |
-| 學習一般使用者怎麼操作 | [使用者操作](user-guide.md) |
-| 審核提案、發布公告與管理平台 | [管理員操作](admin-guide.md) |
-| 深入了解技術架構 | [系統架構](architecture.md) |
-| 調整分類、權限、限流與圖片規則 | [產品規則設定](configuration.md) |
-| 查詢公開環境變數與部署憑證 | [環境與憑證](environment-configuration.md) |
-| 從註冊帳號、取得每個 key 到建立正式環境 | [從零部署指南](deployment-guide.md) |
-| 監控、維護或處理事故 | [維運手冊](operations.md) |
-| 排除常見問題 | [故障排除](troubleshooting.md) |
-| 評估安全與隱私 | [安全模型](security.md) |
-| 預估雲端費用 | [成本指南](costs.md) |
-| 送出 issue 或 pull request | [貢獻指南](contributing.md) |
+| 看懂提案從送出到結案的生命週期 | [產品與流程](project-overview.md) |
+| 從零開始部署 | [部署準備與服務設定](quick-start.md) |
+| 前置工作完成，準備發布 | [最後發布與驗收](deployment-guide.md) |
+| 查一個 secret 從哪裡來 | [憑證填寫表](environment-configuration.md) |
+| 調整附議人數或天數 | [分類與平台規則](configuration.md) |
+| 學會操作 App | [使用者流程](user-guide.md) |
+| 審核、回覆、公告與 Dashboard | [管理員流程](admin-guide.md) |
+| 了解資料與服務怎麼流動 | [系統架構](architecture.md) |
+| 本機開發或送 PR | [貢獻指南](contributing.md) |
 
-### 建議閱讀順序
-
-1. [使用者操作](user-guide.md)與[管理員操作](admin-guide.md)：先看不同角色實際怎麼使用。
-2. [產品規則設定](configuration.md)與[環境與憑證](environment-configuration.md)：決定平台行為與部署值。
-3. [快速開始](quick-start.md)與[部署指南](deployment-guide.md)：建立並發布自己的版本。
-4. [故障排除](troubleshooting.md)與[維運手冊](operations.md)：上線後快速找到處理方式。
+> 本機開發不是部署的前置步驟。只有要修改程式或深入除錯時，才需要安裝 Node.js 並執行本機指令。

@@ -28,32 +28,22 @@
           <button class="button button-dark" type="button" data-download-config><i class="ti ti-download" aria-hidden="true"></i>下載 JSON</button>
         </div>
       </header>
-      <p class="builder-message" data-builder-message>設定只在目前瀏覽器中處理，不會自動寫入專案。</p>
+      <p class="builder-message" data-builder-message>設定只在目前瀏覽器中處理；照著六個步驟完成、下載，再提交到你的 GitHub fork。</p>
 
       <div class="builder-layout">
-        <aside class="builder-sidebar" aria-label="分類清單">
-          <div class="builder-sidebar__head"><div><h2>分類</h2><span data-category-count>1</span></div><button type="button" data-add-category aria-label="新增分類"><i class="ti ti-plus" aria-hidden="true"></i></button></div>
+        <section class="builder-category-strip" aria-label="分類清單">
+          <div class="builder-sidebar__head"><div><h2>正在設定的分類</h2><span data-category-count>1</span></div><button type="button" data-add-category aria-label="新增分類"><i class="ti ti-plus" aria-hidden="true"></i></button></div>
           <div class="builder-category-list" data-category-list></div>
-          <div class="builder-sidebar__help">
-            <strong><i class="ti ti-lock" aria-hidden="true"></i>固定規則</strong>
-            <p>所有分類都需要校內 Google 帳號登入；附件與留言權限會依閱讀範圍自動套用。</p>
-            <a data-site-href="docsConfig" href="./docs/configuration.html">查看設定文件 <i class="ti ti-arrow-right" aria-hidden="true"></i></a>
-          </div>
-        </aside>
+        </section>
 
         <section class="builder-detail">
-          <nav class="builder-view-tabs" aria-label="編輯模式">
-            <button class="active" type="button" data-editor-tab="form" aria-selected="true"><i class="ti ti-adjustments-horizontal" aria-hidden="true"></i>視覺化設定</button>
-            <button type="button" data-editor-tab="source" aria-selected="false"><i class="ti ti-code" aria-hidden="true"></i>JSON 預覽</button>
-          </nav>
-
           <div data-editor-panel="form">
             <section class="builder-editor" data-category-editor aria-live="polite"></section>
           </div>
 
           <div data-editor-panel="source" hidden>
             <div class="builder-source">
-              <header><div><p>GENERATED SOURCE</p><h2>issue-categories.config.json</h2></div><span data-file-status>1 個分類</span></header>
+              <header><button type="button" class="builder-source__back" data-editor-tab="form"><i class="ti ti-arrow-left" aria-hidden="true"></i>返回確認</button><div><p>GENERATED SOURCE</p><h2>issue-categories.config.json</h2></div><span data-file-status>1 個分類</span></header>
               <section class="builder-validation" data-validation-summary hidden><h3>設定還不能下載</h3><p>請先修正以下項目：</p><div data-error-list></div></section>
               <pre><code data-json-preview></code></pre>
             </div>
