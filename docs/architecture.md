@@ -10,6 +10,7 @@ flowchart LR
   U -->|Firebase token + action| E[Supabase Edge Functions]
   E -->|驗證、角色、限流| R[Upstash Redis]
   E -->|RPC／交易| P[Postgres + RLS]
+  P -->|私有 Broadcast| U
   U -->|簽名圖片上傳| C[Cloudinary]
   C -->|簽章 callback| E
   P --> O[Outbox]
@@ -65,6 +66,12 @@ flowchart LR
 Postgres 是 source of truth。需要通知、Push、Notion 或其他外部服務的交易，先在同一資料庫交易寫入 outbox，再由 worker 執行。這讓主要資料成功不依賴第三方當下是否在線，也讓失敗可以重試與追蹤。
 
 圖片採兩段式流程：取得受權限控制的上傳簽名、上傳至 Cloudinary、驗證 callback、保存狀態；讀取時再依內容權限取得短效簽名 URL。
+
+## 即時更新與驗證快取
+
+內容、通知與通知已讀狀態透過 Supabase Realtime 的私有 Broadcast topics 傳送。topic 依校內、管理員或個別使用者分流，連線時由 `realtime.messages` RLS 驗證 Firebase 身分與角色；登入者不需要、也沒有權限直接查詢通知、通知狀態或即時事件私有資料表。Broadcast 只用來提示前端更新，Postgres 仍是 source of truth。
+
+Edge 驗證 Firebase token 後，會將必要的使用者資料短暫保存在 Function instance 記憶體與 Upstash Redis。快取失效時才重新呼叫 Firebase，並保留過期與數量上限，減少重複外部請求而不改變每個 action 的授權檢查。
 
 ## 部署拓樸
 

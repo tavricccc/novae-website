@@ -6,6 +6,7 @@ flowchart LR
   U -->|token + action| E[Supabase Edge Functions]
   E --> R[Upstash rate limits]
   E --> P[Postgres + RLS + RPC]
+  P -->|Private Broadcast| U
   U --> C[Signed Cloudinary upload]
   P --> O[Outbox]
   O --> W[Notifications + FCM + Notion]
@@ -31,5 +32,11 @@ The browser is untrusted. UI conditions improve experience; Edge verification, R
 ## One category source
 
 `config/issue-categories.config.json` is validated by `scripts/issue-category-config.mjs`, which generates both `src/generated/issue-categories.ts` and `supabase/functions/_shared/issue-categories.ts`. It derives author storage, upload/comment visibility, comment timing, automatic support expiry, and response-deadline start so frontend and Edge share one policy.
+
+## Realtime updates and authentication cache
+
+Content, notifications, and notification state changes use private Supabase Realtime Broadcast topics scoped to the school, administrators, or one user. `realtime.messages` RLS verifies the Firebase identity and role when subscribing; authenticated clients do not directly query the private notification, notification-state, or realtime-event tables. Broadcast only invalidates client state, while Postgres remains the source of truth.
+
+After Edge verifies a Firebase token, it briefly caches the required user record in the Function instance and Upstash Redis. Expiry and entry limits ensure Firebase is queried again when needed while avoiding repeated provider calls without bypassing per-action authorization.
 
 `main` deploys through GitHub `production` to Supabase and Vercel. A `dev`/`development` deployment is optional. The complete file map lives in the main repository's `structure.md`.
