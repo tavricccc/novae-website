@@ -1,4 +1,4 @@
-import './styles/index.css';
+import './styles/index.js';
 import './styles/category-builder.css';
 import { applySiteLinks } from './config/site.js';
 import {

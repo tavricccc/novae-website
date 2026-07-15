@@ -1,5 +1,4 @@
-import '../node_modules/harmonyos-sans-webfont-splitted/dist/HarmonyOS_Sans_TC/index.css';
-import './styles/index.css';
+import './styles/index.js';
 import { initializeLanguage } from './modules/i18n.js';
 import { initializeLandingRender } from './modules/landing-render.js';
 import { initializeParallax, initializeReveal } from './modules/reveal.js';

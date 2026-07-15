@@ -16,7 +16,7 @@
 - `src/main.js` / `src/category-builder.js` / `src/main-docs.js`：三個頁面入口。
 - `src/config/site.js`：GitHub、授權與文件網址的單一設定來源。
 - `src/modules/`：首頁語系、內容渲染、示意介面、規則互動與章節導覽。
-- `src/styles/`：共用、首頁區塊、章節導覽、示意介面、文件與設定產生器樣式。
+- `src/styles/`：`index.js` 統一載入全站字體與共用樣式，另含首頁區塊、章節導覽、示意介面、文件與設定產生器樣式。
 - `public/assets/`：Landing 專用透明陶瓷／壓克力裝置與低飽和圖片頭像。
 
 ## 建置與驗證

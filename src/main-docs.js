@@ -1,4 +1,4 @@
-import './styles/index.css';
+import './styles/index.js';
 import './styles/docs.css';
 
 // Docs pages intentionally do NOT register the service worker.
