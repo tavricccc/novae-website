@@ -28,4 +28,6 @@ Keep all three values in a password manager or protected worksheet. Never commit
 - [ ] `VERCEL_ORG_ID` and `VERCEL_PROJECT_ID` are stored safely.
 - [ ] No release was attempted before the remaining secrets were ready.
 
-All seven service setups are now complete. Next, use the [credential worksheet](../environment-configuration.md) to verify and add GitHub `production` Environment secrets in one place.
+Record the production origin shown by Vercel, such as `https://your-project.vercel.app`. The next step must use this exact origin for `ALLOWED_ORIGINS`.
+
+Next: [create Cloudflare Worker](cloudflare.md).

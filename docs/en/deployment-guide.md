@@ -1,10 +1,10 @@
 # Final release and acceptance
 
-Use this page only after all seven service setups, production secrets, and category policy are complete. It does not create services; it performs the final checks, releases backend and frontend in order, and verifies production. You do not need to run Novae locally first.
+Use this page only after all eight service setups, production secrets, and category policy are complete.
 
 ## Prerequisites
 
-- [ ] [Preparation and service setup](quick-start.md) is complete for GitHub, Firebase, Supabase, Cloudinary, Upstash, and Vercel; optional Notion is ready when needed.
+- [ ] GitHub, Firebase, Supabase, Cloudinary, Upstash, Cloudflare, and Vercel are ready; optional Notion is ready when needed.
 - [ ] Every required value from the [credential worksheet](environment-configuration.md) is in GitHub `production` Environment secrets.
 - [ ] The [category builder](../../category-builder.html) output replaced `config/issue-categories.config.json` and was committed and pushed to the fork's `main` branch.
 - [ ] The campus domain and initial administrator emails are final.
@@ -21,18 +21,20 @@ These pairs must match:
 - `VITE_FIREBASE_PROJECT_ID` = `FIREBASE_PROJECT_ID`
 - `VITE_FIREBASE_API_KEY` = `FIREBASE_WEB_API_KEY`
 - Standard Cloudinary HMAC flow: `CLOUDINARY_WEBHOOK_SECRET` = `CLOUDINARY_API_SECRET`
+- Worker URL and allowed origins include `https://` and have no trailing slash.
+- `ALLOWED_ORIGINS` is the Vercel frontend origin, not the Worker URL.
 
 Notion secrets are not required when Notion is disabled; the workflow releases with that optional integration turned off.
 
 ## 2. Release the Supabase backend
 
-In GitHub `Actions`, choose `Deploy Supabase Backend` and run it for `main`. Wait for generated configuration, Edge type and architecture checks, project linking, migration push, Edge secret setup, Function deployment, healthcheck, and maintenance cleanup to succeed.
+In GitHub `Actions`, choose `Deploy Supabase Backend` and run it for `main`. It deploys random-name Supabase Functions, the stable Cloudflare Worker, synchronizes secrets automatically, runs a Worker smoke test, then completes origin health and maintenance checks.
 
 Stop at the first failed step. Do not run the frontend yet; use [step-by-step troubleshooting](troubleshooting.md), fix the cause, and rerun the backend workflow.
 
 ## 3. Release the Vercel frontend
 
-Only after backend success, run `Deploy Frontend to Vercel`. The workflow validates secrets, reads the Vercel project settings, builds `.vercel/output`, and publishes a prebuilt deployment.
+Only after backend success, run `Deploy Frontend to Vercel`. It uses `CLOUDFLARE_WORKER_URL` as the frontend API root and removes legacy fixed Supabase Function entries after successful cutover.
 
 Later pushes to `main` trigger the relevant workflow automatically. When the same commit changes backend or configuration, frontend release waits for backend success.
 
@@ -43,6 +45,8 @@ After the deployment URL opens successfully, connect the production domain in Ve
 ## 5. Production acceptance test
 
 - [ ] Allowed-domain Google sign-in works; another domain is rejected.
+- [ ] Browser API requests go to Cloudflare Worker, not directly to a Supabase Function.
+- [ ] CORS preflight returns `204` with the exact Vercel origin.
 - [ ] An administrator can see the Dashboard and moderation actions after signing in again.
 - [ ] Public, reviewed, and private categories have the correct visibility.
 - [ ] Support goal and days match `issue-categories.config.json`.

@@ -1,6 +1,6 @@
 # 6. 建立 Upstash
 
-Novae 使用 Upstash Redis REST 做跨 Edge Function 執行個體的限流，保護登入同步、讀寫、圖片、附議、公告互動、健康檢查與背景 worker。
+Novae 使用 Upstash Redis REST 做跨 Cloudflare Worker 與 Edge Function 執行個體的限流。公開登入同步、讀寫與 webhook 會先在 Worker 檢查；健康檢查與背景 worker 則保留後端限制。
 
 ## 1. 建立 Redis database
 

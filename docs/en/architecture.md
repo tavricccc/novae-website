@@ -3,8 +3,9 @@
 ```mermaid
 flowchart LR
   U[Browser PWA] --> F[Firebase Auth]
-  U -->|token + action| E[Supabase Edge Functions]
-  E --> R[Upstash rate limits]
+  U -->|token + action| C[Cloudflare Worker]
+  C --> R[Upstash rate limits]
+  C -->|origin secret| E[Random-name Supabase Edge Functions]
   E --> P[Postgres + RLS + RPC]
   P -->|Private Broadcast| U
   U --> C[Signed Cloudinary upload]
@@ -14,7 +15,7 @@ flowchart LR
   G --> V[Vercel]
 ```
 
-The browser is untrusted. UI conditions improve experience; Edge verification, RLS, RPC, constraints, and transactions enforce policy.
+The browser is untrusted. Cloudflare rejects invalid origins, unauthenticated traffic, invalid webhooks, and exhausted limits before Supabase. Edge verification, RLS, RPC, constraints, and transactions still re-authorize every operation.
 
 ## Frontend boundaries
 
@@ -22,12 +23,12 @@ The browser is untrusted. UI conditions improve experience; Edge verification, R
 
 ## Backend Functions
 
-- `backendAction`: CORS, Firebase auth, roles, rate limits, idempotency, validation, and domain dispatch.
-- `syncUser`: allowed-domain users and role claims.
-- `cloudinaryWebhook`: signed upload callbacks.
-- `outboxWorker`: notifications, FCM, optional Notion synchronization, and external effects.
-- `processDeletionJobs`: Cloudinary deletion and synchronized state.
-- `maintenanceCleanup`: retention/maintenance RPCs and worker triggering.
+- `n<namespace>-api`: backend action roles, idempotency, validation, and dispatch.
+- `n<namespace>-sync`: allowed-domain users and role claims.
+- `n<namespace>-media`: signed upload callbacks.
+- `n<namespace>-outbox`: notifications, FCM, optional Notion synchronization, and external effects.
+- `n<namespace>-delete`: Cloudinary deletion and synchronized state.
+- `n<namespace>-maintenance`: retention/maintenance RPCs and worker triggering.
 
 ## One category source
 
@@ -43,4 +44,4 @@ Frontend content reads are cached per account in memory and IndexedDB. Each read
 
 When retention cleanup removes a proposal or facility that has a mapped Notion page, it queues the Notion deletion marker in the same database transaction. Scheduled retention events skip user notifications but remain on the normal retryable outbox path.
 
-`main` deploys through GitHub `production` to Supabase and Vercel. A `dev`/`development` deployment is optional. The complete file map lives in the main repository's `structure.md`.
+`main` deploys through GitHub `production` to Cloudflare, Supabase, and Vercel. GitHub Actions synchronizes vendor runtime secrets automatically. A `dev`/`development` deployment is optional.

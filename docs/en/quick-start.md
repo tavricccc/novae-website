@@ -1,12 +1,12 @@
 # Preparation and service setup
 
-This is not a local-development tutorial, and it does not release the app yet. Decide campus policy first, then create each service in order. Only after all seven steps should you enter credentials, configure categories, and run the final release.
+This is not a local-development tutorial, and it does not release the app yet. Decide campus policy first, then create each service in order. Only after all eight steps should you enter credentials, configure categories, and run the final release.
 
 ## 1. Decide campus policy
 
 Write down the school display name, allowed Google email domain, initial administrator emails, categories, visibility, author display, support goals, support windows, and response deadlines.
 
-## 2. Create the seven service setups in order
+## 2. Create the eight service setups in order
 
 | Service | Purpose |
 | --- | --- |
@@ -15,6 +15,7 @@ Write down the school display name, allowed Google email domain, initial adminis
 | Supabase | Database, RLS, Realtime, and Edge Functions |
 | Cloudinary | Signed image storage and delivery |
 | Upstash | Distributed rate limiting |
+| Cloudflare | Stable API gateway, CORS, and pre-Supabase limits |
 | Vercel | Production PWA hosting |
 
 Notion is an optional operations copy. Create it only when needed; omitting it does not affect proposals, announcements, notifications, or other core features.
@@ -28,6 +29,7 @@ Complete these pages in order. Each page only creates that service and collects 
 5. [Configure optional Notion](deployment/notion.md)
 6. [Create Upstash](deployment/upstash.md)
 7. [Create Vercel](deployment/vercel-github.md)
+8. [Create Cloudflare Worker](deployment/cloudflare.md)
 
 ## 3. Confirm ownership
 
@@ -41,7 +43,7 @@ Use a password manager or protected worksheet based on the [credential worksheet
 
 - [ ] The school domain and administrator emails are final.
 - [ ] Category and deadline rules are decided.
-- [ ] GitHub, Firebase, Supabase, Cloudinary, Upstash, and Vercel are ready; optional Notion is ready when needed.
+- [ ] GitHub, Firebase, Supabase, Cloudinary, Upstash, Cloudflare, and Vercel are ready; optional Notion is ready when needed.
 - [ ] You understand that production values belong in GitHub `production` Environment secrets.
 - [ ] You understand that local `.env` setup is not required for deployment.
 

@@ -1,6 +1,6 @@
 # Credential worksheet
 
-Create these as GitHub `production` Environment secrets. The backend workflow copies runtime values into Supabase Edge secrets. `VITE_*` values are browser-visible; every other credential stays server-side.
+Put every value below in the deploying fork's GitHub `production` Environment secrets. This is the only secret store a deployer must fill. GitHub Actions automatically synchronizes runtime values to Cloudflare and Supabase; do not duplicate them manually in vendor dashboards. `VITE_*` values are browser-visible; every other credential stays server-side.
 
 ## Frontend and Vercel
 
@@ -18,6 +18,7 @@ Create these as GitHub `production` Environment secrets. The backend workflow co
 | `VITE_RECAPTCHA_ENTERPRISE_SITE_KEY` | Required when App Check is enabled |
 | `VITE_SUPABASE_URL` | Supabase Project URL |
 | `VITE_SUPABASE_PUBLISHABLE_KEY` | Supabase publishable key, never service role |
+| `CLOUDFLARE_WORKER_URL` | Stable API root such as `https://novae-api.school.workers.dev`; no trailing slash |
 | `VERCEL_TOKEN` | Vercel account token |
 | `VERCEL_ORG_ID` | Vercel team/account ID |
 | `VERCEL_PROJECT_ID` | Vercel project ID |
@@ -40,19 +41,55 @@ Create these as GitHub `production` Environment secrets. The backend workflow co
 | `CLOUDINARY_API_SECRET` | Same environment API secret |
 | `CLOUDINARY_WEBHOOK_SECRET` | Same API secret for the standard HMAC flow |
 | `WEBHOOK_SECRET` | Independently generated random 32-byte value |
+| `CLOUDFLARE_ACCOUNT_ID` | 32-character Cloudflare Account ID, not zone ID |
+| `CLOUDFLARE_API_TOKEN` | Account-scoped token with Workers deployment permission |
+| `ALLOWED_ORIGINS` | Exact frontend origin such as `https://school-novae.vercel.app`; **never add a trailing slash** |
+| `EDGE_FUNCTION_NAMESPACE` | Private 16–48 character lowercase alphanumeric random value |
+| `EDGE_ORIGIN_SECRET` | Independent high-entropy secret for Worker/internal Edge calls |
 | `NOTION_TOKEN` | Optional internal integration secret |
 | `NOTION_DATABASE_ID` | Optional original database shared with the integration |
 | `NOTION_DATA_SOURCE_ID` | Required for a multi-source database; auto-discovered when only one source exists |
 | `UPSTASH_REDIS_REST_URL` | HTTPS REST URL |
 | `UPSTASH_REDIS_REST_TOKEN` | Writable Standard REST token |
 
-Hosted Edge Functions provide `SUPABASE_URL` automatically; do not create it as a GitHub secret. Local `.env` is only for contributors and is not part of production deployment.
+Hosted Edge Functions provide `SUPABASE_URL` automatically; do not create it as a GitHub secret. `VITE_API_BASE_URL` is also not a separate GitHub secret: the frontend workflow uses `CLOUDFLARE_WORKER_URL`. Local `.env` is only for contributors.
+
+## ALLOWED_ORIGINS: exact format
+
+```text
+https://your-production-domain.vercel.app
+```
+
+> **The final character must not be `/`.**
+
+Include `https://`, omit paths and quotes, and never use `*`. Multiple origins use ASCII commas. The value must exactly match the browser's `from origin 'https://…'` message. After changing it, rerun `Deploy Supabase Backend`; editing GitHub alone does not update the running Worker.
+
+## Generate independent private values
+
+```powershell
+$webhookBytes = New-Object byte[] 32
+[Security.Cryptography.RandomNumberGenerator]::Fill($webhookBytes)
+$webhookSecret = [Convert]::ToBase64String($webhookBytes)
+
+$namespaceBytes = New-Object byte[] 18
+[Security.Cryptography.RandomNumberGenerator]::Fill($namespaceBytes)
+$edgeFunctionNamespace = ([Convert]::ToHexString($namespaceBytes)).ToLower()
+
+$originBytes = New-Object byte[] 32
+[Security.Cryptography.RandomNumberGenerator]::Fill($originBytes)
+$edgeOriginSecret = [Convert]::ToBase64String($originBytes)
+```
+
+Use these for `WEBHOOK_SECRET`, `EDGE_FUNCTION_NAMESPACE`, and `EDGE_ORIGIN_SECRET`. Never reuse provider tokens or reuse one value for multiple roles.
 
 ## Final check
 
 - [ ] Every value is an Environment secret in `production`, not a public variable.
+- [ ] The secrets are in the fork that actually runs Actions, not only in upstream or another GitHub account.
 - [ ] Firebase, Supabase, and Cloudinary values each come from one matching project/environment.
 - [ ] No service role, service account, API secret, password, or token appears in Git.
 - [ ] All administrator emails belong to the allowed domain.
+- [ ] Worker URL and allowed origins include `https://` and have no trailing slash.
+- [ ] `ALLOWED_ORIGINS` contains the frontend Vercel origin, not the Worker URL.
 
 `NOTION_TOKEN` and `NOTION_DATABASE_ID` must either both be set or both be omitted. When both are omitted, the workflow writes `NOTION_ENABLED=false` and Edge Functions safely skip Notion synchronization. A partial pair fails deployment with a clear error. `NOTION_DATA_SOURCE_ID` may only accompany that pair and is checked against the configured database. The API is pinned to `2026-03-11`; there is no `NOTION_VERSION` secret.

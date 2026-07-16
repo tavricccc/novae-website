@@ -7,20 +7,22 @@
 ```mermaid
 flowchart LR
   U[瀏覽器 PWA] -->|Google 登入| F[Firebase Auth]
-  U -->|Firebase token + action| E[Supabase Edge Functions]
-  E -->|驗證、角色、限流| R[Upstash Redis]
+  U -->|Firebase token + action| CFW[Cloudflare Worker]
+  CFW -->|先檢查來源、身分與限流| R[Upstash Redis]
+  CFW -->|origin secret 轉送| E[隨機名稱 Supabase Edge Functions]
   E -->|RPC／交易| P[Postgres + RLS]
   P -->|私有 Broadcast| U
   U -->|簽名圖片上傳| C[Cloudinary]
-  C -->|簽章 callback| E
+  C -->|簽章 callback| CFW
   P --> O[Outbox]
   O --> W[outboxWorker]
   W --> N[站內通知／FCM／Notion]
-  G[GitHub Actions] --> E
+  G[GitHub Actions] --> CFW
+  G --> E
   G --> V[Vercel 前端]
 ```
 
-重要原則：瀏覽器不被信任；UI 顯示條件只改善體驗，真正權限由 Edge 驗證、Postgres RLS、RPC 與資料約束執行。
+重要原則：瀏覽器不被信任；Cloudflare 先擋下 CORS、未登入、webhook 簽章與超額請求，Supabase Edge 與 Postgres 仍重新授權。Cloudflare 不是唯一權限層。
 
 ## 前端層級
 
@@ -41,12 +43,12 @@ flowchart LR
 
 | Function | 真實責任 |
 | --- | --- |
-| `backendAction` | 統一 action 閘道：CORS、Firebase token、角色、限流、冪等、驗證與領域分派 |
-| `syncUser` | 登入後同步允許網域使用者與角色 claim |
-| `cloudinaryWebhook` | 驗證 Cloudinary callback 並更新上傳狀態 |
-| `outboxWorker` | 處理通知、FCM、選用的 Notion 同步與外部副作用 |
-| `processDeletionJobs` | 清除 Cloudinary 資源並同步刪除狀態 |
-| `maintenanceCleanup` | 執行保留期、維護 RPC，並觸發 deletion/outbox workers |
+| `n<namespace>-api` | 原始碼為 `backendAction`；角色、冪等、驗證與領域分派 |
+| `n<namespace>-sync` | 原始碼為 `syncUser`；登入後同步允許網域使用者與角色 claim |
+| `n<namespace>-media` | 原始碼為 `cloudinaryWebhook`；再次驗證 callback 並更新上傳狀態 |
+| `n<namespace>-outbox` | 處理通知、FCM、選用的 Notion 同步與外部副作用 |
+| `n<namespace>-delete` | 清除 Cloudinary 資源並同步刪除狀態 |
+| `n<namespace>-maintenance` | 執行保留期、維護 RPC，並觸發 deletion/outbox workers |
 
 ## 分類設定如何生效
 
@@ -79,10 +81,10 @@ Edge 驗證 Firebase token 後，會將必要的使用者資料短暫保存在 F
 
 ## 部署拓樸
 
-- `main` → GitHub `production` Environment → Supabase production + Vercel production。
+- `main` → GitHub `production` Environment → Cloudflare Worker + Supabase production + Vercel production。
 - `dev` → `development` Environment → 只有維護測試站時才建立的另一套資源。
 - config 或 Supabase 變更會觸發後端；前端若同時變更會等待同 commit 後端成功。
-- backend workflow 套 migration、設定 Edge secrets、部署 Functions、健康檢查。
+- backend workflow 套 migration、由 GitHub secrets 自動設定 Cloudflare／Edge、部署隨機 Functions 與固定 Worker、健康檢查。
 - frontend workflow 由 Vercel CLI build 並 deploy prebuilt artifacts。
 
 完整檔案位置以主程式 repository 的 `structure.md` 為準。

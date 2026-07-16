@@ -8,7 +8,19 @@ Always start with the first failed stage. Do not reset Firebase, Supabase, and V
 2. Missing secrets: compare `production` Environment secrets with the [credential worksheet](environment-configuration.md).
 3. Link or database push: ensure token, project ref, and password belong to one Supabase project.
 4. Generated config diff: validate the JSON against the [actual schema](configuration.md#actual-schema) and commit generated outputs.
-5. Fix the cause and rerun that workflow.
+5. If upstream contains a fix, use `Sync fork → Update branch`, confirm the new commit, and start a new run instead of rerunning an old commit.
+6. Fix the cause and rerun that workflow.
+
+## Cloudflare deployment errors
+
+- `Invalid Function name`: sync the latest workflow. Current deployments automatically use `n<EDGE_FUNCTION_NAMESPACE>-api` and related names so the first character is always a letter.
+- `500` / Cloudflare `1101`: inspect `Workers & Pages → novae-api → Logs`. The current workflow redeploys after secret synchronization and retries transient propagation failures.
+- `403 origin-denied`: make `ALLOWED_ORIGINS` exactly match the browser's Vercel origin. Include `https://`, remove paths and quotes, and **remove the final `/`**.
+- Browser CORS / `net::ERR_FAILED`: this is commonly the same origin mismatch. After editing GitHub production, rerun `Deploy Supabase Backend`.
+- `502`: verify that all six random-name Supabase Functions deployed under the same namespace.
+- `503 rate-limit-provider-unavailable`: verify writable Upstash REST credentials. The gateway fails closed instead of bypassing limits.
+
+A correct preflight returns `204` and an `Access-Control-Allow-Origin` equal to the Vercel origin. An unauthenticated smoke POST should return `401`.
 
 ## Sign-in failure
 
@@ -16,7 +28,7 @@ Check the Google provider, authorized production domain, matching `VITE_ALLOWED_
 
 ## API or permission failure
 
-- All 401/403: inspect Firebase token, domain, service account, and fresh sign-in.
+- All 401/403 after CORS passes: inspect Firebase token, domain, service account, and fresh sign-in.
 - Admin-only 403: inspect `ADMIN_EMAILS` and refresh the session.
 - One category missing: compare `readAccess`, status, author, and role; it may be correct privacy behavior.
 - 429: inspect Upstash and rate-limit config before increasing limits.

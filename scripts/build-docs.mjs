@@ -422,7 +422,7 @@ function build() {
       .map((item) => `<li><a href="${item.file}">${item.title}</a></li>`)
       .join('');
     const body = `<h1>Novae documentation</h1>
-<p>These docs follow one production path. Learn the <a href="project-overview.html">product workflows</a>, use <a href="quick-start.html">preparation and service setup</a> to create the seven service accounts, complete the credential worksheet and category policy, then finish with <a href="deployment-guide.html">release and acceptance</a>. Local setup is only required for contributors.</p>
+<p>These docs follow one production path. Learn the <a href="project-overview.html">product workflows</a>, use <a href="quick-start.html">preparation and service setup</a> to create the eight service accounts, complete the credential worksheet and category policy, then finish with <a href="deployment-guide.html">release and acceptance</a>. Local setup is only required for contributors.</p>
 <ul>${list}</ul>`;
     fs.writeFileSync(
       enIndexPath,

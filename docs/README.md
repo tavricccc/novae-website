@@ -5,7 +5,7 @@
 ## 第一次部署的閱讀順序
 
 1. 先讀[產品與流程](project-overview.md)，確認 Novae 適合你的校園情境。
-2. 按[部署準備與服務設定](quick-start.md)依序建立 GitHub、Firebase、Supabase、Cloudinary、Upstash 與 Vercel；需要營運副本時再加 Notion。
+2. 按[部署準備與服務設定](quick-start.md)依序建立 GitHub、Firebase、Supabase、Cloudinary、Upstash、Cloudflare 與 Vercel；需要營運副本時再加 Notion。
 3. 用[憑證填寫表](environment-configuration.md)逐項核對 GitHub `production` Environment secrets。
 4. 用[分類設定產生器](../category-builder.html)決定分類、可見範圍、作者、附議門檻、附議天數與回應期限，並將檔案提交及推送到 fork。
 5. 所有前置項目完成後，才執行[最後發布與驗收](deployment-guide.md)。

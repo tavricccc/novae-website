@@ -61,6 +61,7 @@ export const DEPLOYMENT_NAV_ZH = [
   { id: 'deployment/notion', title: '5. 選用：Notion 副本', file: 'deployment/notion.html' },
   { id: 'deployment/upstash', title: '6. 建立 Upstash', file: 'deployment/upstash.html' },
   { id: 'deployment/vercel-github', title: '7. 建立 Vercel', file: 'deployment/vercel-github.html' },
+  { id: 'deployment/cloudflare', title: '8. 建立 Cloudflare Worker', file: 'deployment/cloudflare.html' },
 ];
 
 export const DEPLOYMENT_NAV_EN = [
@@ -71,6 +72,7 @@ export const DEPLOYMENT_NAV_EN = [
   { id: 'deployment/notion', title: '5. Optional: Notion copy', file: 'deployment/notion.html' },
   { id: 'deployment/upstash', title: '6. Create Upstash', file: 'deployment/upstash.html' },
   { id: 'deployment/vercel-github', title: '7. Create Vercel', file: 'deployment/vercel-github.html' },
+  { id: 'deployment/cloudflare', title: '8. Create Cloudflare Worker', file: 'deployment/cloudflare.html' },
 ];
 
 export function flattenNav(nav) {

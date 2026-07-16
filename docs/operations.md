@@ -17,13 +17,13 @@
 | --- | --- |
 | 每日 | 待審核、未回覆、Dashboard 錯誤、outbox backlog、Functions 失敗 |
 | 每週 | 圖片 pending／刪除工作、Notion／FCM 失敗、Redis 與資料庫用量 |
-| 每月 | GitHub/Vercel/Supabase/Firebase/Cloudinary/Upstash/Notion 帳單與 token、備份還原演練 |
+| 每月 | GitHub/Cloudflare/Vercel/Supabase/Firebase/Cloudinary/Upstash/Notion 帳單與 token、備份還原演練 |
 | 每學期 | 網域、管理員、分類、附議人數與天數、回應期限、隱私告知 |
 
 ## 事故處理五步
 
 1. **界定範圍**：全部使用者還是單一帳號？全部分類還是單一分類？讀取還是寫入？
-2. **找第一個失敗邊界**：瀏覽器、Firebase、Edge Function、Postgres、Cloudinary、Notion、Upstash 或 Vercel。
+2. **找第一個失敗邊界**：瀏覽器、Cloudflare Worker、Firebase、Edge Function、Postgres、Cloudinary、Notion、Upstash 或 Vercel。
 3. **保留證據**：時間、request ID、HTTP status、第一個錯誤、相關 workflow run。
 4. **降低影響**：暫停有問題的發布或管理操作，不要直接關閉驗證或 RLS。
 5. **修正與驗收**：只改出錯層，重新跑完整使用流程，記錄原因與防止再發方式。

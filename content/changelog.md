@@ -1,6 +1,14 @@
 # 更新紀錄
 
-累計更新：767 次
+累計更新：768 次
+
+## v2.0.229｜新增 Cloudflare API 閘道部署與排錯教學
+
+2026-07-16
+
+- 公開 API 改由固定的 Cloudflare Worker 先驗證來源、Firebase 身分與 Upstash 限流，再轉送到私密隨機名稱的 Supabase Edge Functions。
+- 新增 Cloudflare 帳號、workers.dev 子網域、API token、account ID 與 GitHub production secrets 的保母級設定流程。
+- 特別標示 `ALLOWED_ORIGINS` 必須包含 `https://` 且最後絕對不能有 `/`，並補齊 CORS、1101、403、502、503 與 fork 同步部署排錯。
 
 ## v2.0.228｜重整導覽、提案分類與新增流程
 

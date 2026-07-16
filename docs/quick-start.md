@@ -1,6 +1,6 @@
 # 部署準備與服務設定
 
-這不是本機開發教學，也還不會開始發布。先決定校園規則，再依本頁順序建立部署需要的服務。七項服務都準備好之後，才填寫憑證、設定分類並執行最後發布。
+這不是本機開發教學，也還不會開始發布。先決定校園規則，再依本頁順序建立部署需要的服務。八項服務都準備好之後，才填寫憑證、設定分類並執行最後發布。
 
 ## 1. 決定校園規則
 
@@ -12,7 +12,7 @@
 - 哪些分類要公開、先審核或保持私密。
 - 每個分類是否顯示作者、是否附議、附議人數、附議天數與回應天數。
 
-## 2. 依序建立七項服務
+## 2. 依序建立八項服務
 
 | 服務 | 用途 | 你最後會拿到 |
 | --- | --- | --- |
@@ -21,6 +21,7 @@
 | Supabase | 資料庫、RLS、Edge Functions、Realtime | URL、publishable key、project ref、部署憑證 |
 | Cloudinary | 簽名圖片儲存與讀取 | cloud name、API key、API secret |
 | Upstash | 跨 Edge 執行個體的限流 | REST URL、Standard REST token |
+| Cloudflare | 固定 API 入口、CORS 與進入 Supabase 前的限流 | workers.dev 子網域、account ID、API token |
 | Vercel | 發布 PWA 前端 | token、org ID、project ID |
 
 Notion 是選用的營運副本。需要時才建立 integration 與 database；不需要就完全略過，不會影響提案、公告、通知或其他主要功能。
@@ -34,13 +35,14 @@ Notion 是選用的營運副本。需要時才建立 integration 與 database；
 5. [設定 Notion（選用）](deployment/notion.md)
 6. [建立 Upstash](deployment/upstash.md)
 7. [建立 Vercel](deployment/vercel-github.md)
+8. [建立 Cloudflare Worker](deployment/cloudflare.md)
 
 ## 3. 確認你有權限
 
 部署者需要能：
 
 - 管理 GitHub repository 的 Settings、Actions 與 Environments。
-- 建立 Firebase、Supabase、Cloudinary、Upstash、Vercel 專案；Notion 只在選用時需要。
+- 建立 Firebase、Supabase、Cloudinary、Upstash、Cloudflare、Vercel 專案；Notion 只在選用時需要。
 - 管理學校網域與首批管理員名單。
 - 在正式上線前確認隱私告知、內容管理與資料保留責任。
 
@@ -52,7 +54,7 @@ Notion 是選用的營運副本。需要時才建立 integration 與 database；
 
 - [ ] 已確定學校網域與管理員 Email。
 - [ ] 已決定分類與期限規則。
-- [ ] 已完成 GitHub、Firebase、Supabase、Cloudinary、Upstash 與 Vercel；需要時也已完成 Notion。
+- [ ] 已完成 GitHub、Firebase、Supabase、Cloudinary、Upstash、Cloudflare 與 Vercel；需要時也已完成 Notion。
 - [ ] 知道所有敏感值最後要放進 GitHub `production` Environment secrets。
 - [ ] 知道本機 `.env` 不是正式部署必要步驟。
 

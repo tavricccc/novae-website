@@ -21,7 +21,7 @@
 ## Incident method
 
 1. Scope affected users, categories, states, and operations.
-2. Find the first failing boundary: browser, Firebase, Edge, Postgres, Cloudinary, Notion, Upstash, or Vercel.
+2. Find the first failing boundary: browser, Cloudflare Worker, Firebase, Edge, Postgres, Cloudinary, Notion, Upstash, or Vercel.
 3. Preserve time, request ID, HTTP status, first error, and workflow run.
 4. Reduce impact without disabling authentication or RLS.
 5. Fix one layer, rerun the full workflow, and record prevention.
