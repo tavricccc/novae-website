@@ -6,8 +6,6 @@ This page only creates the frontend hosting project and collects three Vercel va
 
 Sign in to [Vercel](https://vercel.com/), choose `Add New → Project`, import the Novae GitHub fork created in step 1, and create the project.
 
-The repository's `vercel.json` disables Git-based automatic deployment. GitHub Actions owns production release so Vercel and Actions do not deploy the same commit twice.
-
 ## 2. Create a Vercel token
 
 Create a deployment token in Vercel Account Settings and store it as `VERCEL_TOKEN`. Limit its owner and lifetime, and rotate it during ownership changes.
@@ -26,7 +24,6 @@ Keep all three values in a password manager or protected worksheet. Never commit
 ## Completion check
 
 - [ ] Vercel imported the correct Novae fork.
-- [ ] The project exists and `vercel.json` disables Git-based automatic deployment.
 - [ ] `VERCEL_TOKEN` is stored safely.
 - [ ] `VERCEL_ORG_ID` and `VERCEL_PROJECT_ID` are stored safely.
 - [ ] No release was attempted before the remaining secrets were ready.
