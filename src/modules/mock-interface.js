@@ -160,7 +160,8 @@ function fitDemo(root) {
     root.style.height = `${Math.ceil(surface.scrollHeight)}px`;
     return;
   }
-  const designWidth = root.dataset.novaeDemo === 'mobile' ? 390 : root.dataset.novaeDemo === 'hero' ? 720 : 1120;
+  const useMobileLayout = window.matchMedia('(max-width: 760px)').matches;
+  const designWidth = root.dataset.novaeDemo === 'mobile' || useMobileLayout ? 390 : 1120;
   surface.style.width = `${designWidth}px`;
   surface.style.transform = 'scale(1)';
   surface.style.transformOrigin = 'top left';

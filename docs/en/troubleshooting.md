@@ -12,7 +12,7 @@ Always start with the first failed stage. Do not reset Firebase, Supabase, and V
 
 ## Sign-in failure
 
-Check the Google provider, authorized production domain, matching `VITE_ALLOWED_DOMAIN`/`ALLOWED_DOMAIN`, one matching Firebase project, and App Check site-key domain. An administrator who was just added must sign in again.
+Check the Google provider, authorized production domain, matching `VITE_ALLOWED_DOMAIN`/`ALLOWED_DOMAIN`, one matching Firebase project, and App Check site-key domain. An administrator who was just added must sign in again. If a blocked popup falls back to redirect and the return shows a recovery timeout or initialization error, reload once, then verify the authorized domain and Web App configuration.
 
 ## API or permission failure
 
@@ -30,6 +30,6 @@ Check the Google provider, authorized production domain, matching `VITE_ALLOWED_
 
 ## Images, notifications, and Notion
 
-For images, verify one Cloudinary environment, matching API/webhook secret, webhook logs, file limits, and quotas. For notifications or Notion, inspect the outbox backlog and worker logs, then verify FCM/VAPID/service-account values or Notion database sharing. Avoid unlimited manual retries.
+For images, verify one Cloudinary environment, matching API/webhook secret, webhook logs, file limits, and quotas. For notifications or Notion, inspect the outbox backlog and worker logs, then verify FCM/VAPID/service-account values or Notion database sharing. A multi-source Notion database also requires a `NOTION_DATA_SOURCE_ID` that belongs to the configured database. Avoid unlimited manual retries.
 
 When opening an issue, include commit, time zone, role, category, state, steps, first error, HTTP status, request ID, and checks already completed. Remove all credentials and personal data.

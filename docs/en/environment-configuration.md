@@ -42,7 +42,7 @@ Create these as GitHub `production` Environment secrets. The backend workflow co
 | `WEBHOOK_SECRET` | Independently generated random 32-byte value |
 | `NOTION_TOKEN` | Optional internal integration secret |
 | `NOTION_DATABASE_ID` | Optional original database shared with the integration |
-| `NOTION_VERSION` | Optional API version; code defaults to `2022-06-28` |
+| `NOTION_DATA_SOURCE_ID` | Required for a multi-source database; auto-discovered when only one source exists |
 | `UPSTASH_REDIS_REST_URL` | HTTPS REST URL |
 | `UPSTASH_REDIS_REST_TOKEN` | Writable Standard REST token |
 
@@ -55,4 +55,4 @@ Hosted Edge Functions provide `SUPABASE_URL` automatically; do not create it as 
 - [ ] No service role, service account, API secret, password, or token appears in Git.
 - [ ] All administrator emails belong to the allowed domain.
 
-`NOTION_TOKEN` and `NOTION_DATABASE_ID` must either both be set or both be omitted. When both are omitted, the workflow writes `NOTION_ENABLED=false` and Edge Functions safely skip Notion synchronization. A partial pair fails deployment with a clear error.
+`NOTION_TOKEN` and `NOTION_DATABASE_ID` must either both be set or both be omitted. When both are omitted, the workflow writes `NOTION_ENABLED=false` and Edge Functions safely skip Notion synchronization. A partial pair fails deployment with a clear error. `NOTION_DATA_SOURCE_ID` may only accompany that pair and is checked against the configured database. The API is pinned to `2026-03-11`; there is no `NOTION_VERSION` secret.

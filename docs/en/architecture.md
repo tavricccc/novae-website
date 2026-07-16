@@ -39,4 +39,8 @@ Content, notifications, and notification state changes use private Supabase Real
 
 After Edge verifies a Firebase token, it briefly caches the required user record in the Function instance and Upstash Redis. Expiry and entry limits ensure Firebase is queried again when needed while avoiding repeated provider calls without bypassing per-action authorization.
 
+Frontend content reads are cached per account in memory and IndexedDB. Each read carries scope and invalidation versions, so a request that finishes after a write, Realtime invalidation, or account switch cannot restore stale content. Persistent cleanup is write-version guarded to avoid deleting newer data.
+
+When retention cleanup removes a proposal or facility that has a mapped Notion page, it queues the Notion deletion marker in the same database transaction. Scheduled retention events skip user notifications but remain on the normal retryable outbox path.
+
 `main` deploys through GitHub `production` to Supabase and Vercel. A `dev`/`development` deployment is optional. The complete file map lives in the main repository's `structure.md`.

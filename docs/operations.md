@@ -34,6 +34,7 @@
 - 使用 Supabase 的正式備份／PITR 能力時，先確認方案與保留期。
 - 圖片在 Cloudinary；資料庫保存受控識別與狀態。復原要一起驗證兩邊的一致性。
 - 刪除經 deletion job 處理；不要手動刪 Cloudinary 後留下資料庫引用。
+- 保留期清理會在刪除提案／設備時一併排入既有 Notion 頁面的刪除標記，不會對使用者產生一般刪除通知；應從 maintenance details 與 outbox 狀態確認完成。
 - 已部署 migration 不回改；schema 變更新增後續 migration。
 
 ## 變更分類前

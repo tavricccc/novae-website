@@ -26,6 +26,6 @@
 4. Reduce impact without disabling authentication or RLS.
 5. Fix one layer, rerun the full workflow, and record prevention.
 
-Supabase is the source of truth; Notion is only an operations copy. Images live in Cloudinary with database references and state. Never edit deployed migrations or manually delete one side of a cross-service record.
+Supabase is the source of truth; Notion is only an operations copy. Images live in Cloudinary with database references and state. Never edit deployed migrations or manually delete one side of a cross-service record. Retention cleanup queues deletion markers for mapped Notion pages without sending ordinary user deletion notifications; verify completion in maintenance details and the outbox.
 
 For symptoms, use [step-by-step troubleshooting](troubleshooting.md).

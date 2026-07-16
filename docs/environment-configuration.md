@@ -49,7 +49,7 @@
 | `WEBHOOK_SECRET` | 是 | 自行產生、獨立的 32-byte 隨機值 |
 | `NOTION_TOKEN` | 選用 | 啟用 Notion 時的 internal integration secret |
 | `NOTION_DATABASE_ID` | 選用 | 啟用 Notion 時、已分享給 integration 的原始 database ID |
-| `NOTION_VERSION` | 選用 | 啟用時可省略；程式預設 `2022-06-28` |
+| `NOTION_DATA_SOURCE_ID` | 條件 | 同一 database 有多個 data source 時，指定 Novae 使用的來源；單一來源自動探索 |
 | `UPSTASH_REDIS_REST_URL` | 是 | Upstash HTTPS REST URL |
 | `UPSTASH_REDIS_REST_TOKEN` | 是 | Upstash Standard REST token，不是 Read-only token |
 
@@ -73,4 +73,4 @@
 - [ ] `GOOGLE_SERVICE_ACCOUNT_JSON` 是完整 JSON，沒有只貼檔名。
 - [ ] `ADMIN_EMAILS` 中每個帳號都屬於允許網域。
 
-Notion 的 token 與 database ID 必須「兩個都填」或「兩個都不填」。兩個都不填時，workflow 會寫入 `NOTION_ENABLED=false`，Edge Functions 會安全略過所有 Notion 同步；只填一個時部署會明確失敗，避免產生半套設定。
+Notion 的 token 與 database ID 必須「兩個都填」或「兩個都不填」。兩個都不填時，workflow 會寫入 `NOTION_ENABLED=false`，Edge Functions 會安全略過所有 Notion 同步；只填一個時部署會明確失敗。`NOTION_DATA_SOURCE_ID` 只能與這組設定一起使用，程式會驗證它屬於指定 database。Notion API 版本固定為 `2026-03-11`，不再使用 `NOTION_VERSION` secret。

@@ -26,6 +26,7 @@
 3. `VITE_ALLOWED_DOMAIN` 與 `ALLOWED_DOMAIN` 是否完全相同。
 4. Web App config、`FIREBASE_PROJECT_ID`、`FIREBASE_WEB_API_KEY`、service account 是否來自同一 project。
 5. 若剛啟用 App Check，暫時確認 site key 與網域是否正確；不要用關閉所有後端驗證當永久修法。
+6. 若 popup 被瀏覽器阻擋，系統會改用 redirect；回到站內後若顯示「登入回復逾時」或「登入元件初始化失敗」，先重新整理一次，再檢查 Firebase authorized domain 與 Web App config。
 
 ## 4. 登入成功但資料操作失敗
 
@@ -57,7 +58,7 @@
 2. 查看 outbox backlog 與最舊事件。
 3. 檢查 `outboxWorker` log。
 4. Push：確認 VAPID key、瀏覽器權限、FCM token 與 service account。
-5. Notion：確認 database 已分享給 integration，token 與 database ID 同 workspace。
+5. Notion：確認 database 已分享給 integration，token 與 database ID 同 workspace；若 database 有多個 data source，確認 `NOTION_DATA_SOURCE_ID` 已設定且確實屬於該 database。
 6. 修正後讓 worker 重試；不要手動重送大量事件造成重複副作用。
 
 ## 8. 還是無法解決
