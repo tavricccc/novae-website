@@ -26,4 +26,4 @@
 - `scripts/check-built-links.mjs`：檢查建置結果的內部連結。
 - `vite.config.js`：首頁、設定產生器與文件頁的多頁建置。
 - `.github/workflows/verify-pr.yml`：PR 靜態驗證。
-- `.github/workflows/deploy-pages.yml`：驗證後發布 GitHub Pages。
+- `.github/workflows/deploy-pages.yml`：以 Node.js 24 世代的最新版 GitHub Actions 驗證後發布 GitHub Pages。
