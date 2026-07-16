@@ -18,17 +18,34 @@ Copy `.env.example` only when connecting to development services, and never comm
 ## Verify
 
 ```bash
-npm run typecheck
-npm run lint
-npm run build
-npm run check:unused
+npm run verify:local
 ```
 
-For Edge, migration, generator, or architecture changes also run:
+For backend actions, permissions, RPCs, RLS, migrations, Edge Functions, or workers:
 
 ```bash
-npm run check:edge
-npm run test:architecture
+npm run verify:integration
 ```
+
+Before merging a large change:
+
+```bash
+npm run verify:all
+```
+
+PR CI runs both suites. On Windows, run the npm command from PowerShell; the integration launcher enters WSL automatically. Windows requires WSL 2, Docker, and Supabase CLI plus Deno in the WSL `PATH`. Linux and CI do not need WSL.
+
+The integration suite rebuilds an isolated local Supabase stack, applies every migration, runs database lint, and checks actions, permissions, RLS, idempotency, and worker lifecycles. `.env.local` is optional. Supabase URLs and keys are always replaced by local values, so the suite does not write remote application data.
+
+Add integration assertions when introducing or changing:
+
+- backend actions: successful behavior and relevant denial paths;
+- roles or permissions: allowed and denied actors, plus in-scope and out-of-scope resources;
+- RPCs, schemas, or migrations: real local-database results;
+- RLS: anon, authenticated, and service-role access as applicable;
+- idempotent writes: missing request ID, first execution, and replay;
+- workers, outbox, or deletion jobs: claim, completion/failure, retry, and deduplication.
+
+Pure frontend layout work normally needs only `verify:local`. The action coverage guard rejects registered actions that are not referenced by a domain integration test. Do not bypass it with a call that has no assertion.
 
 After config changes, run `npm run generate:all` and commit source JSON plus generated outputs. Never hand-edit generated files or rewrite deployed migrations.

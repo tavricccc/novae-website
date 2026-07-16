@@ -7,7 +7,7 @@
 - `content/landing/zh.json` / `en.json`：首頁雙語文案，兩邊資料結構必須一致。
 - `content/docs-navigation.mjs`：文件側邊欄、順序、上一頁／下一頁與部署教學清單。
 - `content/changelog.md`：網站顯示的產品更新紀錄。
-- `docs/` / `docs/en/`：繁中與英文 Markdown 文件來源；`deployment/cloudflare.md` 說明 Worker、workers.dev、API token 與 CORS 設定。
+- `docs/` / `docs/en/`：繁中與英文 Markdown 文件來源；`contributing.md` 集中記錄主程式的 `verify:local`／`verify:integration`／`verify:all`、Windows 自動 WSL 流程與新增 action／權限／migration 的測試增補規則；`deployment/cloudflare.md` 說明 Worker、workers.dev、API token 與 CORS 設定。
 
 ## 頁面與互動
 
