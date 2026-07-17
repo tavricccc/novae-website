@@ -65,4 +65,8 @@ Elevation has exactly three levels: `--shadow-control`, `--shadow-card`, and `--
 
 When structures differ only by strings, icons, states, slots, or callbacks, extend an existing primitive through props or slots. Add a new primitive only when it has at least two valid consumers and the existing contract cannot express it clearly; then update `structure.md`, architecture tests, and both language versions of this guide. `check:ui`, included in `npm run verify:local`, rejects known parallel styling patterns.
 
-After config changes, run `npm run generate:all` and commit source JSON plus generated outputs. Never hand-edit generated files or rewrite deployed migrations.
+After changing `config/issue-categories.config.json`, `config/rate-limits.config.json`, or `config/api-errors.config.json`, run `npm run generate:all` and commit source JSON plus every generated output. Category, rate-limit, and API error codes must agree across the frontend, Cloudflare, and Edge. Never hand-edit generated files. Public error responses may contain only a contract code, request ID, and required retry metadata—not localized sentences or provider exceptions.
+
+Locale catalogs are split by `src/i18n/messages/<locale>/<domain>.ts`, with the filename matching the first key segment. Keep Traditional Chinese and English keys identical and use short stable semantic names rather than sentences, hashes, or translated source text.
+
+Persist background diagnostics only as native UUID `error_trace_id` values and keep full details in logs. Add a migration that removes the old column or RPC overload; never rewrite a deployed migration or retain two storage formats as a compatibility layer.

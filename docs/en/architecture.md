@@ -23,6 +23,16 @@ The browser is untrusted. Cloudflare rejects invalid origins, unauthenticated tr
 
 `src/styles/primitives.css` and `components/ui/` define the reusable visual contract. `AppShell` and `ViewportFrame` own viewport gutters, safe areas, and content width; shared primitives compose buttons, cards, lists, dropdowns, and controls. Elevation is limited to control, card, and floating levels. Domain pages supply data, strings, states, and slots instead of creating parallel styling systems.
 
+Route changes keep the top navigation, desktop sidebar, and action bar inside the stable `AppShell`; they do not participate in whole-page slide transitions. Only a content panel's own loading, paging, or state transition moves, matching the behavior of an installed native application shell.
+
+## Localization and error contract
+
+Frontend catalogs live in `src/i18n/messages/<locale>/<domain>.ts`. Each file owns one functional domain, keys use short stable semantic names, and Traditional Chinese and English must expose the same keys. Callers translate by key only; localized source text is never used as a reverse lookup.
+
+`config/api-errors.config.json` is the single source for the public API error contract and generates typed definitions for the frontend, Cloudflare Worker, and Supabase Edge. Failure responses contain only a stable `code` and `requestId`, plus `retryAfterSeconds` for rate limits. Backend-localized sentences and raw provider errors are not exposed; the frontend maps the code to the active locale while technical details remain in logs indexed by request or trace ID.
+
+Outbox, deletion, Push delivery, and maintenance tables store only `error_trace_id uuid`, not repeated error sentences. Dashboard diagnostics likewise expose `failed_task_codes` and `error_trace_id` for frontend presentation.
+
 ## Backend Functions
 
 - `n<namespace>-api`: backend action roles, idempotency, validation, and dispatch.
@@ -42,7 +52,9 @@ Content, notifications, and notification state changes use private Supabase Real
 
 After Edge verifies a Firebase token, it briefly caches the required user record in the Function instance and Upstash Redis. Expiry and entry limits ensure Firebase is queried again when needed while avoiding repeated provider calls without bypassing per-action authorization.
 
-Frontend content reads are cached per account in memory and IndexedDB. Each read carries scope and invalidation versions, so a request that finishes after a write, Realtime invalidation, or account switch cannot restore stale content. Persistent cleanup is write-version guarded to avoid deleting newer data.
+Frontend content reads retain an aggressive per-account cache in memory and IndexedDB to minimize server and provider work. The bounded memory tier is a true LRU whose hit order is refreshed, while the persistent tier keeps its longer lifetime. Each read carries scope and invalidation versions, so a request that finishes after a write, Realtime invalidation, or account switch cannot restore stale content. Persistent cleanup is write-version guarded to avoid deleting newer data.
+
+When a PWA update is available, the waiting Service Worker is asked to take control immediately. After `controllerchange`, navigation reloads through a versioned URL; a watchdog and per-version reload cap stop failed update loops. The handover does not retain a legacy update branch and does not require clearing application data or weakening the content cache.
 
 When retention cleanup removes a proposal or facility that has a mapped Notion page, it queues the Notion deletion marker in the same database transaction. Scheduled retention events skip user notifications but remain on the normal retryable outbox path.
 

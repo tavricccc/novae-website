@@ -33,6 +33,10 @@ Check the Google provider, authorized production domain, matching `VITE_ALLOWED_
 - One category missing: compare `readAccess`, status, author, and role; it may be correct privacy behavior.
 - 429: inspect Upstash and rate-limit config before increasing limits.
 
+API error bodies are machine-readable: `error.code` is the stable contract value, `error.requestId` indexes logs, and a 429 also provides `error.retryAfterSeconds`. Backend responses do not contain localized explanations or complete provider errors; the frontend renders the code through its locale catalog. Report the code, request ID, and occurrence time instead of exposing raw exceptions to the browser.
+
+If an installed PWA still shows an old version, keep it open long enough for the new Service Worker to take control. The app reloads through a versioned URL and caps retries automatically. Manually reload once only after the update watchdog reports failure; do not start by clearing site data, content caches, or databases.
+
 ## Wrong support goal or days
 
 1. Inspect the deployed commit's `config/issue-categories.config.json`.
