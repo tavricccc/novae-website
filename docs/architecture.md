@@ -8,8 +8,9 @@
 flowchart LR
   U[瀏覽器 PWA] -->|Google 登入| F[Firebase Auth]
   U -->|Firebase token + action| CFW[Cloudflare Worker]
-  CFW -->|先檢查來源、身分與限流| R[Upstash Redis]
+  CFW -->|來源、身分、原生 burst limit| RL[Cloudflare Rate Limiting]
   CFW -->|origin secret 轉送| E[隨機名稱 Supabase Edge Functions]
+  E -->|精確業務配額／驗證快取| R[Upstash Redis]
   E -->|RPC／交易| P[Postgres + RLS]
   P -->|私有 Broadcast| U
   U -->|簽名圖片上傳| C[Cloudinary]
@@ -22,7 +23,7 @@ flowchart LR
   G --> V[Vercel 前端]
 ```
 
-重要原則：瀏覽器不被信任；Cloudflare 先擋下 CORS、未登入、webhook 簽章與超額請求，Supabase Edge 與 Postgres 仍重新授權。Cloudflare 不是唯一權限層。
+重要原則：瀏覽器不被信任；Cloudflare 先擋下 CORS、未登入、webhook 簽章與短時間刷取，Supabase Edge 再檢查精確業務配額，Postgres 仍重新授權並保存正式關係與計數。Cloudflare 不是唯一權限層。
 
 ## 前端層級
 

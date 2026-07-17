@@ -1,6 +1,6 @@
 # 8. 建立 Cloudflare Worker
 
-Cloudflare Worker 是瀏覽器看到的固定 API 入口。它會先檢查 CORS、Firebase token 與 Upstash 限流，只有通過的請求才轉送到隨機名稱的 Supabase Edge Functions。被 Upstash 擋下的 `429` 不會先進入 Supabase，因此不會消耗該次 Edge Function invocation。
+Cloudflare Worker 是瀏覽器看到的固定 API 入口。它會先檢查 CORS、Firebase token 與 Cloudflare 原生 Rate Limiting bindings，只有通過的請求才轉送到隨機名稱的 Supabase Edge Functions。短時間刷取會在邊緣回覆 `429`；每日發文、每小時留言等精確業務配額則由 Supabase 透過 Upstash 檢查。
 
 ## 1. 建立 Cloudflare 帳號與 workers.dev 子網域
 
@@ -128,6 +128,8 @@ EDGE_ORIGIN_SECRET
 ```
 
 不用在 Cloudflare Worker Settings 或 Supabase Dashboard 再手動填一次。修改 GitHub secret 後，重新執行 `Deploy Supabase Backend`，Action 就會自動同步並部署。
+
+Rate Limiting bindings 與各自的 `namespace_id` 已宣告在主程式 `cloudflare/wrangler.toml`。它們會隨 Worker 自動建立，不需要在 Cloudflare Dashboard 另外註冊服務，也不需要新增 secret。production 與 development 使用不同 namespace，測試流量不會消耗正式環境計數。
 
 ## 完成檢查
 

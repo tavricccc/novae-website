@@ -1,6 +1,6 @@
 # 8. Create Cloudflare Worker
 
-Cloudflare Worker is the stable public API entry point. It checks CORS, Firebase identity, and Upstash limits before forwarding accepted requests to randomly named Supabase Edge Functions. A request rejected with `429` at Cloudflare does not first consume a Supabase Edge invocation.
+Cloudflare Worker is the stable public API entry point. It checks CORS, Firebase identity, and native Cloudflare Rate Limiting bindings before forwarding accepted requests to randomly named Supabase Edge Functions. Edge burst protection returns `429` before Supabase; precise daily and hourly business quotas are checked by Supabase through Upstash.
 
 ## 1. Register workers.dev
 
@@ -73,5 +73,7 @@ EDGE_ORIGIN_SECRET
 ```
 
 Do not duplicate these values manually in Cloudflare Worker Settings or Supabase. After changing a GitHub secret, rerun `Deploy Supabase Backend`; Actions synchronizes and deploys everything automatically.
+
+Rate Limiting bindings and their `namespace_id` values are declared in the application repository's `cloudflare/wrangler.toml`. Worker deployment creates them automatically: there is no separate Dashboard service to register and no additional secret. Production and development use separate namespaces so test traffic cannot consume production counters.
 
 All eight service setups are now complete. Next, use the [credential worksheet](../environment-configuration.md) to add every value to GitHub `production` Environment secrets.

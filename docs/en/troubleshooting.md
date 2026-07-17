@@ -18,7 +18,7 @@ Always start with the first failed stage. Do not reset Firebase, Supabase, and V
 - `403 origin-denied`: make `ALLOWED_ORIGINS` exactly match the browser's Vercel origin. Include `https://`, remove paths and quotes, and **remove the final `/`**.
 - Browser CORS / `net::ERR_FAILED`: this is commonly the same origin mismatch. After editing GitHub production, rerun `Deploy Supabase Backend`.
 - `502`: verify that all six random-name Supabase Functions deployed under the same namespace.
-- `503 rate-limit-provider-unavailable`: verify writable Upstash REST credentials. The gateway fails closed instead of bypassing limits.
+- `503 rate-limit-provider-unavailable`: verify the writable Upstash REST credentials used by Supabase. Precise business quotas fail closed; native Cloudflare burst protection remains independent.
 
 A correct preflight returns `204` and an `Access-Control-Allow-Origin` equal to the Vercel origin. An unauthenticated smoke POST should return `401`.
 
@@ -31,7 +31,7 @@ Check the Google provider, authorized production domain, matching `VITE_ALLOWED_
 - All 401/403 after CORS passes: inspect Firebase token, domain, service account, and fresh sign-in.
 - Admin-only 403: inspect `ADMIN_EMAILS` and refresh the session.
 - One category missing: compare `readAccess`, status, author, and role; it may be correct privacy behavior.
-- 429: inspect Upstash and rate-limit config before increasing limits.
+- 429: inspect the response code. For rapid bursts, review native bindings in `cloudflare/wrangler.toml`; for accumulated business quotas, review Upstash and `rate-limits.config.json`.
 
 API error bodies are machine-readable: `error.code` is the stable contract value, `error.requestId` indexes logs, and a 429 also provides `error.retryAfterSeconds`. Backend responses do not contain localized explanations or complete provider errors; the frontend renders the code through its locale catalog. Report the code, request ID, and occurrence time instead of exposing raw exceptions to the browser.
 

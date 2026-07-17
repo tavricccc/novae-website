@@ -1,6 +1,6 @@
 # 6. Create Upstash
 
-Novae uses this Redis database for limits shared by Cloudflare Worker and Edge workloads. Public requests are rejected at Cloudflare before reaching Supabase when their limit is exhausted.
+Novae uses this Redis database only from Supabase for precise daily and hourly business quotas, short-lived Firebase user caching, and backend worker protection. Cloudflare burst protection uses native Rate Limiting bindings and does not receive Upstash credentials.
 
 1. Create a Redis database in the [Upstash Console](https://console.upstash.com/), preferably near the Supabase region.
 2. Copy the HTTPS REST URL to `UPSTASH_REDIS_REST_URL`.

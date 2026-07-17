@@ -57,8 +57,8 @@
 | `NOTION_TOKEN` | 選用 | 啟用 Notion 時的 internal integration secret |
 | `NOTION_DATABASE_ID` | 選用 | 啟用 Notion 時、已分享給 integration 的原始 database ID |
 | `NOTION_DATA_SOURCE_ID` | 條件 | 同一 database 有多個 data source 時，指定 Novae 使用的來源；單一來源自動探索 |
-| `UPSTASH_REDIS_REST_URL` | 是 | Upstash HTTPS REST URL |
-| `UPSTASH_REDIS_REST_TOKEN` | 是 | Upstash Standard REST token，不是 Read-only token |
+| `UPSTASH_REDIS_REST_URL` | 是 | Supabase 專用的 Upstash HTTPS REST URL；不會同步到 Cloudflare Worker |
+| `UPSTASH_REDIS_REST_TOKEN` | 是 | Supabase 專用的 Upstash Standard REST token，不是 Read-only token |
 
 ## ALLOWED_ORIGINS 填寫規則
 

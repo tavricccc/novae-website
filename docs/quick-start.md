@@ -20,8 +20,8 @@
 | Firebase | Google 登入、App Check、Web Push | Web App config、VAPID key、service account JSON |
 | Supabase | 資料庫、RLS、Edge Functions、Realtime | URL、publishable key、project ref、部署憑證 |
 | Cloudinary | 簽名圖片儲存與讀取 | cloud name、API key、API secret |
-| Upstash | 跨 Edge 執行個體的限流 | REST URL、Standard REST token |
-| Cloudflare | 固定 API 入口、CORS 與進入 Supabase 前的限流 | workers.dev 子網域、account ID、API token |
+| Upstash | Supabase 精確業務配額與驗證快取 | REST URL、Standard REST token |
+| Cloudflare | 固定 API 入口、CORS 與原生短時間防刷 | workers.dev 子網域、account ID、API token |
 | Vercel | 發布 PWA 前端 | token、org ID、project ID |
 
 Notion 是選用的營運副本。需要時才建立 integration 與 database；不需要就完全略過，不會影響提案、公告、通知或其他主要功能。

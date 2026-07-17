@@ -49,8 +49,8 @@ Put every value below in the deploying fork's GitHub `production` Environment se
 | `NOTION_TOKEN` | Optional internal integration secret |
 | `NOTION_DATABASE_ID` | Optional original database shared with the integration |
 | `NOTION_DATA_SOURCE_ID` | Required for a multi-source database; auto-discovered when only one source exists |
-| `UPSTASH_REDIS_REST_URL` | HTTPS REST URL |
-| `UPSTASH_REDIS_REST_TOKEN` | Writable Standard REST token |
+| `UPSTASH_REDIS_REST_URL` | Upstash HTTPS REST URL used only by Supabase, never synchronized to the Cloudflare Worker |
+| `UPSTASH_REDIS_REST_TOKEN` | Writable Standard REST token used only by Supabase |
 
 Hosted Edge Functions provide `SUPABASE_URL` automatically; do not create it as a GitHub secret. `VITE_API_BASE_URL` is also not a separate GitHub secret: the frontend workflow uses `CLOUDFLARE_WORKER_URL`. Local `.env` is only for contributors.
 
