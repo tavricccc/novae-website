@@ -12,3 +12,5 @@
 10. 每次變更在 `content/changelog.md` 最前方新增產品向紀錄，只讀與 patch 最前 20 行。
 11. 完成後執行 `npm run check`；不以人工預覽取代內容、連結與建置驗證。
 12. 主程式本地驗證與測試增補規則集中維護於 `docs/contributing.md` 與 `docs/en/contributing.md`；兩語結構同步，主程式 repo 只保留短版命令入口。
+13. 主程式 UI 規範以 `novae/src/styles/primitives.css` 與 `novae/src/components/ui/` 為單一來源；本網站只負責同步說明，不另行定義另一套主程式元件契約。
+14. 主程式新增或調整 viewport、button、card、list、dropdown、shadow、control primitive 時，同步更新雙語 contributing／architecture 文件與產品更新紀錄。

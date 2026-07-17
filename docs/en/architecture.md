@@ -21,6 +21,8 @@ The browser is untrusted. Cloudflare rejects invalid origins, unauthenticated tr
 
 `views/` compose routes, `components/` render application UI, `components/ui/` contains business-free primitives, `composables/` own Vue workflows, `services/` cross API boundaries, `lib/` contains pure helpers, `types/` shares contracts, and `generated/` contains code-generated category policy.
 
+`src/styles/primitives.css` and `components/ui/` define the reusable visual contract. `AppShell` and `ViewportFrame` own viewport gutters, safe areas, and content width; shared primitives compose buttons, cards, lists, dropdowns, and controls. Elevation is limited to control, card, and floating levels. Domain pages supply data, strings, states, and slots instead of creating parallel styling systems.
+
 ## Backend Functions
 
 - `n<namespace>-api`: backend action roles, idempotency, validation, and dispatch.

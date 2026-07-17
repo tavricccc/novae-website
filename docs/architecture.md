@@ -39,6 +39,8 @@ flowchart LR
 
 主要路由是提案列表／詳情、公告列表／詳情、通知、設定與管理 Dashboard。桌面與手機共用資料流，只切換 layout。
 
+共用視覺契約位於 `src/styles/primitives.css` 與 `components/ui/`。`AppShell`／`ViewportFrame` 統一管理 viewport gutter、safe area 與內容寬度；button、card、list、dropdown、control 由共用元件或 primitive class 組合，陰影只分 control、card、floating 三階。領域頁只提供資料、字串、狀態與 slots，不各自建立近似樣式。
+
 ## 後端入口
 
 | Function | 真實責任 |

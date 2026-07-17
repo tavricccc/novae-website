@@ -48,4 +48,21 @@ Add integration assertions when introducing or changing:
 
 Pure frontend layout work normally needs only `verify:local`. The action coverage guard rejects registered actions that are not referenced by a domain integration test. Do not bypass it with a call that has no assertion.
 
+## Reusable UI system
+
+The main application treats `src/styles/primitives.css` and `src/components/ui/` as the single source of truth for visual primitives. Proposals, announcements, facilities, notifications, settings, and administration may keep domain-specific fields and states, but must not maintain parallel viewport, button, card, list, dropdown, shadow, or control systems.
+
+| Need | Canonical entry point |
+|---|---|
+| Page gutters, safe areas, and content width | `AppShell` / `ViewportFrame`, `route-page`, `viewport-floating-inline` |
+| Standard, icon, toolbar, primary, and secondary actions | `AppButton` or an existing `button-*` variant |
+| Cards, controls, floating panels, and inset areas | `SurfacePanel` or `surface-control` / `surface-card` / `surface-floating` / `surface-inset` |
+| Grouped lists and interactive rows | `list-surface`, `list-surface-row` |
+| Dropdowns and menu items | `DropdownMenu` / `DropdownPanel`, `dropdown-item` |
+| Composite fields and footers | `field`, `control-frame`, `control-footer` |
+
+Elevation has exactly three levels: `--shadow-control`, `--shadow-card`, and `--shadow-floating`. Do not add arbitrary shadows, page-level horizontal padding in route views, fixed left/right offsets that imitate safe areas, or manually assembled near-duplicate cards.
+
+When structures differ only by strings, icons, states, slots, or callbacks, extend an existing primitive through props or slots. Add a new primitive only when it has at least two valid consumers and the existing contract cannot express it clearly; then update `structure.md`, architecture tests, and both language versions of this guide. `check:ui`, included in `npm run verify:local`, rejects known parallel styling patterns.
+
 After config changes, run `npm run generate:all` and commit source JSON plus generated outputs. Never hand-edit generated files or rewrite deployed migrations.
