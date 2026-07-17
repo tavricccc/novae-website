@@ -14,8 +14,8 @@ Write down the school display name, allowed Google email domain, initial adminis
 | Firebase | Google sign-in, App Check, and Web Push |
 | Supabase | Database, RLS, Realtime, and Edge Functions |
 | Cloudinary | Signed image storage and delivery |
-| Upstash | Distributed rate limiting |
-| Cloudflare | Stable API gateway, CORS, and pre-Supabase limits |
+| Upstash | Precise Supabase business quotas and auth cache |
+| Cloudflare | Stable API gateway, CORS, and native burst protection |
 | Vercel | Production PWA hosting |
 
 Notion is an optional operations copy. Create it only when needed; omitting it does not affect proposals, announcements, notifications, or other core features.

@@ -4,8 +4,9 @@
 flowchart LR
   U[Browser PWA] --> F[Firebase Auth]
   U -->|token + action| C[Cloudflare Worker]
-  C --> R[Upstash rate limits]
+  C --> RL[Cloudflare Rate Limiting]
   C -->|origin secret| E[Random-name Supabase Edge Functions]
+  E --> R[Upstash business quotas and auth cache]
   E --> P[Postgres + RLS + RPC]
   P -->|Private Broadcast| U
   U --> C[Signed Cloudinary upload]
@@ -15,7 +16,7 @@ flowchart LR
   G --> V[Vercel]
 ```
 
-The browser is untrusted. Cloudflare rejects invalid origins, unauthenticated traffic, invalid webhooks, and exhausted limits before Supabase. Edge verification, RLS, RPC, constraints, and transactions still re-authorize every operation.
+The browser is untrusted. Cloudflare rejects invalid origins, unauthenticated traffic, invalid webhooks, and burst abuse before Supabase. Edge checks precise business quotas through Upstash; RLS, RPC, constraints, and transactions still re-authorize operations and retain authoritative relationships and counters.
 
 ## Frontend boundaries
 

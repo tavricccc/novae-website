@@ -17,10 +17,10 @@ Novae treats the browser, user input, and public network as untrusted. Authentic
 
 ## Abuse and cost boundaries
 
-- Cloudflare Worker is the stable public gateway. Public actions, sign-in synchronization, and Cloudinary webhooks are limited there before Supabase Edge invocations.
+- Cloudflare Worker is the stable public gateway. Native bindings stop burst abuse on actions, sign-in synchronization, and Cloudinary webhooks before Supabase Edge invocations; authenticated limits primarily use UID keys so a shared school NAT does not merge users.
 - Supabase Functions use private random names plus an origin secret, then re-authorize roles and data access.
 - JSON and webhook request bodies are capped at 64 KB.
-- `backendAction` separates read, write, sensitive-write, admin-write, and upload-resolution limits, with additional domain limits for proposals, comments, support, likes, and images.
+- Supabase uses Upstash for precise quotas covering creation, comments, support, likes, affected reports, administration, deletion, preferences, Push tokens, and images. PostgreSQL relationships and transactional counters remain authoritative.
 - Each user may keep at most 10 Push devices. Existing devices can refresh tokens, but new devices cannot grow notification fan-out indefinitely.
 - Realtime subscriptions are limited by RLS to authorized private Broadcast topics; authenticated clients cannot directly read private notification and realtime-event tables.
 - The Cloudinary preset enforces authenticated WebP images, 800 KB maximum size, and a 2,000 px long edge at the provider. The webhook validates the result again and schedules non-compliant assets for deletion.

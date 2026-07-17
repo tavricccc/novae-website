@@ -47,7 +47,7 @@ These are examples and may be replaced with institutional policy.
 
 ## Rate limits and images
 
-The current config allows 30 proposals per day, 200 comments per hour, 200 image uploads per day, 5 proposal images, 5 announcement images, and 1 comment image. Browser compression targets 800 KB, accepts sources up to 20 MB, limits the long edge to 2000 px, and starts WebP quality at 0.82. It also contains separate read, write, sensitive, admin, upload, healthcheck, webhook, and worker burst limits.
+The current config allows each user 10 proposals, 10 facility reports, and 50 images per day; administrators may create 20 announcements per day. It allows 60 comments and 120 support, like, or affected-report interactions per hour. Proposal and announcement bodies accept 5 images and comments accept 1. Browser compression targets 800 KB from sources up to 20 MB, limits the long edge to 2000 px, and starts WebP quality at 0.82. Supabase applies these precise quotas through Upstash; Cloudflare's 10/60-second native burst limits live in `cloudflare/wrangler.toml`.
 
 The 30-character title, 1,000-visible-character proposal/announcement content, and 70-visible-character comment limits are fixed product and database rules, not values in `rate-limits.config.json`. Markdown image markers preserve attachment references and do not count toward visible text; comments do not render other Markdown formatting.
 

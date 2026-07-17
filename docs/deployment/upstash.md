@@ -1,6 +1,6 @@
 # 6. 建立 Upstash
 
-Novae 使用 Upstash Redis REST 做跨 Cloudflare Worker 與 Edge Function 執行個體的限流。公開登入同步、讀寫與 webhook 會先在 Worker 檢查；健康檢查與背景 worker 則保留後端限制。
+Novae 只在 Supabase 使用 Upstash Redis REST：精確計算每日建立、每小時留言、互動、管理與其他業務配額，並支援 Firebase 使用者短期快取及背景 worker 保護。Cloudflare Worker 的短時間防刷改由原生 Rate Limiting bindings 負責，不會持有 Upstash URL 或 token。
 
 ## 1. 建立 Redis database
 
