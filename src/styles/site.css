@@ -189,10 +189,10 @@ h1,h2,h3,p{overflow-wrap:anywhere}
   .capability-ledger,.pwa-ledger,.roles-ledger{display:flex;grid-template-columns:none;gap:12px;margin-inline:-18px;padding:7px 18px 15px;overflow-x:auto;border-radius:0;background:transparent;box-shadow:none;scroll-snap-type:x mandatory}.capability-card,.pwa-ledger article,.roles-ledger article{min-width:min(78vw,280px);padding:19px;border:0!important;border-radius:18px;background:#fff;box-shadow:var(--shadow-control);scroll-snap-align:start}.capability-card p{font-size:12.5px}.pwa-ledger article{display:flex}.roles-ledger article{min-width:min(82vw,292px)}
   .workflow-rail{display:flex;overflow-x:auto;margin-inline:-18px;padding:7px 18px 15px;scroll-snap-type:x mandatory}.workflow-rail li{min-width:min(72vw,250px);padding:18px 18px 18px 48px;scroll-snap-align:start}.status-ledger{flex-wrap:nowrap;gap:8px;margin-inline:-18px;padding:6px 18px 14px;overflow-x:auto}.status-ledger>div{display:flex;min-width:max-content}.status-ledger span{margin-left:7px}
   .config-studio__workspace{box-shadow:var(--shadow-card)}
-  .device-stage{display:block}.device-stage__desktop{display:none}.device-stage__mobile{width:min(100%,390px);margin-inline:auto}.site-footer{grid-template-columns:1fr;gap:20px;padding:30px 0 82px}.site-footer>div{flex-wrap:wrap;gap:12px 20px}
+  .site-footer{grid-template-columns:1fr;gap:20px;padding:30px 0 82px}.site-footer>div{flex-wrap:wrap;gap:12px 20px}
   .cta-section{min-height:0;padding:84px 0}.cta-section>p:not(.section-number){margin-top:20px;line-height:1.75}.cta-section>div{display:grid;width:100%;gap:9px;margin-top:26px}.cta-section .button{width:100%}
 }
 
-@media(max-width:470px){.hero-stage{min-height:420px}.hero-sculpture{width:43%}.hero-actions{grid-template-columns:1fr}.hero-compact-facts{grid-template-columns:1fr 1fr}.device-stage__mobile{width:100%}}
+@media(max-width:470px){.hero-stage{min-height:420px}.hero-sculpture{width:43%}.hero-actions{grid-template-columns:1fr}.hero-compact-facts{grid-template-columns:1fr 1fr}}
 
 @media(prefers-reduced-motion:reduce){html{scroll-behavior:auto}*,*::before,*::after{scroll-behavior:auto!important;transition-duration:.01ms!important;animation-duration:.01ms!important;animation-iteration-count:1!important}.product-frame--hero,.hero-sculpture{transform:none!important}.reveal{opacity:1;transform:none}}

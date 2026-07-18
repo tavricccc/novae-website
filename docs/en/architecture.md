@@ -24,7 +24,7 @@ The browser is untrusted. Cloudflare rejects invalid origins, unauthenticated tr
 
 `src/styles/primitives.css` and `components/ui/` define the reusable visual contract, composed in the one-way order `atoms → molecules → organisms`. `AppShell`, `ViewportFrame`, and `RoutePageFrame` own viewport gutters, safe areas, content width, and route-page structure. Shared components compose buttons, cards, lists, dropdowns, dialogs, and controls; elevation is limited to control, card, and floating levels. See the [UI design system](ui-design-system.md) for the full contract and new-page checklist.
 
-Route depth and navigation source determine transition direction. On mobile, child and nested detail routes use push/pop transitions, same-level routes use a light fade, and notification-opened details retain notifications as their return source. Desktop keeps a restrained web transition, while navigation shell and content state remain separate.
+For signed-in users, mobile bottom navigation remains visible on both root and child pages. `AppShell` includes the safe area, floating gap, and navigation height in the content's bottom clearance; route origin only determines the back destination and no longer controls navigation visibility. Navigation chrome remains separate from route content state.
 
 ## Localization and error contract
 

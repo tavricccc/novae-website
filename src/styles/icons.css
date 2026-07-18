@@ -72,3 +72,11 @@
 .ti-sort-descending:before{content:'\eb27'}
 .ti-plus:before{content:'\eb0b'}
 .ti-chevron-down:before{content:'\ea5f'}
+.ti-chevron-left:before{content:'\ea60'}
+.ti-chevron-right:before{content:'\ea61'}
+.ti-list:before{content:'\eb6b'}
+.ti-pencil:before{content:'\eb04'}
+.ti-send:before{content:'\eb1e'}
+.ti-share-2:before{content:'\f799'}
+.ti-switch-horizontal:before{content:'\eb31'}
+.ti-user:before{content:'\eb4d'}

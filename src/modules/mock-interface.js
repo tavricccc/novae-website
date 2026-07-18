@@ -153,15 +153,11 @@ function fitDemo(root) {
   if (!surface || !root.isConnected) return;
   const available = root.clientWidth;
   if (!available) return;
-  if (root.dataset.novaeDemo === 'hero') {
-    surface.style.width = `${Math.min(720, available)}px`;
-    surface.style.transform = 'none';
-    surface.style.transformOrigin = 'top left';
-    root.style.height = `${Math.ceil(surface.scrollHeight)}px`;
-    return;
-  }
-  const useMobileLayout = window.matchMedia('(max-width: 760px)').matches;
-  const designWidth = root.dataset.novaeDemo === 'mobile' || useMobileLayout ? 390 : 1120;
+  const designWidth = root.dataset.novaeDemo === 'hero'
+    ? 720
+    : root.dataset.novaeDemo === 'mobile'
+      ? 390
+      : 1120;
   surface.style.width = `${designWidth}px`;
   surface.style.transform = 'scale(1)';
   surface.style.transformOrigin = 'top left';
