@@ -50,11 +50,13 @@ Pure frontend layout work normally needs only `verify:local`. The action coverag
 
 ## Reusable UI system
 
+See the [UI design system](ui-design-system.md) for the complete Atomic Design layers, component mapping, elevation contract, and new-page checklist. This section keeps the boundaries every contribution must follow.
+
 The main application treats `src/styles/primitives.css` and `src/components/ui/` as the single source of truth for visual primitives. Proposals, announcements, facilities, notifications, settings, and administration may keep domain-specific fields and states, but must not maintain parallel viewport, button, card, list, dropdown, shadow, or control systems.
 
 | Need | Canonical entry point |
 |---|---|
-| Page gutters, safe areas, and content width | `AppShell` / `ViewportFrame`, `route-page`, `viewport-floating-inline` |
+| Page gutters, safe areas, and content width | `AppShell` / `ViewportFrame` / `RoutePageFrame` |
 | Standard, icon, toolbar, primary, and secondary actions | `AppButton` or an existing `button-*` variant |
 | Cards, controls, floating panels, and inset areas | `SurfacePanel` or `surface-control` / `surface-card` / `surface-floating` / `surface-inset` |
 | Grouped lists and interactive rows | `list-surface`, `list-surface-row` |

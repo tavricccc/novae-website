@@ -40,9 +40,9 @@ flowchart LR
 
 主要路由是提案列表／詳情、公告列表／詳情、通知、設定與管理 Dashboard。桌面與手機共用資料流，只切換 layout。
 
-共用視覺契約位於 `src/styles/primitives.css` 與 `components/ui/`。`AppShell`／`ViewportFrame` 統一管理 viewport gutter、safe area 與內容寬度；button、card、list、dropdown、control 由共用元件或 primitive class 組合，陰影只分 control、card、floating 三階。領域頁只提供資料、字串、狀態與 slots，不各自建立近似樣式。
+共用視覺契約位於 `src/styles/primitives.css` 與 `components/ui/`，並依 `atoms → molecules → organisms` 單向組合。`AppShell`／`ViewportFrame`／`RoutePageFrame` 統一管理 viewport gutter、safe area、內容寬度與 route page 骨架；button、card、list、dropdown、Dialog、control 由共用元件組合，陰影只分 control、card、floating 三階。完整規範與新頁面清單見 [UI 設計系統](ui-design-system.md)。
 
-路由切換時，`AppShell` 內的頂部導覽、桌面側欄與 action bar 不參與整頁滑入／滑出動畫；只有各內容面板自己的載入、分頁或狀態轉場會移動。這使安裝後的 PWA 更接近原生 App：固定的 shell 保持位置，內容才隨操作更新。
+路由切換由路由深度與來源決定方向：手機版子頁與巢狀詳情使用 push／pop，同層使用輕量 fade，從通知開啟詳情時會保留返回通知的來源。桌面版維持輕量網頁轉場；導覽 shell 與內容狀態仍保持分離。
 
 ## 本地化與錯誤契約
 

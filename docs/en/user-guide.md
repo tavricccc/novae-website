@@ -38,4 +38,4 @@ Comments support replies and plain-text input only. Markdown is not rendered and
 
 ## Announcements, notifications, and settings
 
-Announcements have separate list and detail pages with likes and comments. New announcements use the same 30-character title and 1,000-visible-character content limits. The notification page groups items inside one card and synchronizes read state; it does not show per-item time or a per-item mark-read button. Settings controls Push and app preferences, and sign-out is one standalone action.
+Announcements have separate list and detail pages with likes and comments. New announcements use the same 30-character title and 1,000-visible-character content limits. The notification page groups items inside one card and synchronizes read state; it does not show per-item time or a per-item mark-read button. Settings controls Push and app preferences. Language uses a dropdown that shows the active locale and all available options, so future locales join the same list. Sign-out is one standalone action.

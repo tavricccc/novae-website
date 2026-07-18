@@ -1,6 +1,16 @@
 # 更新紀錄
 
-累計更新：775 次
+累計更新：776 次
+
+## v2.0.237｜Atomic UI 與階層式導覽重構
+
+2026-07-18
+
+- 前端共用元件完整分為 atoms、molecules、organisms，統一頁面骨架、Dialog、卡片、列表、編輯器、載入與錯誤狀態，並新增雙語 UI 設計系統與新頁面清單。
+- `AppShell`、`ViewportFrame` 與 `RoutePageFrame` 統一 viewport gutter、safe area 與 route layout；手機導覽依路由深度使用 push／pop，同層切換與桌面版保留輕量轉場。
+- 表面陰影固定為 control、card、floating 三階，`check:ui` 與架構測試阻止手組卡片、任意陰影、舊 dropdown 與自行管理 viewport 的回歸。
+- 設定頁修正群組列表內距，語言切換改為資料驅動 dropdown，可在同一清單擴充後續語系並保留 listbox ARIA 狀態。
+- 主程式 `npm run verify:local` 已通過 typecheck、unused、i18n、UI 規則、lint、build、Worker／Edge 與 46 項架構測試。
 
 ## v2.0.236｜移除頁面轉場與全面 Skeleton 化
 

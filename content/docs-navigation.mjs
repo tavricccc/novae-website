@@ -21,6 +21,7 @@ export const NAV_ZH = [
   ] },
   { group: '開發與參考', items: [
     { id: 'architecture', title: '系統架構', file: 'architecture.html' },
+    { id: 'ui-design-system', title: 'UI 設計系統', file: 'ui-design-system.html' },
     { id: 'contributing', title: '貢獻指南', file: 'contributing.html' },
     { id: 'changelog', title: '更新紀錄', file: 'changelog.html' },
   ] },
@@ -49,6 +50,7 @@ export const NAV_EN = [
   ] },
   { group: 'Develop and reference', items: [
     { id: 'architecture', title: 'Architecture', file: 'architecture.html' },
+    { id: 'ui-design-system', title: 'UI design system', file: 'ui-design-system.html' },
     { id: 'contributing', title: 'Contributing', file: 'contributing.html' },
   ] },
 ];

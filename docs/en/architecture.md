@@ -22,9 +22,9 @@ The browser is untrusted. Cloudflare rejects invalid origins, unauthenticated tr
 
 `views/` compose routes, `components/` render application UI, `components/ui/` contains business-free primitives, `composables/` own Vue workflows, `services/` cross API boundaries, `lib/` contains pure helpers, `types/` shares contracts, and `generated/` contains code-generated category policy.
 
-`src/styles/primitives.css` and `components/ui/` define the reusable visual contract. `AppShell` and `ViewportFrame` own viewport gutters, safe areas, and content width; shared primitives compose buttons, cards, lists, dropdowns, and controls. Elevation is limited to control, card, and floating levels. Domain pages supply data, strings, states, and slots instead of creating parallel styling systems.
+`src/styles/primitives.css` and `components/ui/` define the reusable visual contract, composed in the one-way order `atoms → molecules → organisms`. `AppShell`, `ViewportFrame`, and `RoutePageFrame` own viewport gutters, safe areas, content width, and route-page structure. Shared components compose buttons, cards, lists, dropdowns, dialogs, and controls; elevation is limited to control, card, and floating levels. See the [UI design system](ui-design-system.md) for the full contract and new-page checklist.
 
-Route changes keep the top navigation, desktop sidebar, and action bar inside the stable `AppShell`; they do not participate in whole-page slide transitions. Only a content panel's own loading, paging, or state transition moves, matching the behavior of an installed native application shell.
+Route depth and navigation source determine transition direction. On mobile, child and nested detail routes use push/pop transitions, same-level routes use a light fade, and notification-opened details retain notifications as their return source. Desktop keeps a restrained web transition, while navigation shell and content state remain separate.
 
 ## Localization and error contract
 
