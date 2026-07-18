@@ -24,7 +24,7 @@ The browser is untrusted. Cloudflare rejects invalid origins, unauthenticated tr
 
 `src/styles/primitives.css` and `components/ui/` define the reusable visual contract, composed in the one-way order `atoms → molecules → organisms`. `AppShell`, `ViewportFrame`, and `RoutePageFrame` own viewport gutters, safe areas, content width, and route-page structure. Shared components compose buttons, cards, lists, dropdowns, dialogs, and controls; elevation is limited to control, card, and floating levels. See the [UI design system](ui-design-system.md) for the full contract and new-page checklist.
 
-For signed-in users, mobile bottom navigation remains visible on both root and child pages. `AppShell` includes the safe area, floating gap, and navigation height in the content's bottom clearance; route origin only determines the back destination and no longer controls navigation visibility. Navigation chrome remains separate from route content state.
+For signed-in users, mobile bottom navigation remains visible on both root and child pages. `AppShell` lets each page's scroll viewport extend behind the navigation, while `RoutePageFrame` and `route-scroll-through` place the safe area, floating gap, and navigation height at the end of the content. Content can pass behind the navigation and the final item can still scroll fully into view. Route origin only determines the back destination; navigation chrome remains separate from route content state.
 
 ## Localization and error contract
 

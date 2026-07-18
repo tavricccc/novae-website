@@ -42,7 +42,7 @@ flowchart LR
 
 共用視覺契約位於 `src/styles/primitives.css` 與 `components/ui/`，並依 `atoms → molecules → organisms` 單向組合。`AppShell`／`ViewportFrame`／`RoutePageFrame` 統一管理 viewport gutter、safe area、內容寬度與 route page 骨架；button、card、list、dropdown、Dialog、control 由共用元件組合，陰影只分 control、card、floating 三階。完整規範與新頁面清單見 [UI 設計系統](ui-design-system.md)。
 
-手機底部導覽在已登入的根頁與子頁持續顯示，`AppShell` 統一把 safe area、導覽浮動間距與導覽高度納入內容底部避讓；路由來源仍只負責返回目的地，不再控制導覽列顯示。導覽 shell 與內容狀態保持分離。
+手機底部導覽在已登入的根頁與子頁持續顯示。`AppShell` 讓頁面捲動視窗延伸到導覽背後，`RoutePageFrame` 與 `route-scroll-through` 再把 safe area、浮動間距及導覽高度放進內容尾端；內容可穿透導覽所在區域，捲到底時最後一項仍能完整露出。路由來源只負責返回目的地，不控制導覽列顯示；導覽 shell 與內容狀態保持分離。
 
 ## 本地化與錯誤契約
 
