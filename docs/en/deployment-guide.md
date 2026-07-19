@@ -1,13 +1,13 @@
 # Final release and acceptance
 
-Use this page only after all eight service setups, production secrets, and category policy are complete.
+Use this page after all eight service setups and production secrets are complete. The first administrator configures categories in the app after deployment.
 
 ## Prerequisites
 
 - [ ] GitHub, Firebase, Supabase, Cloudinary, Upstash, Cloudflare, and Vercel are ready; optional Notion is ready when needed.
 - [ ] Every required value from the [credential worksheet](environment-configuration.md) is in GitHub `production` Environment secrets.
-- [ ] The [category builder](../../category-builder.html) output replaced `config/issue-categories.config.json` and was committed and pushed to the fork's `main` branch.
-- [ ] The campus domain and initial administrator emails are final.
+- [ ] The campus domain and first administrator in `ADMIN_EMAILS` are final.
+- [ ] Proposal and facility-report rules are ready to enter during guided first sign-in.
 
 If any item is incomplete, return to that page instead of running a deployment workflow early.
 
@@ -48,8 +48,10 @@ After the deployment URL opens successfully, connect the production domain in Ve
 - [ ] Browser API requests go to Cloudflare Worker, not directly to a Supabase Function.
 - [ ] CORS preflight returns `204` with the exact Vercel origin.
 - [ ] An administrator can see the Dashboard and moderation actions after signing in again.
+- [ ] The first administrator in `ADMIN_EMAILS` completes proposal and facility category setup.
 - [ ] Public, reviewed, and private categories have the correct visibility.
-- [ ] Support goal and days match `issue-categories.config.json`.
+- [ ] Support goal and days match in-app category settings, while older proposals retain their creation-time snapshot.
+- [ ] A facility-category manager receives new-report notifications and can update status.
 - [ ] Images survive reload and remain permission controlled.
 - [ ] Review, status updates, announcements, notifications, and Web Push work.
 - [ ] If Notion is enabled, its operations copy is created; otherwise the app works normally without treating Notion as a failure.

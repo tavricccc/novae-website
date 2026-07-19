@@ -43,9 +43,9 @@ Outbox, deletion, Push delivery, and maintenance tables store only `error_trace_
 - `n<namespace>-delete`: Cloudinary deletion and synchronized state.
 - `n<namespace>-maintenance`: retention/maintenance RPCs and worker triggering.
 
-## One category source
+## One runtime category source
 
-`config/issue-categories.config.json` is validated by `scripts/issue-category-config.mjs`, which generates both `src/generated/issue-categories.ts` and `supabase/functions/_shared/issue-categories.ts`. It derives author storage, upload/comment visibility, comment timing, automatic support expiry, and response-deadline start so frontend and Edge share one policy.
+Guided setup and category management write through controlled backend actions to Postgres. The frontend reads a runtime catalog, while Edge authorization, workflows, manager assignments, and facility notifications use the same records. Proposal creation snapshots privacy, comments, support, and deadlines onto the proposal. Database triggers permanently lock read access and author visibility after category creation.
 
 ## Realtime updates and authentication cache
 

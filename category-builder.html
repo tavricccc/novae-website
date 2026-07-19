@@ -4,52 +4,38 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <meta name="theme-color" content="#ffffff" />
-    <meta name="description" content="以視覺化介面建立 Novae 提案分類設定，並下載 issue-categories.config.json。" />
-    <title>分類設定產生器｜Novae</title>
-    <script type="module" src="/src/category-builder.js"></script>
+    <meta name="description" content="Novae 分類已改由首次登入引導與程式內管理後台動態設定。" />
+    <title>分類設定｜Novae</title>
+    <script type="module" src="/src/main-docs.js"></script>
   </head>
-  <body class="builder-page">
-    <a class="skip-link" href="#builder-main">跳到設定產生器</a>
-    <header class="site-header builder-header">
+  <body class="docs-body">
+    <a class="skip-link" href="#category-guide">跳到分類設定說明</a>
+    <header class="site-header">
       <a class="brand" href="./" aria-label="Novae 首頁"><span class="brand-mark"><img src="./logo.svg" alt="" /></span></a>
-      <nav aria-label="主要導覽"><a href="./">首頁</a><a data-site-href="docsHome" href="./docs/">文件</a><a class="is-active" href="./category-builder.html">設定產生器</a></nav>
-      <a class="button button-small button-dark" data-site-href="docsConfig" href="./docs/configuration.html">設定文件 <i class="ti ti-arrow-right" aria-hidden="true"></i></a>
+      <nav aria-label="主要導覽"><a href="./">首頁</a><a data-site-href="docsHome" href="./docs/">文件</a><a class="is-active" href="./category-builder.html">分類設定</a></nav>
+      <a class="button button-small button-dark" data-site-href="docsConfig" href="./docs/configuration.html">完整文件 <i class="ti ti-arrow-right" aria-hidden="true"></i></a>
     </header>
 
-    <main id="builder-main" class="builder-app" data-category-builder>
-      <header class="builder-commandbar">
-        <div class="builder-commandbar__title">
-          <a href="./#custom"><i class="ti ti-arrow-left" aria-hidden="true"></i><span>返回介紹</span></a>
-          <div><h1>分類設定產生器</h1><code>config/issue-categories.config.json</code></div>
-          <span class="builder-status" data-validity-badge>草稿</span>
-        </div>
-        <div class="builder-commandbar__actions">
-          <label class="button button-secondary builder-import"><i class="ti ti-file-upload" aria-hidden="true"></i>開啟 JSON<input type="file" accept="application/json,.json" data-import-config /></label>
-          <button class="button button-dark" type="button" data-download-config><i class="ti ti-download" aria-hidden="true"></i>下載 JSON</button>
-        </div>
-      </header>
-      <p class="builder-message" data-builder-message>設定只在目前瀏覽器中處理；照著六個步驟完成、下載，再提交到你的 GitHub fork。</p>
+    <main id="category-guide" class="docs-layout" style="grid-template-columns:minmax(0,1fr);max-width:900px">
+      <article class="docs-main docs-prose">
+        <h1>分類已改為程式內動態設定</h1>
+        <p>不再下載 JSON、不必修改 repository，也不需要為分類變更重新部署。首次安裝時，請由 <code>ADMIN_EMAILS</code> 中的管理員登入並完成提案與設備報修分類設定。</p>
 
-      <div class="builder-layout">
-        <section class="builder-category-strip" aria-label="分類清單">
-          <div class="builder-sidebar__head"><div><h2>正在設定的分類</h2><span data-category-count>1</span></div><button type="button" data-add-category aria-label="新增分類"><i class="ti ti-plus" aria-hidden="true"></i></button></div>
-          <div class="builder-category-list" data-category-list></div>
-        </section>
+        <h2>首次安裝</h2>
+        <ol>
+          <li>先完成 Novae 後端與前端部署。</li>
+          <li>使用列在 <code>ADMIN_EMAILS</code> 的帳號登入。</li>
+          <li>在引導頁建立至少一個提案分類與一個設備報修分類。</li>
+          <li>完成後到「我的 → 權限管理」，指派已登入註冊的分類管理員。</li>
+        </ol>
 
-        <section class="builder-detail">
-          <div data-editor-panel="form">
-            <section class="builder-editor" data-category-editor aria-live="polite"></section>
-          </div>
+        <h2>日後修改</h2>
+        <p>平台管理員可在「我的 → 分類與流程管理」新增、封存、設為預設及調整新案件規則。閱讀範圍與作者顯示在分類建立後永久鎖定；留言、附議與期限只影響日後建立的提案，舊資料與舊留言不會被改寫。</p>
 
-          <div data-editor-panel="source" hidden>
-            <div class="builder-source">
-              <header><button type="button" class="builder-source__back" data-editor-tab="form"><i class="ti ti-arrow-left" aria-hidden="true"></i>返回確認</button><div><p>GENERATED SOURCE</p><h2>issue-categories.config.json</h2></div><span data-file-status>1 個分類</span></header>
-              <section class="builder-validation" data-validation-summary hidden><h3>設定還不能下載</h3><p>請先修正以下項目：</p><div data-error-list></div></section>
-              <pre><code data-json-preview></code></pre>
-            </div>
-          </div>
-        </section>
-      </div>
+        <blockquote><p>從舊版升級時，migration 會自動遷移既有提案、設備報修與分類指派，不需要先用舊產生器匯出設定。</p></blockquote>
+
+        <p><a class="button button-dark" data-site-href="docsConfig" href="./docs/configuration.html">閱讀分類與平台規則 <i class="ti ti-arrow-right" aria-hidden="true"></i></a></p>
+      </article>
     </main>
   </body>
 </html>

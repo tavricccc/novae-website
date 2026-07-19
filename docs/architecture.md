@@ -67,14 +67,14 @@ flowchart LR
 
 ```mermaid
 flowchart LR
-  J[config/issue-categories.config.json] --> S[scripts/issue-category-config.mjs 驗證與推導]
-  S --> A[src/generated/issue-categories.ts]
-  S --> B[supabase/functions/_shared/issue-categories.ts]
-  A --> UI[前端分類、期限、顯示]
-  B --> API[Edge 權限與流程]
+  S[首次設定／分類管理頁] --> A[受控 backend actions]
+  A --> D[(Postgres 動態分類與指派)]
+  D --> UI[前端 runtime catalog]
+  D --> API[Edge 權限、流程與通知]
+  API --> P[新案件規則快照]
 ```
 
-原始 JSON 只要求人能理解的欄位。產生器會推導作者儲存、附件／留言可見性、留言開放時機、附議未達標自動結束，以及回應期限從建立或附議達標開始。前端與 Edge 共享同一來源，避免各自寫一套規則。
+分類、設備分類與管理員指派以 Postgres 為單一來源。建立提案時會把隱私、留言、附議與期限規則快照到案件；分類日後調整只影響新案件。閱讀範圍與作者顯示由資料庫 trigger 鎖定，前端條件不承擔安全責任。
 
 ## 資料與副作用
 

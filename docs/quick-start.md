@@ -1,6 +1,6 @@
 # 部署準備與服務設定
 
-這不是本機開發教學，也還不會開始發布。先決定校園規則，再依本頁順序建立部署需要的服務。八項服務都準備好之後，才填寫憑證、設定分類並執行最後發布。
+這不是本機開發教學。先決定校園規則，再依本頁順序建立部署需要的服務；分類會在發布後由首位管理員首次登入設定。
 
 ## 1. 決定校園規則
 
@@ -58,4 +58,4 @@ Notion 是選用的營運副本。需要時才建立 integration 與 database；
 - [ ] 知道所有敏感值最後要放進 GitHub `production` Environment secrets。
 - [ ] 知道本機 `.env` 不是正式部署必要步驟。
 
-全部完成後，先開啟[憑證填寫表](environment-configuration.md)，集中核對並填入 GitHub `production` Environment secrets；接著設定[分類與平台規則](configuration.md)。這兩步完成後，才進入[最後發布與驗收](deployment-guide.md)。
+全部完成後，先開啟[憑證填寫表](environment-configuration.md)，集中核對並填入 GitHub `production` Environment secrets，再進入[最後發布與驗收](deployment-guide.md)。部署完成後依[分類與平台規則](configuration.md)完成首次登入引導。

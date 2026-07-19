@@ -1,54 +1,58 @@
 # Categories and product rules
 
-Novae has two hand-edited JSON sources. Build scripts generate matching frontend and Edge TypeScript rules from them.
+Proposal and facility-report categories are runtime data created after installation, not hard-coded repository JSON. After the first deployment, the initial platform administrator listed in `ADMIN_EMAILS` signs in and completes guided setup. Later changes live under **My → Platform management center**.
 
-| Source | Controls |
-| --- | --- |
-| `config/issue-categories.config.json` | Categories, visibility, author display, support goal, support days, response days |
-| `config/rate-limits.config.json` | Action limits, image counts, and browser compression |
+## Initial setup
 
-## Configure one category at a time
+1. Deploy the backend and frontend.
+2. Sign in with an account listed in `ADMIN_EMAILS`.
+3. Create at least one proposal category and one facility-report category.
+4. Give each category a permanent unique ID, display name, and description.
+5. For proposals, choose read access, author visibility, comments, support goal/window, and response days.
+6. After setup, open **Platform management center → People and management access** to assign registered users by campus email or UID.
 
-1. Open the [category builder](../../category-builder.html).
-2. Set a permanent lowercase-and-hyphen `id` and a user-facing `label`.
-3. Choose school-wide, reviewed school-wide, or owner/admin-only access.
-4. Decide whether authorized readers see the author.
-5. Decide whether support is enabled.
-6. If enabled, independently set the required number of supporters and the number of open days.
-7. Set response days, or leave them empty for no deadline.
-8. Download and replace `config/issue-categories.config.json`.
+Manager assignment is intentionally optional during setup because other administrators may not have registered yet.
 
-## Actual schema
+## What can change later
 
-```json
-{
-  "categories": [{
-    "id": "public-issues",
-    "label": "公共議題",
-    "readAccess": "reviewed-school",
-    "authorVisible": false,
-    "support": { "enabled": true, "goal": 50, "deadlineDays": 14 },
-    "responseDeadlineDays": 7
-  }]
-}
-```
+| Rule | After creation | Scope |
+| --- | --- | --- |
+| Category ID | Locked | Protects URLs, relationships, and notifications |
+| Read access | Permanently locked | Prevents an edit from exposing existing content |
+| Author visibility | Permanently locked | Preserves the original anonymity promise |
+| Comments | Editable | Future proposals only; existing comments remain |
+| Support and deadlines | Editable | Future proposals only |
+| Name and description | Editable | Updates category display immediately |
+| Active or archived | Editable | Archived categories reject new records but preserve old ones |
 
-`readAccess` accepts `school`, `reviewed-school`, or `owner-admin`. Enabled support requires positive integer `goal` and `deadlineDays`. `responseDeadlineDays` is a positive integer or `null`; it starts at support completion when support is enabled, otherwise at creation. Owner/admin categories normalize author display to true.
+Each proposal snapshots privacy, comments, support, and deadline rules when it is created. Turning comments off for a category never deletes old comments or retroactively disables comments on existing proposals. A category manager can still close or reopen new comments on an individual proposal; previously posted comments remain readable while composition is closed.
 
-The generator derives author storage, upload and comment visibility, when comments open, automatic failure when support expires, and the response-deadline start. There is no second policy file to edit.
+## Read access
 
-## Repository example values
+- `school`: any signed-in user from the allowed campus domain may read.
+- `reviewed-school`: only the author and managers may read before approval; approved content enters the school list.
+- `owner-admin`: only the author and assigned category managers may read; the author remains visible to managers.
 
-- Public issues: reviewed school-wide, hidden author, 50 supporters in 14 days, 7 response days after support succeeds.
-- Student rights: owner/admin, visible author, no support, 7 response days after creation.
-- Facilities: school-wide, visible author, no support, 7 response days after creation.
+Backend authorization and database rules enforce these boundaries.
 
-These are examples and may be replaced with institutional policy.
+## Category managers and notifications
+
+**Platform management center → People and management access** assigns proposal and facility responsibilities independently. Facility-category managers receive notifications for new reports in their categories and may reply, update status, or delete those reports. Platform administrators retain access to every category.
+
+If a campus email or UID cannot be found, ask that person to sign in once before assigning access.
+
+## Upgrading an existing installation
+
+The migration converts existing proposal categories, assignments, and facility reports to runtime records automatically. Existing proposals receive privacy, comment, support, and deadline snapshots from their previous rules. Facility reports enter a compatible default category. Never rewrite an already deployed migration.
 
 ## Rate limits and images
 
-The current config allows each user 10 proposals, 10 facility reports, and 50 images per day; administrators may create 20 announcements per day. It allows 60 comments and 120 support, like, or affected-report interactions per hour. Proposal and announcement bodies accept 5 images and comments accept 1. Browser compression targets 800 KB from sources up to 20 MB, limits the long edge to 2000 px, and starts WebP quality at 0.82. Supabase applies these precise quotas through Upstash; Cloudflare's 10/60-second native burst limits live in `cloudflare/wrangler.toml`.
+`config/rate-limits.config.json` still controls action quotas, image counts, and browser compression. It is not a category source. Follow the repository codegen and verification workflow when changing it. Native Cloudflare burst limits remain in `cloudflare/wrangler.toml`.
 
-The 30-character title, 1,000-visible-character proposal/announcement content, and 70-visible-character comment limits are fixed product and database rules, not values in `rate-limits.config.json`. Markdown image markers preserve attachment references and do not count toward visible text; comments do not render other Markdown formatting.
+## Acceptance checks
 
-Config commits trigger both backend and frontend deployment. Verify each category after both workflows succeed.
+1. Create test proposals in public, reviewed, and private categories.
+2. Verify what a general user, author, and category manager can see.
+3. Confirm comments and support use the proposal-time snapshot, and that closing new comments on one proposal preserves its existing thread.
+4. Create one facility report per category and verify the assigned manager receives a notification and can update status.
+5. Archive a test category and confirm old records remain readable while new records cannot select it.

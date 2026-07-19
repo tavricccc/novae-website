@@ -7,7 +7,7 @@ Always start with the first failed stage. Do not reset Firebase, Supabase, and V
 1. Open the run and the first red step.
 2. Missing secrets: compare `production` Environment secrets with the [credential worksheet](environment-configuration.md).
 3. Link or database push: ensure token, project ref, and password belong to one Supabase project.
-4. Generated config diff: validate the JSON against the [actual schema](configuration.md#actual-schema) and commit generated outputs.
+4. Generated config diff: inspect only API error, rate-limit, and retention sources that still use codegen; categories no longer do.
 5. If upstream contains a fix, use `Sync fork → Update branch`, confirm the new commit, and start a new run instead of rerunning an old commit.
 6. Fix the cause and rerun that workflow.
 
@@ -39,10 +39,9 @@ If an installed PWA still shows an old version, keep it open long enough for the
 
 ## Wrong support goal or days
 
-1. Inspect the deployed commit's `config/issue-categories.config.json`.
-2. Check that category's `support.enabled`, `support.goal`, and `support.deadlineDays`.
-3. Confirm both backend and frontend workflows succeeded for that config commit.
-4. Runtime config is authoritative; landing mockups and documentation examples are not.
+1. Inspect the category in **Platform management center → Categories and workflows**.
+2. Check when the proposal was created. Existing proposals keep their creation-time snapshot and do not follow later category edits.
+3. Postgres runtime categories and proposal snapshots are authoritative; landing mockups and documentation examples are not.
 
 ## Images, notifications, and Notion
 

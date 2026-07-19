@@ -7,10 +7,9 @@
 1. 先讀[產品與流程](project-overview.md)，確認 Novae 適合你的校園情境。
 2. 按[部署準備與服務設定](quick-start.md)依序建立 GitHub、Firebase、Supabase、Cloudinary、Upstash、Cloudflare 與 Vercel；需要營運副本時再加 Notion。
 3. 用[憑證填寫表](environment-configuration.md)逐項核對 GitHub `production` Environment secrets。
-4. 用[分類設定產生器](../category-builder.html)決定分類、可見範圍、作者、附議門檻、附議天數與回應期限，並將檔案提交及推送到 fork。
-5. 所有前置項目完成後，才執行[最後發布與驗收](deployment-guide.md)。
-6. 發布後照[使用者流程](user-guide.md)與[管理員流程](admin-guide.md)完成操作驗收。
-7. 上線後依[維運手冊](operations.md)定期檢查，出錯時從[一步一步排錯](troubleshooting.md)開始。
+4. 執行[最後發布與驗收](deployment-guide.md)，再由 `ADMIN_EMAILS` 管理員首次登入完成[分類與平台規則](configuration.md)。
+5. 發布後照[使用者流程](user-guide.md)與[管理員流程](admin-guide.md)完成操作驗收。
+6. 上線後依[維運手冊](operations.md)定期檢查，出錯時從[一步一步排錯](troubleshooting.md)開始。
 
 ## 只想找一件事
 

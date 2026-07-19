@@ -24,7 +24,7 @@ The real statuses are pending review, awaiting response, review rejected, proces
 
 Each category independently sets who may read, whether the author is shown, whether support is enabled, the support goal, the support window in days, and the response deadline. The repository's 50 supporters in 14 days is an example configuration, not a hard-coded product rule.
 
-Use the [category builder](../../category-builder.html) to create rules for your institution.
+The first administrator creates institutional rules during guided sign-in and maintains them later in the Platform management center.
 
 ## Real product capabilities
 

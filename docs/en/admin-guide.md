@@ -16,6 +16,8 @@ Open a pending proposal, verify category, privacy, personal data, content, and i
 
 Move Awaiting response to Processing with a useful update. Close as Completed with a verifiable result, or Infeasible with constraints and alternatives. A category response deadline starts at creation without support, or when support succeeds when enabled.
 
+When a discussion needs to pause, close new comments from that proposal's management actions. Existing comments remain readable, and a manager for the category can reopen composition later.
+
 ## Announcements and deletion
 
 Publish announcements from the global create menu. Published announcements are immutable; delete and republish only after checking impact. Proposal and announcement deletion uses a warning confirmation and the controlled deletion worker—never manually remove only the Cloudinary resource or only the database record.

@@ -8,7 +8,7 @@
 2. 找第一個紅色 step，不要只看最後的 cancelled step。
 3. 若訊息是 `Missing deployment secrets` 或 `Missing Supabase backend secrets`，回到 `production` Environment 對照[憑證填寫表](environment-configuration.md)。
 4. 若是 Supabase link／db push，確認 token、project ref、DB password 屬於同一 project。
-5. 若是 generated config diff，確認 JSON 符合[真實 schema](configuration.md#真實-schema)，並提交產生檔。
+5. 若是 generated config diff，只檢查仍使用 codegen 的 API error、限流與保留期設定；分類已不是 codegen。
 6. 若上游已發布修正，先在 fork 按 `Sync fork → Update branch`，確認最新 commit 已出現，再執行新 run；不要只重跑舊 commit。
 7. 修正後重新執行失敗的 workflow。
 
@@ -89,11 +89,10 @@ No 'Access-Control-Allow-Origin' header
 
 ## 5. 附議人數或天數不對
 
-1. 打開目前部署 commit 的 `config/issue-categories.config.json`。
-2. 確認該分類的 `support.enabled`、`support.goal`、`support.deadlineDays`。
-3. 確認 config commit 同時觸發且成功完成 backend 與 frontend workflow。
-4. 不要把 landing mockup 或文件範例值當成執行時設定；真正來源只有 config。
-5. 既有提案若在規則變更前建立，先查資料與 migration 設計，不要直接改歷史資料。
+1. 在「平台管理中心 → 分類與處理流程」確認該分類目前的附議門檻與天數。
+2. 確認提案建立時間；既有提案沿用建立時快照，不會跟著後來的分類設定改變。
+3. 不要把 landing mockup 或文件範例值當成執行時設定；真正來源是 Postgres runtime category 與案件快照。
+4. 不要直接改歷史資料；需要修正時先確認 migration 與稽核紀錄。
 
 ## 6. 圖片卡住
 

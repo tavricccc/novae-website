@@ -7,7 +7,7 @@
   "nav": {
     "home": "Home",
     "docs": "Docs",
-    "builder": "Config builder"
+    "builder": "Category setup"
   },
   "sectionNav": {
     "label": "Page chapters",
@@ -122,8 +122,8 @@
     "studio": {
       "number": "03 / ADJUSTABLE RULES",
       "title": "Do not pick a preset.<br><em>Compose the right rules.</em>",
-      "lede": "Open the visual category configuration tool",
-      "builderCta": "Open the category config builder",
+      "lede": "Configure categories during first sign-in and in the admin UI—no code changes required",
+      "builderCta": "See in-app category setup",
       "stepLabel": "Rule module",
       "dimensions": [
         {

@@ -7,7 +7,7 @@
   "nav": {
     "home": "首頁",
     "docs": "文件",
-    "builder": "設定產生器"
+    "builder": "分類設定"
   },
   "sectionNav": {
     "label": "頁面章節",
@@ -122,8 +122,8 @@
     "studio": {
       "number": "03 / 可調規則",
       "title": "不是選預設，<br><em>是組合適合的規則。</em>",
-      "lede": "前往可視化分類設定工具",
-      "builderCta": "前往分類設定產生器",
+      "lede": "首次登入與後台直接設定，不必修改程式碼",
+      "builderCta": "查看程式內設定方式",
       "stepLabel": "設定模組",
       "dimensions": [
         {
