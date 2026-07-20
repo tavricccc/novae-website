@@ -7,7 +7,7 @@
 - `content/landing/zh.json` / `en.json`：首頁雙語文案，兩邊資料結構必須一致。
 - `content/docs-navigation.mjs`：文件側邊欄、順序、上一頁／下一頁與部署教學清單。
 - `content/changelog.md`：網站顯示的產品更新紀錄。
-- `docs/` / `docs/en/`：繁中與英文 Markdown 文件來源；`ui-design-system.md` 定義 Atomic Design、可復用元件、三階陰影與新 UI 交付清單；`contributing.md` 集中本地驗證與測試規則；`architecture.md` 說明前端邊界；`deployment/cloudflare.md` 說明 Worker、workers.dev、API token 與 CORS 設定。
+- `docs/` / `docs/en/`：繁中與英文 Markdown 文件來源；`configuration.md`、`admin-guide.md` 與 `user-guide.md` 維護語言優先 Setup、動態提案／設備分類、分類優先授權與通知收件矩陣；`ui-design-system.md` 定義 Atomic Design、可復用元件、三階陰影與新 UI 交付清單；`contributing.md` 集中 `test:env`、`verify:stress` 與一般驗證規則；`architecture.md` 說明前端邊界；`deployment/cloudflare.md` 說明 Worker、workers.dev、API token 與 CORS 設定。
 
 ## 頁面與互動
 
@@ -27,3 +27,4 @@
 - `vite.config.js`：首頁、分類設定相容說明與文件頁的多頁建置。
 - `.github/workflows/verify-pr.yml`：PR 靜態驗證。
 - `.github/workflows/deploy-pages.yml`：以 Node.js 24 世代的最新版 GitHub Actions 驗證後發布 GitHub Pages。
+- `.gitignore`：排除網站建置產物、依賴、作業系統檔案與本地 `.code-review-graph/` 快取。

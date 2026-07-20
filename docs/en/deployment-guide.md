@@ -48,10 +48,11 @@ After the deployment URL opens successfully, connect the production domain in Ve
 - [ ] Browser API requests go to Cloudflare Worker, not directly to a Supabase Function.
 - [ ] CORS preflight returns `204` with the exact Vercel origin.
 - [ ] An administrator can see the Dashboard and moderation actions after signing in again.
-- [ ] The first administrator in `ADMIN_EMAILS` completes proposal and facility category setup.
+- [ ] The first platform administrator in `ADMIN_EMAILS` confirms language, then completes proposal and facility category setup; retrying completion does not duplicate setup.
 - [ ] Public, reviewed, and private categories have the correct visibility.
 - [ ] Support goal and days match in-app category settings, while older proposals retain their creation-time snapshot.
-- [ ] A facility-category manager receives new-report notifications and can update status.
+- [ ] Proposal and facility boards both browse and create within dynamic categories; scoped managers can comment, update status, and delete.
+- [ ] New proposals notify only proposal-category managers, new reports notify only facility-category managers whose setting is enabled, and an unassigned platform administrator receives neither.
 - [ ] Images survive reload and remain permission controlled.
 - [ ] Review, status updates, announcements, notifications, and Web Push work.
 - [ ] If Notion is enabled, its operations copy is created; otherwise the app works normally without treating Notion as a failure.

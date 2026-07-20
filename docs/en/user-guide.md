@@ -9,6 +9,8 @@ Desktop uses the sidebar; mobile uses the floating bottom navigation, where the 
 3. Search, filter, and sort cards, then open a detail page.
 4. Pending-review and private proposals remain visible only to their author and administrators.
 
+On an unconfigured installation, the first platform administrator confirms language before creating proposal and facility categories. The browser or operating system's first preferred language is the default. If completion is interrupted, refresh or retry; the app recognizes setup that already committed.
+
 ## Create a proposal
 
 1. Open the global create action.
@@ -36,6 +38,26 @@ Comments support replies and plain-text input only. Markdown is not rendered and
 | Completed | Closed with an outcome |
 | Infeasible | Closed with constraints or alternatives explained |
 
+## Facility reports
+
+The facility board, like proposals, starts with a category. The selection remains in the URL and carries into creation. Reports can include content and images; their detail page supports comments, “I have this issue too,” and status tracking. Only a manager assigned to that facility category or a platform administrator may manage the report, and each assignment controls whether it receives new-report notices.
+
 ## Announcements, notifications, and settings
 
 Announcements have separate list and detail pages with likes and comments. New announcements use the same 30-character title and 1,000-visible-character content limits. The notification page groups items inside one card and synchronizes read state; it does not show per-item time or a per-item mark-read button. Settings controls Push and app preferences. Language uses a dropdown that shows the active locale and all available options, so future locales join the same list. Sign-out is one standalone action.
+
+### Notification recipients
+
+| Event | Recipients |
+| --- | --- |
+| New announcement | All signed-in school users eligible for broadcast notifications |
+| Announcement comment | Parent-comment author for a reply, otherwise announcement author; actor excluded |
+| New proposal | Explicit managers of that proposal category, excluding the author; platform administrators are not implicit recipients |
+| Proposal comment | Parent-comment author for a reply, otherwise proposal author; actor excluded |
+| Proposal status change | Proposal author and current supporters; actor excluded |
+| Support goal met | Proposal author and all supporters |
+| Proposal deleted | Proposal author and the pre-deletion supporter snapshot; actor excluded |
+| New facility report | Managers in that facility category with new-report notices enabled, excluding the author; platform administrators are not implicit recipients |
+| Facility status change | Report author and everyone who marked “I have this issue too” |
+
+In-app and Web Push delivery share this recipient logic. Disabling device notifications stops Push only; it does not alter authorization or storage for in-app notifications.

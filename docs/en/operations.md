@@ -28,4 +28,6 @@
 
 Supabase is the source of truth; Notion is only an operations copy. Images live in Cloudinary with database references and state. Never edit deployed migrations or manually delete one side of a cross-service record. Retention cleanup queues deletion markers for mapped Notion pages without sending ordinary user deletion notifications; verify completion in maintenance details and the outbox.
 
+Before changing categories, inspect existing proposals, facility reports, and assignments. Afterward, create several records per category and verify category-filtered lists, comments, status, and deletion. Confirm new proposals notify only assigned proposal-category managers, new facility reports notify only assigned managers whose setting is enabled, and an unassigned platform administrator receives neither. The category-first access page must also list current managers and support multi-manager assignment, notification edits, and revocation.
+
 For symptoms, use [step-by-step troubleshooting](troubleshooting.md).

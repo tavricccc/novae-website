@@ -6,12 +6,13 @@ Proposal and facility-report categories are runtime data created after installat
 
 1. Deploy the backend and frontend.
 2. Sign in with an account listed in `ADMIN_EMAILS`.
-3. Create at least one proposal category and one facility-report category.
-4. Give each category a permanent unique ID, display name, and description.
-5. For proposals, choose read access, author visibility, comments, support goal/window, and response days.
-6. After setup, open **Platform management center → People and management access** to assign registered users by campus email or UID.
+3. Confirm the interface language first. The browser or operating system's first preferred language is preselected, and it can be changed before continuing.
+4. Create at least one proposal category and one facility-report category.
+5. Give each category a permanent unique ID and display name.
+6. For proposals, choose read access, author visibility, comments, support goal/window, and response days.
+7. After setup, open **Platform management center → People and management access**, choose a proposal or facility category, and add registered people responsible for it.
 
-Manager assignment is intentionally optional during setup because other administrators may not have registered yet.
+Manager assignment is intentionally optional during setup because other administrators may not have registered yet. Setup completion is safe to retry: if data committed but the response was interrupted, refreshing or submitting again reads the completed state instead of creating another setup.
 
 ## What can change later
 
@@ -22,7 +23,7 @@ Manager assignment is intentionally optional during setup because other administ
 | Author visibility | Permanently locked | Preserves the original anonymity promise |
 | Comments | Editable | Future proposals only; existing comments remain |
 | Support and deadlines | Editable | Future proposals only |
-| Name and description | Editable | Updates category display immediately |
+| Name | Editable | Updates category display immediately |
 | Active or archived | Editable | Archived categories reject new records but preserve old ones |
 
 Each proposal snapshots privacy, comments, support, and deadline rules when it is created. Turning comments off for a category never deletes old comments or retroactively disables comments on existing proposals. A category manager can still close or reopen new comments on an individual proposal; previously posted comments remain readable while composition is closed.
@@ -37,7 +38,9 @@ Backend authorization and database rules enforce these boundaries.
 
 ## Category managers and notifications
 
-**Platform management center → People and management access** assigns proposal and facility responsibilities independently. Facility-category managers receive notifications for new reports in their categories and may reply, update status, or delete those reports. Platform administrators retain access to every category.
+**Platform management center → People and management access** starts with a proposal or facility category and lists everyone who already has access. From there, search registered users to add them, change notification preferences, or revoke access quickly. One person may manage multiple categories, and one category may have multiple managers.
+
+Proposal-category managers receive new-proposal notifications. Facility-category managers receive new-report notifications only when that assignment enables them. Both exclude the author. Platform administrators can operate across all categories but do not receive new-proposal or new-report notifications merely because they are platform administrators; assign them explicitly when they should receive a category's events. Platform-administrator status can only be changed through the deployment environment's `ADMIN_EMAILS`; the application has no grant or revoke control.
 
 If a campus email or UID cannot be found, ask that person to sign in once before assigning access.
 
@@ -54,5 +57,6 @@ The migration converts existing proposal categories, assignments, and facility r
 1. Create test proposals in public, reviewed, and private categories.
 2. Verify what a general user, author, and category manager can see.
 3. Confirm comments and support use the proposal-time snapshot, and that closing new comments on one proposal preserves its existing thread.
-4. Create one facility report per category and verify the assigned manager receives a notification and can update status.
-5. Archive a test category and confirm old records remain readable while new records cannot select it.
+4. Create a proposal and facility report in every category. Verify that only explicitly assigned managers whose notification setting applies receive creation notices, and that an unassigned platform administrator does not.
+5. Verify the facility board switches categories, creation preserves the active category, and the correct manager can comment, update status, and delete.
+6. Archive a test category and confirm old records remain readable while new records cannot select it.

@@ -1,10 +1,10 @@
 # Administrator workflows
 
-Administrator status comes from backend `ADMIN_EMAILS`. Users must sign in again after the list changes.
+Platform-administrator status comes only from backend `ADMIN_EMAILS`; the application cannot grant or revoke it. Users must sign in again after the environment value changes.
 
 ## Daily order
 
-1. Check notifications.
+1. Check notifications for categories explicitly assigned to you; platform administrators do not automatically receive every new record.
 2. Filter proposals to Pending review and Awaiting response.
 3. Review Dashboard errors, outbox backlog, and vendor failures.
 
@@ -21,6 +21,12 @@ When a discussion needs to pause, close new comments from that proposal's manage
 ## Announcements and deletion
 
 Publish announcements from the global create menu. Published announcements are immutable; delete and republish only after checking impact. Proposal and announcement deletion uses a warning confirmation and the controlled deletion worker—never manually remove only the Cloudinary resource or only the database record.
+
+## Category managers
+
+In **Platform management center → People and management access**, select a proposal or facility category first. The page lists every current manager; search users who have signed in to add them, change facility new-report notices, or revoke access. One category can have several managers, and category access never promotes someone to platform administrator.
+
+New proposals notify only explicit managers of their proposal category. New facility reports notify only managers of their facility category whose assignment enables them. Authors are excluded, and an unassigned platform administrator is not a recipient. See the complete event matrix in [user workflows](user-guide.md#notification-recipients).
 
 ## Handoff
 

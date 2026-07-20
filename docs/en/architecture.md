@@ -20,7 +20,7 @@ The browser is untrusted. Cloudflare rejects invalid origins, unauthenticated tr
 
 ## Frontend boundaries
 
-`views/` compose routes, `components/` render application UI, `components/ui/` contains business-free primitives, `composables/` own Vue workflows, `services/` cross API boundaries, `lib/` contains pure helpers, `types/` shares contracts, and `generated/` contains code-generated category policy.
+`views/` compose routes, `components/` render application UI, `components/ui/` contains business-free primitives, `composables/` own Vue workflows, `services/` cross API boundaries, `lib/` contains pure helpers, `types/` shares contracts, and `generated/` contains typed outputs for JSON-backed API-error and rate-limit policy. Categories are not generated code.
 
 `src/styles/primitives.css` and `components/ui/` define the reusable visual contract, composed in the one-way order `atoms → molecules → organisms`. `AppShell`, `ViewportFrame`, and `RoutePageFrame` own viewport gutters, safe areas, content width, and route-page structure. Shared components compose buttons, cards, lists, dropdowns, dialogs, and controls; elevation is limited to control, card, and floating levels. See the [UI design system](ui-design-system.md) for the full contract and new-page checklist.
 
@@ -45,7 +45,9 @@ Outbox, deletion, Push delivery, and maintenance tables store only `error_trace_
 
 ## One runtime category source
 
-Guided setup and category management write through controlled backend actions to Postgres. The frontend reads a runtime catalog, while Edge authorization, workflows, manager assignments, and facility notifications use the same records. Proposal creation snapshots privacy, comments, support, and deadlines onto the proposal. Database triggers permanently lock read access and author visibility after category creation.
+Guided setup and category management write through controlled backend actions to Postgres. Proposal and facility boards both select from the same runtime catalog, and creation plus list queries preserve the category scope. Edge authorization, workflows, manager assignments, and notifications use those records. Proposal creation snapshots privacy, comments, support, and deadlines onto the proposal. Database triggers permanently lock read access and author visibility after category creation.
+
+Platform-administrator identity comes only from `ADMIN_EMAILS`; category assignments are separate scoped data. New proposals and facility reports create personal notifications for explicitly assigned managers rather than an administrator broadcast, so platform administrators are not implicit recipients.
 
 ## Realtime updates and authentication cache
 

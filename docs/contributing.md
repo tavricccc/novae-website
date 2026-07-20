@@ -27,6 +27,14 @@ npm ci
 npm run dev
 ```
 
+需要完整且不連正式服務的互動測試環境時，使用單一入口：
+
+```bash
+npm run test:env
+```
+
+它會啟動隔離的 Supabase、Edge Functions、Firebase Auth Emulator、Cloudflare gateway 與 Vite，並在登入、custom claims、平台總管理員與 Setup 前置檢查成功後顯示 Ready。可在 Auth Emulator 建立任意 `@integration.invalid` 測試帳號；按 `Ctrl+C` 會關閉整組服務。本機 emulator debug log 是產物，不應提交。
+
 只有要驗證 migration 與本機 Supabase 時才使用：
 
 ```bash
@@ -52,6 +60,14 @@ npm run verify:integration
 ```bash
 npm run verify:all
 ```
+
+多人、多分類、多權限與完整內容流程的壓力矩陣使用：
+
+```bash
+npm run verify:stress
+```
+
+預設會從實際 runtime catalog 展開多名使用者與重疊權限，涵蓋每個提案／設備分類、圖片、巢狀留言、附議／我也遇到、通知、狀態、多人管理與分類新增／刪除，不以固定分類數或單一帳號代替壓測。
 
 PR CI 會自動執行兩套驗證。Windows 直接在 PowerShell 執行 npm 指令即可；整合驗證會自動轉入 WSL。Windows 需要 WSL 2、Docker，以及 WSL `PATH` 內的 Supabase CLI 與 Deno；Linux 與 CI 不需要 WSL。
 

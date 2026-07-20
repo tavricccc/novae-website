@@ -1,6 +1,6 @@
 # Product and workflows
 
-Novae is a campus PWA for proposals, support, review, responses, announcements, and notifications. It replaces disconnected forms and posts with a permission-aware, stateful, time-bound workflow.
+Novae is a campus PWA for proposals, facility reports, support, review, responses, announcements, and notifications. It replaces disconnected forms and posts with category-scoped, stateful, time-bound workflows.
 
 ## The proposal lifecycle
 
@@ -31,6 +31,8 @@ The first administrator creates institutional rules during guided sign-in and ma
 - Google sign-in restricted to an allowed school domain.
 - Public-after-review and owner/admin-only privacy models.
 - Proposal search, comments, sharing, support, review, status, and deadlines.
+- Dynamic multi-category facility boards and creation, with images, comments, affected-user tracking, status, and category-scoped management.
+- Category-first manager assignment with several people per category and several categories per person. Platform administrators come only from `ADMIN_EMAILS` and are not implicit recipients of new-record notifications.
 - Separate announcement, notification, settings, and admin Dashboard pages.
 - Signed Cloudinary image upload and expiring signed delivery.
 - Supabase Postgres, RLS, RPC, Realtime, Edge Functions, and outbox processing.

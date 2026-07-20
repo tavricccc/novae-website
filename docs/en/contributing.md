@@ -15,6 +15,14 @@ npm run dev
 
 Copy `.env.example` only when connecting to development services, and never commit real values. Read `AGENTS.md` and `structure.md` before editing; preserve architecture boundaries and update `structure.md` when files move, split, appear, or disappear.
 
+For a complete interactive environment isolated from production services, use the single supported entry point:
+
+```bash
+npm run test:env
+```
+
+It starts local Supabase, Edge Functions, Firebase Auth Emulator, the Cloudflare gateway, and Vite, then reports Ready only after sign-in, custom-claim, platform-administrator, and Setup prerequisites pass. Create arbitrary `@integration.invalid` accounts in the Auth Emulator. `Ctrl+C` stops the whole stack. Local emulator debug logs are generated artifacts and must not be committed.
+
 ## Verify
 
 ```bash
@@ -32,6 +40,14 @@ Before merging a large change:
 ```bash
 npm run verify:all
 ```
+
+For the multi-user, multi-category, overlapping-permission stress matrix:
+
+```bash
+npm run verify:stress
+```
+
+It expands from the runtime catalog and covers every proposal and facility category, images, nested comments, support/affected reports, notifications, status, multiple managers, and category creation/deletion. Do not replace it with fixed category counts or a single test account.
 
 PR CI runs both suites. On Windows, run the npm command from PowerShell; the integration launcher enters WSL automatically. Windows requires WSL 2, Docker, and Supabase CLI plus Deno in the WSL `PATH`. Linux and CI do not need WSL.
 
