@@ -24,7 +24,7 @@ A correct preflight returns `204` and an `Access-Control-Allow-Origin` equal to 
 
 ## Sign-in failure
 
-Check the Google provider, authorized production domain, matching `VITE_ALLOWED_DOMAIN`/`ALLOWED_DOMAIN`, one matching Firebase project, and App Check site-key domain. An administrator who was just added must sign in again. If a blocked popup falls back to redirect and the return shows a recovery timeout or initialization error, reload once, then verify the authorized domain and Web App configuration.
+Check the Google provider, authorized production domain, matching `VITE_ALLOWED_DOMAIN`/`ALLOWED_DOMAIN`, one matching Firebase project, and App Check site-key domain. An administrator who was just added must sign in again. If a blocked popup falls back to redirect, the sign-in button should stay busy until bootstrap finishes. If it becomes clickable again too early, or the return shows a recovery timeout or initialization error, reload once, then verify the authorized domain and Web App configuration. If sign-in succeeds but the login card remains, or Proposal opens My proposals, verify that role bootstrap and the category catalog completed; the app should leave login only after that and route to the default category.
 
 ## API or permission failure
 

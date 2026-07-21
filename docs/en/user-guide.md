@@ -4,10 +4,11 @@ Desktop uses the sidebar; mobile uses the floating bottom navigation, where the 
 
 ## Sign in and browse
 
-1. Sign in with a Google account in the allowed school domain.
-2. Choose a proposal category or My proposals.
-3. Search, filter, and sort cards, then open a detail page.
-4. Pending-review and private proposals remain visible only to their author and administrators.
+1. Sign in with a Google account in the allowed school domain. The control shows a busy spinner and stays disabled while sign-in is in progress.
+2. If the browser falls back to a redirect, the button remains busy after returning from Google until role and category bootstrap finish.
+3. After bootstrap, the app leaves the sign-in page for the default proposal category; mobile bottom navigation and the desktop sidebar appear only then.
+4. Browse a proposal category or My proposals, then search, filter, and sort cards before opening a detail page.
+5. Pending-review and private proposals remain visible only to their author and administrators.
 
 On an unconfigured installation, the first platform administrator confirms language, chooses whether proposals and facility reports are enabled, and then creates categories only for the enabled features. The browser or operating system's first preferred language is the default. If completion is interrupted, refresh or retry; the app recognizes setup that already committed.
 

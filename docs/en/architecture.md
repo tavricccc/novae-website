@@ -45,7 +45,7 @@ Outbox, deletion, Push delivery, and maintenance tables store only `error_trace_
 
 ## Cold-start reads and Edge invocations
 
-The public gateway remains the Cloudflare Worker. Each forwarded action still counts as one Supabase Edge Function invocation. After sign-in, the client prefers a single `getSessionBootstrap` read for role and permissions, category catalog, content revisions, and notification unread state, and may record the platform visit in the same call. Granular actions remain for partial refresh and management writes. Cost control comes from merged reads and client caches, not from moving domain logic into the Worker.
+The public gateway remains the Cloudflare Worker. Each forwarded action still counts as one Supabase Edge Function invocation. After sign-in, the client prefers a single `getSessionBootstrap` read for role and permissions, category catalog, content revisions, and notification unread state, and may record the platform visit in the same call. Navigation chrome and the leave-login redirect wait for that bootstrap so the default proposal category is seeded before the bottom bar or sidebar appears; a Google redirect return keeps the sign-in control busy until recovery and bootstrap settle. Granular actions remain for partial refresh and management writes. Cost control comes from merged reads and client caches, not from moving domain logic into the Worker.
 
 ## One runtime category source
 
