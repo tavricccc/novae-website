@@ -55,7 +55,7 @@ Route views must not add another page-level `px-*`, `left-*`, `right-*`, safe-ar
 
 Structures that differ only by strings, icons, states, slots, or callbacks must share one component.
 
-Route-level session skeletons and live list content must be exclusive (`v-if` / `v-else-if` on one chain). Never mount both the skeleton and boards such as `IssueBoard` at once. Empty lists that use `EmptyStatePanel` keep the icon tile at `elevation="none"` so a vacant board does not look like a leftover card. `.skeleton-card` enter animations may use opacity only—no transform—so unmount does not leave composite shadows.
+Route-level session skeletons and live list content must be exclusive (`v-if` / `v-else-if` on one chain). Never mount both the skeleton and boards such as `IssueBoard` at once. Empty lists that use `EmptyStatePanel` keep the icon tile at `elevation="none"` so a vacant board does not look like a leftover card. Initial list loads and infinite-scroll load-more states both use skeletons; `.skeleton-card` / `.skeleton-enter` animations may use opacity only—no transform—so unmount does not leave composite shadows. System settings category and membership flows also use skeletons while loading, never a bare "Loading…" label.
 
 ## Surfaces and shadows
 

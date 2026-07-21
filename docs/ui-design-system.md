@@ -55,7 +55,7 @@ Route view 不得自行增加另一套頁面級 `px-*`、`left-*`、`right-*`、
 
 相同結構若只差字串、icon、狀態、slot 或 callback，必須共用；不要複製近似元件。
 
-路由頁的 session 骨架與實際列表必須互斥（`v-if` / `v-else-if` 同一鏈），不得在 skeleton 仍掛載時同時渲染 `IssueBoard` 等內容。空列表使用 `EmptyStatePanel` 時 icon tile 預設 `elevation="none"`，避免空白頁看起來像殘留卡片。`.skeleton-card` 進場只允許 opacity，不對 skeleton 使用 transform，以免卸載後留下合成陰影。
+路由頁的 session 骨架與實際列表必須互斥（`v-if` / `v-else-if` 同一鏈），不得在 skeleton 仍掛載時同時渲染 `IssueBoard` 等內容。空列表使用 `EmptyStatePanel` 時 icon tile 預設 `elevation="none"`，避免空白頁看起來像殘留卡片。列表初次載入與向下載入更多都使用 skeleton；`.skeleton-card`／`.skeleton-enter` 進場只允許 opacity，不對 skeleton 使用 transform，以免卸載後留下合成陰影。系統設定的分類流程與人員權限載入中也改為 skeleton，不使用純文字「載入中」。
 
 ## Surface 與陰影
 
