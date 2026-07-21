@@ -55,6 +55,8 @@ Route views must not add another page-level `px-*`, `left-*`, `right-*`, safe-ar
 
 Structures that differ only by strings, icons, states, slots, or callbacks must share one component.
 
+Route-level session skeletons and live list content must be exclusive (`v-if` / `v-else-if` on one chain). Never mount both the skeleton and boards such as `IssueBoard` at once. Empty lists that use `EmptyStatePanel` keep the icon tile at `elevation="none"` so a vacant board does not look like a leftover card. `.skeleton-card` enter animations may use opacity only—no transform—so unmount does not leave composite shadows.
+
 ## Surfaces and shadows
 
 Elevation has exactly three levels:
@@ -65,7 +67,7 @@ Elevation has exactly three levels:
 | `--shadow-card` / `shadow-card` | Content cards and large stable surfaces |
 | `--shadow-floating` / `shadow-floating` | Dropdowns, toasts, floating navigation, and top-layer surfaces |
 
-Arbitrary shadows, a fourth elevation name, and domain-level `rounded + border + background + shadow` card assembly are forbidden. Use the semantic `control`, `card`, `floating`, `inset`, and `list` variants of `SurfacePanel`.
+Arbitrary shadows, a fourth elevation name, and domain-level `rounded + border + background + shadow` card assembly are forbidden. Use the semantic `control`, `card`, `floating`, `inset`, and `list` variants of `SurfacePanel`. Empty-state and descriptive icons must not use card elevation.
 
 ## Dialogs, forms, and feedback
 

@@ -55,6 +55,8 @@ Route view 不得自行增加另一套頁面級 `px-*`、`left-*`、`right-*`、
 
 相同結構若只差字串、icon、狀態、slot 或 callback，必須共用；不要複製近似元件。
 
+路由頁的 session 骨架與實際列表必須互斥（`v-if` / `v-else-if` 同一鏈），不得在 skeleton 仍掛載時同時渲染 `IssueBoard` 等內容。空列表使用 `EmptyStatePanel` 時 icon tile 預設 `elevation="none"`，避免空白頁看起來像殘留卡片。`.skeleton-card` 進場只允許 opacity，不對 skeleton 使用 transform，以免卸載後留下合成陰影。
+
 ## Surface 與陰影
 
 陰影只有三階：
@@ -65,7 +67,7 @@ Route view 不得自行增加另一套頁面級 `px-*`、`left-*`、`right-*`、
 | `--shadow-card` / `shadow-card` | 內容卡片與大型穩定表面 |
 | `--shadow-floating` / `shadow-floating` | Dropdown、toast、浮動導覽與最上層浮動表面 |
 
-禁止 arbitrary shadow、第四套 elevation 名稱，以及在領域元件重複拼出 `rounded + border + background + shadow` 的卡片。`SurfacePanel` 的 `control`、`card`、`floating`、`inset`、`list` variant 應表達表面的語意。
+禁止 arbitrary shadow、第四套 elevation 名稱，以及在領域元件重複拼出 `rounded + border + background + shadow` 的卡片。`SurfacePanel` 的 `control`、`card`、`floating`、`inset`、`list` variant 應表達表面的語意。空白狀態與說明性 icon 不應使用 card elevation。
 
 ## Dialog、表單與回饋
 
