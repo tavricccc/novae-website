@@ -1,6 +1,15 @@
 # 更新紀錄
 
-累計更新：787 次
+累計更新：788 次
+
+## v2.0.249｜Google Identity Services 登入
+
+2026-07-21
+
+- 正式環境瀏覽器 Google 登入改為 Google Identity Services Token Client，再以 Firebase `signInWithCredential` 建立 session；後端 Firebase JWT／Edge 驗證不變。
+- 移除 production 的 Firebase redirect 回復路徑與 `novae:google-redirect-pending`；彈出視窗被擋或取消時只顯示錯誤，不再 fallback redirect。
+- 新增必要的前端 secret `VITE_GOOGLE_CLIENT_ID`（同一 Firebase／GCP 專案 Web OAuth Client ID），CSP `script-src` 允許 `https://accounts.google.com`；Auth Emulator／`test:env` 仍可用 popup。
+- OAuth Web client 的 Authorized JavaScript origins 建議只含正式站與本機；Vercel preview 可不支援真實 GIS 登入。
 
 ## v2.0.248｜空列表不再留下骨架卡片陰影
 

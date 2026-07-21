@@ -17,7 +17,7 @@
 | 服務 | 用途 | 你最後會拿到 |
 | --- | --- | --- |
 | GitHub | 保存你的 fork、secrets 與自動部署 | repository、`production` Environment |
-| Firebase | Google 登入、App Check、Web Push | Web App config、VAPID key、service account JSON |
+| Firebase | Google 登入、App Check、Web Push | Web App config、Web OAuth Client ID（`VITE_GOOGLE_CLIENT_ID`）、VAPID key、service account JSON |
 | Supabase | 資料庫、RLS、Edge Functions、Realtime | URL、publishable key、project ref、部署憑證 |
 | Cloudinary | 簽名圖片儲存與讀取 | cloud name、API key、API secret |
 | Upstash | Supabase 精確業務配額與驗證快取 | REST URL、Standard REST token |

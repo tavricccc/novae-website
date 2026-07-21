@@ -14,6 +14,7 @@ Put every value below in the deploying fork's GitHub `production` Environment se
 | `VITE_FIREBASE_APP_ID` | Firebase `appId` |
 | `VITE_FIREBASE_MESSAGING_SENDER_ID` | Firebase `messagingSenderId` |
 | `VITE_FIREBASE_VAPID_KEY` | FCM Web Push public VAPID key |
+| `VITE_GOOGLE_CLIENT_ID` | Same Firebase/GCP project **Web** OAuth 2.0 Client ID (`….apps.googleusercontent.com`); browser-visible; used by Google Identity Services sign-in |
 | `VITE_FIREBASE_APP_CHECK_ENABLED` | `false` initially; `true` after App Check setup |
 | `VITE_RECAPTCHA_ENTERPRISE_SITE_KEY` | Required when App Check is enabled |
 | `VITE_SUPABASE_URL` | Supabase Project URL |

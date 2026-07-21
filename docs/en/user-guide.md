@@ -5,8 +5,8 @@ Desktop uses the sidebar; mobile uses the floating bottom navigation, where the 
 ## Sign in and browse
 
 1. Sign in with a Google account in the allowed school domain. The control shows a busy spinner and stays disabled while sign-in is in progress.
-2. If the browser falls back to a redirect, the button remains busy after returning from Google until role and category bootstrap finish.
-3. After bootstrap, the app leaves the sign-in page for the default proposal category; mobile bottom navigation and the desktop sidebar appear only then.
+2. Google always shows the account picker. Closing it, a blocked popup, or an in-app browser shows an error only; production does not fall back to a full-page Firebase redirect.
+3. After role and category bootstrap, the app leaves the sign-in page for the default proposal category; mobile bottom navigation and the desktop sidebar appear only then.
 4. Browse a proposal category or My proposals, then search, filter, and sort cards before opening a detail page.
 5. Pending-review and private proposals remain visible only to their author and administrators.
 

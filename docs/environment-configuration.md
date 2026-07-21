@@ -22,6 +22,7 @@
 | `VITE_FIREBASE_APP_ID` | 是 | Firebase Web App `appId` |
 | `VITE_FIREBASE_MESSAGING_SENDER_ID` | 是 | Firebase Web App `messagingSenderId` |
 | `VITE_FIREBASE_VAPID_KEY` | 是 | Firebase Cloud Messaging Web Push public key |
+| `VITE_GOOGLE_CLIENT_ID` | 是 | 同一 Firebase／GCP 專案的 **Web** OAuth 2.0 Client ID（`….apps.googleusercontent.com`）；瀏覽器可見，用於 Google Identity Services 登入 |
 | `VITE_FIREBASE_APP_CHECK_ENABLED` | 否 | 初次部署填 `false`；完成 App Check 後改 `true` |
 | `VITE_RECAPTCHA_ENTERPRISE_SITE_KEY` | 條件 | 啟用 App Check 時填入 |
 | `VITE_SUPABASE_URL` | 是 | Supabase Project URL |

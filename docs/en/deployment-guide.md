@@ -20,6 +20,7 @@ These pairs must match:
 - `VITE_ALLOWED_DOMAIN` = `ALLOWED_DOMAIN`
 - `VITE_FIREBASE_PROJECT_ID` = `FIREBASE_PROJECT_ID`
 - `VITE_FIREBASE_API_KEY` = `FIREBASE_WEB_API_KEY`
+- `VITE_GOOGLE_CLIENT_ID` is the same Firebase/GCP project's Web OAuth Client ID, with Authorized JavaScript origins covering production (and local Vite)
 - Standard Cloudinary HMAC flow: `CLOUDINARY_WEBHOOK_SECRET` = `CLOUDINARY_API_SECRET`
 - Worker URL and allowed origins include `https://` and have no trailing slash.
 - `ALLOWED_ORIGINS` is the Vercel frontend origin, not the Worker URL.
@@ -40,7 +41,7 @@ Later pushes to `main` trigger the relevant workflow automatically. When the sam
 
 ## 4. Add the production domain
 
-After the deployment URL opens successfully, connect the production domain in Vercel and add it to Firebase Authentication authorized domains. When App Check is enabled, allow the domain in the reCAPTCHA Enterprise site key as well.
+After the deployment URL opens successfully, connect the production domain in Vercel, add it to Firebase Authentication authorized domains, and add the same origin to the OAuth Web client's Authorized JavaScript origins for `VITE_GOOGLE_CLIENT_ID`. When App Check is enabled, allow the domain in the reCAPTCHA Enterprise site key as well.
 
 ## 5. Production acceptance test
 

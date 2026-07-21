@@ -11,7 +11,7 @@ Write down the school display name, allowed Google email domain, initial adminis
 | Service | Purpose |
 | --- | --- |
 | GitHub | Fork, production secrets, and deployment workflows |
-| Firebase | Google sign-in, App Check, and Web Push |
+| Firebase | Google sign-in (GIS Token Client + Firebase session), App Check, and Web Push |
 | Supabase | Database, RLS, Realtime, and Edge Functions |
 | Cloudinary | Signed image storage and delivery |
 | Upstash | Precise Supabase business quotas and auth cache |
