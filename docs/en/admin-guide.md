@@ -24,7 +24,7 @@ Publish announcements from the global create menu. Published announcements are i
 
 ## Category managers
 
-In **Platform management center → People and management access**, select a proposal or facility category first. The page lists every current manager; search users who have signed in to add them, change facility new-report notices, or revoke access. One category can have several managers, and category access never promotes someone to platform administrator.
+In **System settings → People and management access**, select a proposal or facility category first. The page lists every current manager; search signed-in users by name, email, or UID to add them, change facility new-report notices, or revoke access. One category can have several managers, and category access never promotes someone to platform administrator.
 
 New proposals notify only explicit managers of their proposal category. New facility reports notify only managers of their facility category whose assignment enables them. Authors are excluded, and an unassigned platform administrator is not a recipient. See the complete event matrix in [user workflows](user-guide.md#notification-recipients).
 

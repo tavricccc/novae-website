@@ -30,9 +30,9 @@
     "updatesLede": "Announcements can broadcast and invite discussion; new proposals and facility reports reach their category owners, while status and comment updates return to the people involved.",
     "managementNumber": "04 / MANAGEMENT & RESPONSE",
     "managementTitle": "Students speak up.<br><em>Schools can respond clearly.</em>",
-    "managementLede": "Choose a category first to review, add, edit, or revoke its owners; reviews, response deadlines, and operations stay together too.",
+    "managementLede": "Choose a category first to review, add, edit, or revoke its owners; feature switches, reviews, and response deadlines live together in System settings.",
     "configNumber": "05 / ADAPTABLE RULES",
-    "configLede": "Set reading scope, author visibility, support and response deadlines around the way your campus works.",
+    "configLede": "Choose whether proposals and facilities are enabled during setup, then set reading scope, author visibility, support, and response deadlines around the way your campus works.",
     "interfaceNumber": "06 / REAL INTERFACE"
   },
   "hero": {
@@ -42,10 +42,22 @@
     "ctaPrimary": "Explore the project",
     "ctaDocs": "Read the documentation",
     "facts": [
-      { "label": "Propose", "text": "Make ideas visible" },
-      { "label": "Gather", "text": "Find people who care" },
-      { "label": "Respond", "text": "Follow the response" },
-      { "label": "Protect", "text": "Protect student privacy" }
+      {
+        "label": "Propose",
+        "text": "Make ideas visible"
+      },
+      {
+        "label": "Gather",
+        "text": "Find people who care"
+      },
+      {
+        "label": "Respond",
+        "text": "Follow the response"
+      },
+      {
+        "label": "Protect",
+        "text": "Protect student privacy"
+      }
     ]
   },
   "story": {
@@ -104,25 +116,60 @@
     "title": "From a voice to <em>a traceable outcome.</em>",
     "lede": "Students know what happens next. Administrators know what needs attention. The exact path still depends on each category's configuration.",
     "steps": [
-      { "n": "01", "title": "Submit", "body": "Choose a topic, understand who can see it, and clearly describe the change you want." },
-      { "n": "02", "title": "Review", "body": "When review is required, admins approve publication or record a concrete rejection reason." },
-      { "n": "03", "title": "Participate", "body": "Authorized users may support (when enabled), comment, and follow progress." },
-      { "n": "04", "title": "Process", "body": "Admins update status and response targets, notifying authors and related users." },
-      { "n": "05", "title": "Resolve", "body": "Close as completed or infeasible with a written outcome students can revisit." }
+      {
+        "n": "01",
+        "title": "Submit",
+        "body": "Choose a topic, understand who can see it, and clearly describe the change you want."
+      },
+      {
+        "n": "02",
+        "title": "Review",
+        "body": "When review is required, admins approve publication or record a concrete rejection reason."
+      },
+      {
+        "n": "03",
+        "title": "Participate",
+        "body": "Authorized users may support (when enabled), comment, and follow progress."
+      },
+      {
+        "n": "04",
+        "title": "Process",
+        "body": "Admins update status and response targets, notifying authors and related users."
+      },
+      {
+        "n": "05",
+        "title": "Resolve",
+        "body": "Close as completed or infeasible with a written outcome students can revisit."
+      }
     ],
     "statuses": [
-      { "title": "Under review", "body": "Awaiting publish decision" },
-      { "title": "Rejected", "body": "Author sees the reason" },
-      { "title": "Processing", "body": "Response deadline tracked" },
-      { "title": "Completed", "body": "Outcome recorded" },
-      { "title": "Infeasible", "body": "Why it cannot proceed" }
+      {
+        "title": "Under review",
+        "body": "Awaiting publish decision"
+      },
+      {
+        "title": "Rejected",
+        "body": "Author sees the reason"
+      },
+      {
+        "title": "Processing",
+        "body": "Response deadline tracked"
+      },
+      {
+        "title": "Completed",
+        "body": "Outcome recorded"
+      },
+      {
+        "title": "Infeasible",
+        "body": "Why it cannot proceed"
+      }
     ]
   },
   "config": {
     "studio": {
       "number": "03 / ADJUSTABLE RULES",
       "title": "Do not pick a preset.<br><em>Compose the right rules.</em>",
-      "lede": "Configure categories during first sign-in and in the admin UI—no code changes required",
+      "lede": "Configure during first sign-in and in System settings—no code changes required",
       "builderCta": "See in-app category setup",
       "stepLabel": "Rule module",
       "dimensions": [
@@ -133,9 +180,18 @@
           "title": "Choose who can read content, and when",
           "body": "All three scopes start from an authenticated school identity. Backend authorization and database policies enforce access.",
           "options": [
-            { "title": "School-wide", "body": "Signed-in users from the allowed school domain can read." },
-            { "title": "School-wide after review", "body": "Author and admins before approval; the school list after approval." },
-            { "title": "Owner and admins", "body": "The content stays off the school list and is handled privately." }
+            {
+              "title": "School-wide",
+              "body": "Signed-in users from the allowed school domain can read."
+            },
+            {
+              "title": "School-wide after review",
+              "body": "Author and admins before approval; the school list after approval."
+            },
+            {
+              "title": "Owner and admins",
+              "body": "The content stays off the school list and is handled privately."
+            }
           ]
         },
         {
@@ -145,8 +201,14 @@
           "title": "Choose whether authorized readers see the author",
           "body": "The author can be shown or hidden. Hiding changes the interface only; the backend retains the author relationship for access and case handling.",
           "options": [
-            { "title": "Show author", "body": "Readers with content access also see author information." },
-            { "title": "Hide author", "body": "School readers do not see the name; administrators retain the required relationship." }
+            {
+              "title": "Show author",
+              "body": "Readers with content access also see author information."
+            },
+            {
+              "title": "Hide author",
+              "body": "School readers do not see the name; administrators retain the required relationship."
+            }
           ]
         },
         {
@@ -156,8 +218,14 @@
           "title": "Choose whether support is gathered and when it qualifies",
           "body": "Support can be disabled. When enabled, both the goal and deadline must be positive integers; an unmet campaign ends according to the rule.",
           "options": [
-            { "title": "Support off", "body": "The issue enters handling directly with no support progress." },
-            { "title": "Support on", "body": "Set a goal and deadline—for example, the current public category uses 50 people in 14 days." }
+            {
+              "title": "Support off",
+              "body": "The issue enters handling directly with no support progress."
+            },
+            {
+              "title": "Support on",
+              "body": "Set a goal and deadline—for example, the current public category uses 50 people in 14 days."
+            }
           ]
         },
         {
@@ -167,9 +235,18 @@
           "title": "Give administrative response a clear time boundary",
           "body": "Set response days or leave the deadline unset. With support enabled it starts after the goal is met; otherwise it starts when the issue is created.",
           "options": [
-            { "title": "From creation", "body": "For categories that go directly into handling." },
-            { "title": "After support goal", "body": "For categories that gather support before a response is required." },
-            { "title": "No deadline", "body": "Status remains trackable without a response countdown." }
+            {
+              "title": "From creation",
+              "body": "For categories that go directly into handling."
+            },
+            {
+              "title": "After support goal",
+              "body": "For categories that gather support before a response is required."
+            },
+            {
+              "title": "No deadline",
+              "body": "Status remains trackable without a response countdown."
+            }
           ]
         },
         {
@@ -179,9 +256,18 @@
           "title": "Attachments and comments follow the reading scope",
           "body": "Sensitive categories keep attachments and comments private. School categories keep them within the school. Reviewed categories open school discussion only after publication.",
           "options": [
-            { "title": "Attachment visibility", "body": "Owner-and-admin categories use private attachments; other categories use school attachments." },
-            { "title": "Comment visibility", "body": "Comments inherit the same scope to avoid leaking content." },
-            { "title": "Comment timing", "body": "Reviewed categories enable school comments after approval." }
+            {
+              "title": "Attachment visibility",
+              "body": "Owner-and-admin categories use private attachments; other categories use school attachments."
+            },
+            {
+              "title": "Comment visibility",
+              "body": "Comments inherit the same scope to avoid leaking content."
+            },
+            {
+              "title": "Comment timing",
+              "body": "Reviewed categories enable school comments after approval."
+            }
           ]
         }
       ]
@@ -224,22 +310,46 @@
     "cards": [
       {
         "title": "School users",
-        "items": ["Browse permitted proposals and announcements", "Create proposals, comment, and support", "Manage their own content and notifications"]
+        "items": [
+          "Browse permitted proposals and announcements",
+          "Create proposals, comment, and support",
+          "Manage their own content and notifications"
+        ]
       },
       {
         "title": "Administrators",
-        "items": ["Review and update status", "Publish announcements and moderate content", "Use the admin dashboard to prioritize work"]
+        "items": [
+          "Review and update status",
+          "Publish announcements and moderate content",
+          "Manage categories, features, and owners in System settings"
+        ]
       },
       {
         "title": "Admin responses",
-        "items": ["Explain review approval or rejection", "Post progress updates and formal responses", "Close with the outcome or why it cannot proceed"]
+        "items": [
+          "Explain review approval or rejection",
+          "Post progress updates and formal responses",
+          "Close with the outcome or why it cannot proceed"
+        ]
       }
     ],
     "more": [
-      { "title": "Board & search", "body": "Browse by category, status, and title. My proposals keeps what you can still read." },
-      { "title": "Discussion in context", "body": "Questions and replies stay beside the proposal—not scattered across chats." },
-      { "title": "Photos of the site", "body": "Facility and routing issues become clear at a glance." },
-      { "title": "Open to reshape", "body": "MIT licensed. Fork it and build participation with your own rules." }
+      {
+        "title": "Board & search",
+        "body": "Browse by category, status, and title. My proposals keeps what you can still read."
+      },
+      {
+        "title": "Discussion in context",
+        "body": "Questions and replies stay beside the proposal—not scattered across chats."
+      },
+      {
+        "title": "Photos of the site",
+        "body": "Facility and routing issues become clear at a glance."
+      },
+      {
+        "title": "Open to reshape",
+        "body": "MIT licensed. Fork it and build participation with your own rules."
+      }
     ]
   },
   "fit": {

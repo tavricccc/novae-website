@@ -43,11 +43,15 @@ Outbox, deletion, Push delivery, and maintenance tables store only `error_trace_
 - `n<namespace>-delete`: Cloudinary deletion and synchronized state.
 - `n<namespace>-maintenance`: retention/maintenance RPCs and worker triggering.
 
+## Cold-start reads and Edge invocations
+
+The public gateway remains the Cloudflare Worker. Each forwarded action still counts as one Supabase Edge Function invocation. After sign-in, the client prefers a single `getSessionBootstrap` read for role and permissions, category catalog, content revisions, and notification unread state, and may record the platform visit in the same call. Granular actions remain for partial refresh and management writes. Cost control comes from merged reads and client caches, not from moving domain logic into the Worker.
+
 ## One runtime category source
 
-Guided setup and category management write through controlled backend actions to Postgres. Proposal and facility boards both select from the same runtime catalog, and creation plus list queries preserve the category scope. Edge authorization, workflows, manager assignments, and notifications use those records. Proposal creation snapshots privacy, comments, support, and deadlines onto the proposal. Database triggers permanently lock read access and author visibility after category creation.
+Guided setup and System settings write feature switches, categories, and manager assignments through controlled backend actions to Postgres. Proposal and facility boards both select from the same runtime catalog, and creation plus list queries preserve the category scope; disabled features are hidden from navigation while existing records remain manageable. Edge authorization, workflows, manager assignments, and notifications use those records. Feature switches and category drafts are saved together so a partial update cannot leave only one side applied. Proposal creation snapshots privacy, comments, support, and deadlines onto the proposal. Database triggers permanently lock read access and author visibility after category creation.
 
-Platform-administrator identity comes only from `ADMIN_EMAILS`; category assignments are separate scoped data. New proposals and facility reports create personal notifications for explicitly assigned managers rather than an administrator broadcast, so platform administrators are not implicit recipients.
+Platform-administrator identity comes only from `ADMIN_EMAILS`; category assignments are separate scoped data. New proposals and facility reports create personal notifications for explicitly assigned managers rather than an administrator broadcast, so platform administrators are not implicit recipients. Author display for content and comments is loaded by UID so the client does not keep a drifting author copy.
 
 ## Realtime updates and authentication cache
 

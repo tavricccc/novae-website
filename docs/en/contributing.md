@@ -21,7 +21,7 @@ For a complete interactive environment isolated from production services, use th
 npm run test:env
 ```
 
-It starts local Supabase, Edge Functions, Firebase Auth Emulator, the Cloudflare gateway, and Vite, then reports Ready only after sign-in, custom-claim, platform-administrator, and Setup prerequisites pass. Create arbitrary `@integration.invalid` accounts in the Auth Emulator. `Ctrl+C` stops the whole stack. Local emulator debug logs are generated artifacts and must not be committed.
+It starts local Supabase, Edge Functions, Firebase Auth Emulator, the Cloudflare gateway, and Vite, then reports Ready only after sign-in, custom-claim, platform-administrator, and Setup prerequisites pass. Create arbitrary `@integration.invalid` accounts in the Auth Emulator. `Ctrl+C` stops the whole stack. Local emulator debug logs are generated artifacts and must not be committed. Automatic integration runs also start isolated Upstash and external-provider receivers so FCM topic/token delivery, Cloudinary deletion, and retention cleanup can be asserted without production credentials. Prefer folding high-frequency cold-start reads into `getSessionBootstrap` or client caches instead of adding another Edge invocation on every app open.
 
 ## Verify
 

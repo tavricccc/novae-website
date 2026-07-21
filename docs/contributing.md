@@ -33,7 +33,7 @@ npm run dev
 npm run test:env
 ```
 
-它會啟動隔離的 Supabase、Edge Functions、Firebase Auth Emulator、Cloudflare gateway 與 Vite，並在登入、custom claims、平台總管理員與 Setup 前置檢查成功後顯示 Ready。可在 Auth Emulator 建立任意 `@integration.invalid` 測試帳號；按 `Ctrl+C` 會關閉整組服務。本機 emulator debug log 是產物，不應提交。
+它會啟動隔離的 Supabase、Edge Functions、Firebase Auth Emulator、Cloudflare gateway 與 Vite，並在登入、custom claims、平台總管理員與 Setup 前置檢查成功後顯示 Ready。可在 Auth Emulator 建立任意 `@integration.invalid` 測試帳號；按 `Ctrl+C` 會關閉整組服務。本機 emulator debug log 是產物，不應提交。自動整合驗證另會啟動隔離的 Upstash 與外部服務收件器，用來檢查 FCM topic／token 推播、Cloudinary 刪除與保留期清理，不連正式 provider。新增高頻讀取時優先考慮併入 `getSessionBootstrap` 或前端快取，避免冷啟動再多一次 Edge invocation。
 
 只有要驗證 migration 與本機 Supabase 時才使用：
 

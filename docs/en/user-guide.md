@@ -9,7 +9,7 @@ Desktop uses the sidebar; mobile uses the floating bottom navigation, where the 
 3. Search, filter, and sort cards, then open a detail page.
 4. Pending-review and private proposals remain visible only to their author and administrators.
 
-On an unconfigured installation, the first platform administrator confirms language before creating proposal and facility categories. The browser or operating system's first preferred language is the default. If completion is interrupted, refresh or retry; the app recognizes setup that already committed.
+On an unconfigured installation, the first platform administrator confirms language, chooses whether proposals and facility reports are enabled, and then creates categories only for the enabled features. The browser or operating system's first preferred language is the default. If completion is interrupted, refresh or retry; the app recognizes setup that already committed.
 
 ## Create a proposal
 

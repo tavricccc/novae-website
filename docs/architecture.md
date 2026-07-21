@@ -63,20 +63,24 @@ flowchart LR
 | `n<namespace>-delete` | 清除 Cloudinary 資源並同步刪除狀態 |
 | `n<namespace>-maintenance` | 執行保留期、維護 RPC，並觸發 deletion/outbox workers |
 
+公開路徑仍由 Cloudflare Worker 先驗證來源與粗限流，再轉送 Edge。每一次成功轉送都會計入 Supabase Edge Function invocation；因此冷啟動改以 `getSessionBootstrap` 一次讀取角色、分類目錄、內容版本與未讀提示，並可選擇合併平台造訪寫入。細項 action 仍保留給局部刷新與管理寫入。省用額度靠合併請求與前端快取，不把 domain 業務搬進 Worker。
+
 ## 分類設定如何生效
 
 ```mermaid
 flowchart LR
-  S[首次設定／分類管理頁] --> A[受控 backend actions]
-  A --> D[(Postgres 動態分類與指派)]
+  S[首次設定／系統設定] --> A[受控 backend actions]
+  A --> D[(Postgres 功能開關、動態分類與指派)]
   D --> UI[前端 runtime catalog]
   D --> API[Edge 權限、流程與通知]
   API --> P[新案件規則快照]
 ```
 
-分類、設備分類與管理員指派以 Postgres 為單一來源。提案與設備看板都從同一 runtime catalog 選擇分類，建立與列表查詢都保存分類範圍。建立提案時會把隱私、留言、附議與期限規則快照到案件；分類日後調整只影響新案件。閱讀範圍與作者顯示由資料庫 trigger 鎖定，前端條件不承擔安全責任。
+分類、設備分類、平台功能開關與管理員指派以 Postgres 為單一來源。提案與設備看板都從同一 runtime catalog 選擇分類，建立與列表查詢都保存分類範圍；關閉的功能不會出現在導覽，但既有資料仍可管理。建立提案時會把隱私、留言、附議與期限規則快照到案件；分類日後調整只影響新案件。閱讀範圍與作者顯示由資料庫 trigger 鎖定，前端條件不承擔安全責任。
 
-平台總管理員只由 `ADMIN_EMAILS` 產生；分類指派則是獨立的 scope 資料。新提案與新設備回報寫入個人通知給該分類明確負責人，不使用管理員廣播，因此平台總管理員不會因角色自動成為收件人。
+系統設定將功能開關與兩邊分類草稿一次寫入受控 backend action，避免只更新其中一部分。平台總管理員只由 `ADMIN_EMAILS` 產生；分類指派則是獨立的 scope 資料。新提案與新設備回報寫入個人通知給該分類明確負責人，不使用管理員廣播，因此平台總管理員不會因角色自動成為收件人。
+
+內容與留言的作者顯示改以 UID 讀取使用者資料，避免前端另外保存可漂移的作者副本。
 
 ## 資料與副作用
 

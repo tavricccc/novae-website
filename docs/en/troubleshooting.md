@@ -37,11 +37,11 @@ API error bodies are machine-readable: `error.code` is the stable contract value
 
 If an installed PWA still shows an old version, keep it open long enough for the new Service Worker to take control. The app reloads through a versioned URL and caps retries automatically. Manually reload once only after the update watchdog reports failure; do not start by clearing site data, content caches, or databases.
 
-Guided setup first confirms the browser or operating system's first preferred language. If completion briefly fails and retry says setup is already complete, the first request may have committed before its response was interrupted; the current client refreshes platform state and continues. If it remains on Setup, verify that at least one proposal and facility category exists, the latest migration is applied, and capture the request ID.
+Guided setup first confirms the browser or operating system's first preferred language, then the platform feature switches, and finally categories for enabled features only. If completion briefly fails and retry says setup is already complete, the first request may have committed before its response was interrupted; the current client refreshes platform state and continues. If it remains on Setup, verify that every enabled feature has at least one category, the latest migration is applied, and capture the request ID.
 
 ## Wrong support goal or days
 
-1. Inspect the category in **Platform management center → Categories and workflows**.
+1. Inspect the category in **System settings → Categories and workflows**.
 2. Check when the proposal was created. Existing proposals keep their creation-time snapshot and do not follow later category edits.
 3. Postgres runtime categories and proposal snapshots are authoritative; landing mockups and documentation examples are not.
 
