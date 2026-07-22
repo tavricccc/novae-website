@@ -1,5 +1,6 @@
 import './styles/index.js';
 import './styles/docs.css';
+import { initializePressFeedback } from './modules/press-feedback.js';
 
 // Docs pages intentionally do NOT register the service worker.
 // Nested URLs under /docs/ would resolve PWA assets/manifest relative to
@@ -52,5 +53,6 @@ function initializeDocumentNavigation() {
   markCurrent(headings[0]?.id);
 }
 
+initializePressFeedback();
 initializeDocumentNavigation();
 initMermaid();

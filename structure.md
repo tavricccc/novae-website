@@ -15,7 +15,7 @@
 - `category-builder.html`：程式內動態分類設定的相容入口與升級說明。
 - `src/main.js` / `src/main-docs.js`：首頁與文件頁入口。
 - `src/config/site.js`：GitHub、授權與文件網址的單一設定來源。
-- `src/modules/`：首頁語系、內容渲染、示意介面、規則互動與章節導覽；mock interface 以固定設計寬度與實際完整內容高度作為圖片式畫布，再依容器等比例縮放，不以固定高度裁切內容。
+- `src/modules/`：首頁語系、內容渲染、示意介面、規則互動、章節導覽與共用 pointer 按壓可見時間；mock interface 以固定設計寬度與實際完整內容高度作為圖片式畫布，再依容器等比例縮放，不以固定高度裁切內容。
 - `src/styles/`：`index.js` 統一載入全站字體與共用樣式，另含首頁區塊、章節導覽、示意介面與文件樣式；手機版以頁面既有 padding 容納 mockup 與橫向資訊列，不使用負 margin 或頁面級 overflow 裁切。
 - `public/assets/`：Landing 專用透明陶瓷／壓克力裝置與低飽和圖片頭像。
 

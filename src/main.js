@@ -3,9 +3,11 @@ import { initializeLanguage } from './modules/i18n.js';
 import { initializeLandingRender } from './modules/landing-render.js';
 import { initializeParallax, initializeReveal } from './modules/reveal.js';
 import { initializeInterfaceDemos } from './modules/mock-interface.js';
+import { initializePressFeedback } from './modules/press-feedback.js';
 
 // Language first so list render + demos read the preferred locale.
 initializeLanguage();
+initializePressFeedback();
 initializeLandingRender();
 initializeInterfaceDemos();
 initializeReveal();

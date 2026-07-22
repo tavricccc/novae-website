@@ -74,7 +74,7 @@ Route view 不得自行增加另一套頁面級 `px-*`、`left-*`、`right-*`、
 
 ## 動態與頁面連續性
 
-- 全域可點擊元素使用無位移的輕微放大與 spring-like 回彈；小型控制幅度較大，大型卡片／列表幅度較小。不使用縮小、下沉、變暗或 inset shadow，也不模擬 Liquid Glass。
+- 全域可點擊元素使用無位移的輕微放大與 spring-like 回彈；小型控制幅度較大，大型卡片／列表幅度較小。共用 pointer 狀態至少保留 120ms，移動超過 12px 視為捲動並取消。不使用縮小、下沉、變暗或 inset shadow，也不模擬 Liquid Glass。
 - Route 換頁使用固定 Grid 儲存格疊放新舊頁；前進／返回以短距離 logical inset 搭配 opacity，同層 route 使用純 crossfade。不在離場時切換 absolute 定位，不使用會產生空白幀的 `out-in`，也不對包含陰影的整頁套用 transform。
 - Persistent Header 的控制項不得用立即移除造成文字跳位；返回鍵保留單一 DOM 並以寬度與 opacity 收合，標題維持單一內容實例，不做 keyed 雙層排版。
 - 頁內互斥分頁只使用短 opacity crossfade，並一律尊重 `prefers-reduced-motion`。

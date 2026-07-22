@@ -74,7 +74,7 @@ Arbitrary shadows, a fourth elevation name, and domain-level `rounded + border +
 
 ## Motion and page continuity
 
-- Every clickable element uses a translation-free, gentle scale-up with a spring-like release. Small controls use a stronger amplitude than large cards and rows. Do not shrink, sink, dim, add an inset shadow, or imitate Liquid Glass.
+- Every clickable element uses a translation-free, gentle scale-up with a spring-like release. Small controls use a stronger amplitude than large cards and rows. Shared pointer state stays visible for at least 120ms and cancels after 12px of movement so scrolling remains natural. Do not shrink, sink, dim, add an inset shadow, or imitate Liquid Glass.
 - Route changes overlap in one fixed Grid cell. Forward/back hierarchy changes combine a short logical-inset slide with opacity, while same-level routes use a pure crossfade. Never switch the leaving page to absolute positioning, use blank-frame-producing `out-in`, or transform an entire shadow-bearing route layer.
 - Persistent Header controls must not disappear immediately and make text jump. Keep one back-button node, collapse it with width and opacity, and keep one title-content instance instead of keyed duplicate layout.
 - Mutually exclusive in-page tabs use a short opacity crossfade, and all motion respects `prefers-reduced-motion`.

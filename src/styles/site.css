@@ -28,7 +28,7 @@
   --ease:cubic-bezier(.16,1,.3,1);
   --ease-press:cubic-bezier(.2,.8,.2,1);
   --ease-spring:linear(0,0.44 14%,0.78 27%,1.03 48%,0.985 66%,1.004 82%,1);
-  --press-scale:1.018;
+  --press-scale:1.04;
   --fast:.14s;
   --normal:.22s;
   --slow:.32s;
@@ -43,7 +43,7 @@ button,input,select,textarea{font:inherit}
 a{color:inherit;text-decoration:none}
 img{display:block;max-width:100%}
 button,a[href]{scale:1;-webkit-tap-highlight-color:transparent;transition:scale .3s var(--ease-spring),transform var(--normal) var(--ease),opacity var(--normal) var(--ease),box-shadow var(--normal) var(--ease),background-color var(--normal) ease,color var(--normal) ease}
-button:active:not(:disabled),a[href]:active{scale:var(--press-scale);filter:brightness(1.025) saturate(1.01);transition-duration:.11s;transition-timing-function:var(--ease-press)}
+button:active:not(:disabled),a[href]:active,.is-pressing{scale:var(--press-scale);transition-duration:.14s;transition-timing-function:var(--ease-press)}
 :focus-visible{outline:2px solid rgba(70,70,70,.62);outline-offset:3px}
 ::selection{background:var(--lavender-soft);color:var(--ink)}
 
@@ -200,4 +200,4 @@ h1,h2,h3,p{overflow-wrap:anywhere}
 
 @media(max-width:470px){.hero-stage{min-height:420px}.hero-sculpture{width:43%}.hero-actions{grid-template-columns:1fr}.hero-compact-facts{grid-template-columns:1fr 1fr}}
 
-@media(prefers-reduced-motion:reduce){html{scroll-behavior:auto}*,*::before,*::after{scroll-behavior:auto!important;transition-duration:.01ms!important;animation-duration:.01ms!important;animation-iteration-count:1!important}button:active:not(:disabled),a[href]:active{scale:1!important;filter:none!important}.product-frame--hero,.hero-sculpture{transform:none!important}.reveal{opacity:1;transform:none}}
+@media(prefers-reduced-motion:reduce){html{scroll-behavior:auto}*,*::before,*::after{scroll-behavior:auto!important;transition-duration:.01ms!important;animation-duration:.01ms!important;animation-iteration-count:1!important}button:active:not(:disabled),a[href]:active,.is-pressing{scale:1!important}.product-frame--hero,.hero-sculpture{transform:none!important}.reveal{opacity:1;transform:none}}
