@@ -31,7 +31,7 @@ Lower layers must not import higher layers, and molecules must not depend on org
 
 ## New-page composition order
 
-1. Use `RoutePageFrame` for flow/fill layout, vertical padding, and bottom safe area.
+1. Use `RoutePageFrame` for flow/fill layout, vertical padding, and bottom safe area. Only shared immersive pages such as composers use `bleed` to fill the available content area; route views must not calculate negative margins themselves.
 2. Look for an organism covering list, detail, dialog, composer, or loading behavior.
 3. Compose sections with molecules such as `SurfacePanel`, `SectionHeader`, and `LabeledListSection`.
 4. Add atoms for buttons, icons, badges, messages, and skeletons last.
@@ -69,9 +69,18 @@ Elevation has exactly three levels:
 
 Arbitrary shadows, a fourth elevation name, and domain-level `rounded + border + background + shadow` card assembly are forbidden. Use the semantic `control`, `card`, `floating`, `inset`, and `list` variants of `SurfacePanel`. Empty-state and descriptive icons must not use card elevation.
 
+## Motion and page continuity
+
+- Forward/back routes overlap during directional transitions; do not use `out-in`, which creates a blank frame. Same-level navigation uses a short crossfade.
+- Persistent Header controls must not disappear immediately and make text jump. Collapse back controls with width and opacity, and crossfade keyed title content.
+- Mutually exclusive in-page tabs use the shared directional motion. Shadow-bearing surfaces use opacity-only teardown on iOS, and all motion respects `prefers-reduced-motion`.
+
 ## Dialogs, forms, and feedback
 
 - `DialogShell` owns overlays, focus trapping, body scroll lock, ARIA, dismissal, and persistent behavior.
+- Desktop popups do not show a drag handle or inherit Bottom Sheet top compensation. Keep outer padding compact and reserve card-shadow bleed inside the scrolling container instead of masking clipping with oversized outer spacing.
+- Immersive composer pages use a 1rem mobile side inset. Their bottom action row removes duplicated safe-area whitespace while still clearing the Home Indicator, and desktop scroll containers reserve room for control shadows.
+- Mobile `RoutePageFrame` bottom-safe content shares the Bottom Tab's measured screen gap. Detail footers should have the same spacing above the Tab as the Tab has below the viewport edge.
 - Use counted fields for length limits and `BusyButtonContent` for asynchronous actions.
 - Use `InlineAlert` for framed messages and `InlineMessage` for compact field-adjacent status.
 - All visible copy uses i18n keys, with identical Traditional Chinese and English key structures.

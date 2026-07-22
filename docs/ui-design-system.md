@@ -31,7 +31,7 @@ atoms → molecules → organisms → domain components / views
 
 ## 新頁面組裝順序
 
-1. 使用 `RoutePageFrame` 決定 flow/fill、垂直 padding 與 bottom safe area。
+1. 使用 `RoutePageFrame` 決定 flow/fill、垂直 padding 與 bottom safe area；只有沉浸式 Composer 等需要填滿可用內容區的共用頁面使用 `bleed`，不得在 route view 手算負 margin。
 2. 先找涵蓋列表、詳情、Dialog、Composer 或 loading state 的 organism。
 3. 用 `SurfacePanel`、`SectionHeader`、`LabeledListSection` 等 molecule 組成區塊。
 4. 最後才以 atom 補上按鈕、icon、標籤、訊息與 skeleton。
@@ -69,9 +69,18 @@ Route view 不得自行增加另一套頁面級 `px-*`、`left-*`、`right-*`、
 
 禁止 arbitrary shadow、第四套 elevation 名稱，以及在領域元件重複拼出 `rounded + border + background + shadow` 的卡片。`SurfacePanel` 的 `control`、`card`、`floating`、`inset`、`list` variant 應表達表面的語意。空白狀態與說明性 icon 不應使用 card elevation。
 
+## 動態與頁面連續性
+
+- Route 前進／返回使用新舊頁重疊的方向轉場，不使用會產生空白幀的 `out-in`；同層切換使用短 crossfade。
+- Persistent Header 的控制項不得用立即移除造成文字跳位；返回鍵以寬度與 opacity 收合，標題內容使用 keyed crossfade。
+- 頁內互斥分頁使用共用方向動畫。iOS 的陰影表面卸載只做 opacity，並一律尊重 `prefers-reduced-motion`。
+
 ## Dialog、表單與回饋
 
 - Dialog 統一由 `DialogShell` 管理 overlay、focus trap、body scroll lock、ARIA、dismiss 與 persistent 行為。
+- 桌面 Popup 不顯示拖曳把手，也不套用 Bottom Sheet 的頂部補償；外層 padding 應保持緊湊，卡片陰影空間由內層 scroll container 預留，避免以大量外距掩蓋裁切問題。
+- 沉浸式新增頁的手機側距以 1rem 為基準；底部動作列須扣除 safe area 的重複空白但仍避開 Home Indicator，桌面則在可裁切的捲動容器內預留控制項陰影空間。
+- 手機 `RoutePageFrame` 的 bottom-safe 內容與 Bottom Tab 使用同一個動態螢幕底距；Detail 頁底部操作列到 Tab、Tab 到螢幕底部應形成相同間距。
 - 有最大字數的輸入使用 counted field；非同步按鈕內容使用 `BusyButtonContent`。
 - 有框線背景的訊息使用 `InlineAlert`；欄位附近的精簡狀態使用 `InlineMessage`。
 - 可見文字一律使用 i18n key，繁中與英文 key 結構必須一致。
