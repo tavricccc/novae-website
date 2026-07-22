@@ -76,6 +76,7 @@ The main application treats `src/styles/primitives.css` and `src/components/ui/`
 | Standard, icon, toolbar, primary, and secondary actions | `AppButton` or an existing `button-*` variant |
 | Cards, controls, floating panels, and inset areas | `SurfacePanel` or `surface-control` / `surface-card` / `surface-floating` / `surface-inset` |
 | Grouped lists and interactive rows | `list-surface`, `list-surface-row` |
+| Page tabs, exclusive choices, and equal-width segments | Semantic `AppButton` tabs, `SelectionOptionButton`, and `PillSegmentedControl` with `adaptive` / `equal` layout |
 | Dropdowns and menu items | `DropdownMenu` / `DropdownPanel`, `dropdown-item` |
 | Composite fields and footers | `field`, `control-frame`, `control-footer` |
 

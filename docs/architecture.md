@@ -40,9 +40,9 @@ flowchart LR
 
 主要路由是提案列表／詳情、公告列表／詳情、通知、設定與管理 Dashboard。桌面與手機共用資料流，只切換 layout。
 
-共用視覺契約位於 `src/styles/primitives.css` 與 `components/ui/`，並依 `atoms → molecules → organisms` 單向組合。`AppShell`／`ViewportFrame`／`RoutePageFrame` 統一管理 viewport gutter、safe area、內容寬度與 route page 骨架；button、card、list、dropdown、Dialog、control 由共用元件組合，陰影只分 control、card、floating 三階。列表 session 骨架與內容互斥；空列表用無 elevation 的 `EmptyStatePanel`，避免卸載後殘留卡片陰影。完整規範與新頁面清單見 [UI 設計系統](ui-design-system.md)。
+共用視覺契約位於 `src/styles/primitives.css` 與 `components/ui/`，並依 `atoms → molecules → organisms` 單向組合。`AppShell`／`ViewportFrame`／`RoutePageFrame` 統一管理 viewport gutter、safe area、內容寬度與 route page 骨架；button、card、list、dropdown、Dialog、control 由共用元件組合，陰影只分 control、card、floating 三階。頁面層級 Tabs 使用語意化 `AppButton`，互斥選項與分段切換分別使用 `SelectionOptionButton`、`PillSegmentedControl`；分段控制可採內容自適應或標籤完整顯示的等寬 layout。列表 session 骨架與內容互斥；空列表用無 elevation 的 `EmptyStatePanel`，避免卸載後殘留卡片陰影。完整規範與新頁面清單見 [UI 設計系統](ui-design-system.md)。
 
-手機底部導覽在已登入且角色 bootstrap 完成後的根頁與子頁持續顯示；登入過程中不提前露出底欄與側欄，避免半登入狀態。`AppShell` 讓頁面捲動視窗延伸到導覽背後，`RoutePageFrame` 與 `route-scroll-through` 再把 safe area、浮動間距及導覽高度放進內容尾端；內容可穿透導覽所在區域，捲到底時最後一項仍能完整露出。路由來源只負責返回目的地，不控制導覽列顯示；導覽 shell 與內容狀態保持分離。正式環境 Google 登入使用 Google Identity Services Token Client，再以 Firebase credential 建立 session；登入頁在使用者就緒後會等角色與分類目錄再導向預設提案分類，過程中登入按鈕維持 busy，避免重複送出。
+手機底部導覽在已登入且角色 bootstrap 完成後的根頁與一般子頁持續顯示；提案、設備與公告的新增路由是專注輸入頁，會暫時隱藏底欄並以 Visual Viewport 避免鍵盤擠壓。登入過程中不提前露出底欄與側欄，避免半登入狀態。`AppShell` 讓一般頁面的捲動視窗延伸到導覽背後，`RoutePageFrame` 與 `route-scroll-through` 再把 safe area、浮動間距及導覽高度放進內容尾端；內容可穿透導覽所在區域，捲到底時最後一項仍能完整露出。路由來源只負責返回目的地，導覽 shell 與內容狀態保持分離。正式環境 Google 登入使用 Google Identity Services Token Client，再以 Firebase credential 建立 session；登入頁在使用者就緒後會等角色與分類目錄再導向預設提案分類，過程中登入按鈕維持 busy，避免重複送出。
 
 ## 本地化與錯誤契約
 
@@ -76,7 +76,7 @@ flowchart LR
   API --> P[新案件規則快照]
 ```
 
-分類、設備分類、平台功能開關與管理員指派以 Postgres 為單一來源。提案與設備看板都從同一 runtime catalog 選擇分類，建立與列表查詢都保存分類範圍；關閉的功能不會出現在導覽，但既有資料仍可管理。建立提案時會把隱私、留言、附議與期限規則快照到案件；分類日後調整只影響新案件。閱讀範圍與作者顯示由資料庫 trigger 鎖定，前端條件不承擔安全責任。
+分類、設備分類、平台功能開關與管理員指派以 Postgres 為單一來源。首次設定與系統設定共用相同的分類選擇與編輯結構；首次完成時先略過尚未註冊人員的負責人指派。提案與設備看板都從同一 runtime catalog 選擇分類，建立與列表查詢都保存分類範圍；關閉的功能不會出現在導覽，但既有資料仍可管理。分類沒有封存狀態，資料庫強制既有分類保持可用；刪除分類會在同一受控流程永久刪除其中案件、關聯、通知與圖片引用並排入外部圖片刪除工作。建立提案時會把隱私、留言、附議與期限規則快照到案件；分類日後調整只影響新案件。閱讀範圍與作者顯示由資料庫 trigger 鎖定，前端條件不承擔安全責任。
 
 系統設定將功能開關與兩邊分類草稿一次寫入受控 backend action，避免只更新其中一部分。平台總管理員只由 `ADMIN_EMAILS` 產生；分類指派則是獨立的 scope 資料。新提案與新設備回報寫入個人通知給該分類明確負責人，不使用管理員廣播，因此平台總管理員不會因角色自動成為收件人。
 

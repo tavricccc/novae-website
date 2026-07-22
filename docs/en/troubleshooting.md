@@ -37,7 +37,7 @@ API error bodies are machine-readable: `error.code` is the stable contract value
 
 If an installed PWA still shows an old version, keep it open long enough for the new Service Worker to take control. The app reloads through a versioned URL and caps retries automatically. Manually reload once only after the update watchdog reports failure; do not start by clearing site data, content caches, or databases.
 
-Guided setup first confirms the browser or operating system's first preferred language, then the platform feature switches, and finally categories for enabled features only. If completion briefly fails and retry says setup is already complete, the first request may have committed before its response was interrupted; the current client refreshes platform state and continues. If it remains on Setup, verify that every enabled feature has at least one category, the latest migration is applied, and capture the request ID.
+Guided setup first confirms the browser or operating system's first preferred language, then uses the same feature-and-category editor as System settings. Completion explains that manager assignment is skipped until the relevant people have registered. If completion briefly fails and retry says setup is already complete, the first request may have committed before its response was interrupted; the current client refreshes platform state and continues. If it remains on Setup, verify that every enabled feature has at least one category, the latest migration is applied, and capture the request ID.
 
 ## Wrong support goal or days
 
