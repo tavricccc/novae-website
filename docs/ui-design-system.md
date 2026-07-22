@@ -31,13 +31,13 @@ atoms → molecules → organisms → domain components / views
 
 ## 新頁面組裝順序
 
-1. 使用 `RoutePageFrame` 決定 flow/fill、垂直 padding 與 bottom safe area；只有沉浸式 Composer 等需要填滿可用內容區的共用頁面使用 `bleed`，不得在 route view 手算負 margin。
+1. 使用 `RoutePageFrame` 決定 flow/fill、垂直 padding 與 bottom safe area；水平邊界只由 `ViewportFrame` 的 safe-area-aware padding 提供，不使用 bleed、負 margin 或頁面級橫向裁切。
 2. 先找涵蓋列表、詳情、Dialog、Composer 或 loading state 的 organism。
 3. 用 `SurfacePanel`、`SectionHeader`、`LabeledListSection` 等 molecule 組成區塊。
 4. 最後才以 atom 補上按鈕、icon、標籤、訊息與 skeleton。
 5. route 組裝與頁面級狀態留在 `views/`，流程進 composable，資料邊界只經 service。
 
-Route view 不得自行增加另一套頁面級 `px-*`、`left-*`、`right-*`、safe-area 計算或 max-width。這些由 `AppShell`、`ViewportFrame` 與 `RoutePageFrame` 統一負責。
+Route view 不得自行增加另一套頁面級 `px-*`、`left-*`、`right-*`、safe-area 計算或 max-width。這些由 `AppShell`、`ViewportFrame` 與 `RoutePageFrame` 統一負責。卡片陰影需要空間時，應在捲動內容內側增加共用 padding；不得先把內容推出容器再用 `overflow-x-hidden` 裁掉。
 
 ## 常見需求對照
 
@@ -45,7 +45,10 @@ Route view 不得自行增加另一套頁面級 `px-*`、`left-*`、`right-*`、
 | --- | --- |
 | 頁面骨架、左右留白與安全區 | `RoutePageFrame`、`ViewportFrame` |
 | 一般、icon、toolbar、主要與次要按鈕 | `AppButton` |
+| 列表內的附議、遇到與按讚計數 | `AppButton` 搭配 `button-card-count`（32px 表面、44px 觸控區） |
 | 卡片、控制框、浮動層、內嵌區、列表外殼 | `SurfacePanel` |
+| 詳情頁分享、支持／遇到、管理與刪除操作 | `DetailActionGroup`、`DetailActionButton` |
+| 列表補充資訊、詳情地點與處理結果 | `ContentNoticePanel`（compact／detail，neutral／success／error） |
 | grouped list 與設定列 | `ListSurfaceRow`、`IconListRow`、`LabeledListSection` |
 | dropdown 與項目 | `DropdownMenu`、`DropdownPanel`、`dropdown-item` |
 | Dialog | `DialogShell`、`DialogHeading`、`DialogActionRow` |
@@ -71,16 +74,21 @@ Route view 不得自行增加另一套頁面級 `px-*`、`left-*`、`right-*`、
 
 ## 動態與頁面連續性
 
-- Route 前進／返回使用新舊頁重疊的方向轉場，不使用會產生空白幀的 `out-in`；同層切換使用短 crossfade。
-- Persistent Header 的控制項不得用立即移除造成文字跳位；返回鍵以寬度與 opacity 收合，標題內容使用 keyed crossfade。
-- 頁內互斥分頁使用共用方向動畫。iOS 的陰影表面卸載只做 opacity，並一律尊重 `prefers-reduced-motion`。
+- 全域可點擊元素使用無位移的輕微放大與 spring-like 回彈；小型控制幅度較大，大型卡片／列表幅度較小。不使用縮小、下沉、變暗或 inset shadow，也不模擬 Liquid Glass。
+- Route 換頁使用固定 Grid 儲存格疊放新舊頁；前進／返回以短距離 logical inset 搭配 opacity，同層 route 使用純 crossfade。不在離場時切換 absolute 定位，不使用會產生空白幀的 `out-in`，也不對包含陰影的整頁套用 transform。
+- Persistent Header 的控制項不得用立即移除造成文字跳位；返回鍵保留單一 DOM 並以寬度與 opacity 收合，標題維持單一內容實例，不做 keyed 雙層排版。
+- 頁內互斥分頁只使用短 opacity crossfade，並一律尊重 `prefers-reduced-motion`。
+- 遠端圖片與本機預覽統一使用 block-level `DecodedImage`：原生圖片在 `load` 與 `decode()` 完成前維持透明並顯示 spinner，禁止直接露出瀏覽器的漸進式掃描繪製，也不得因 inline baseline 留下底部白邊；錯誤時必須結束 loading 並提供 fallback。
+- 觸控介面以 `touch-action: manipulation` 搭配 capture touchend 座標判斷阻止雙擊縮放，且保留雙指 pinch zoom；不得依賴兩次點擊命中完全相同的子節點。
 
 ## Dialog、表單與回饋
 
 - Dialog 統一由 `DialogShell` 管理 overlay、focus trap、body scroll lock、ARIA、dismiss 與 persistent 行為。
 - 桌面 Popup 不顯示拖曳把手，也不套用 Bottom Sheet 的頂部補償；外層 padding 應保持緊湊，卡片陰影空間由內層 scroll container 預留，避免以大量外距掩蓋裁切問題。
-- 沉浸式新增頁的手機側距以 1rem 為基準；底部動作列須扣除 safe area 的重複空白但仍避開 Home Indicator，桌面則在可裁切的捲動容器內預留控制項陰影空間。
+- 沉浸式新增頁沿用 AppShell 的手機側距；底部動作列須扣除 safe area 的重複空白但仍避開 Home Indicator，桌面則在捲動內容內側預留控制項陰影空間。
 - 手機 `RoutePageFrame` 的 bottom-safe 內容與 Bottom Tab 使用同一個動態螢幕底距；Detail 頁底部操作列到 Tab、Tab 到螢幕底部應形成相同間距。
+- Bottom Tab 已存在時，App 主內容與 Detail/Skeleton 內層不得再疊加底部 padding；Header 返回鍵的動畫槽位必須與實際 44px tap target 同寬，避免視覺控制溢出覆蓋標題。
+- Bottom Tab 的選中底色屬於各按鈕自身狀態；不得用 DOM 量測與 transform 搬動跨項目的共用 indicator。
 - 有最大字數的輸入使用 counted field；非同步按鈕內容使用 `BusyButtonContent`。
 - 有框線背景的訊息使用 `InlineAlert`；欄位附近的精簡狀態使用 `InlineMessage`。
 - 可見文字一律使用 i18n key，繁中與英文 key 結構必須一致。

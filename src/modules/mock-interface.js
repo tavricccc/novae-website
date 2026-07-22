@@ -148,23 +148,32 @@ function templateFor(variant) {
   return boardDemo();
 }
 
+const demoDimensions = {
+  announcements: [1120, 480],
+  board: [1120, 620],
+  detail: [1120, 625],
+  hero: [720, 520],
+  mobile: [390, 760],
+  moderation: [1120, 620],
+  notifications: [1120, 480],
+};
+
 function fitDemo(root) {
   const surface = root.firstElementChild;
   if (!surface || !root.isConnected) return;
   const available = root.clientWidth;
   if (!available) return;
-  const designWidth = root.dataset.novaeDemo === 'hero'
-    ? 720
-    : root.dataset.novaeDemo === 'mobile'
-      ? 390
-      : 1120;
+  const [designWidth, designHeight] = demoDimensions[root.dataset.novaeDemo] ?? demoDimensions.board;
   surface.style.width = `${designWidth}px`;
+  surface.style.height = 'auto';
+  surface.style.minHeight = `${designHeight}px`;
   surface.style.transform = 'scale(1)';
   surface.style.transformOrigin = 'top left';
-  const scale = Math.min(1, available / designWidth);
+  const naturalHeight = Math.max(designHeight, surface.scrollHeight);
+  const scale = available / designWidth;
   surface.style.transform = `scale(${scale})`;
-  const naturalHeight = root.dataset.novaeDemo === 'mobile' ? 760 : surface.scrollHeight;
-  root.style.height = `${Math.ceil(naturalHeight * scale)}px`;
+  root.style.aspectRatio = `${designWidth} / ${naturalHeight}`;
+  root.style.height = 'auto';
 }
 
 function paint(root) {
