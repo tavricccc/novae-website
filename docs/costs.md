@@ -1,71 +1,103 @@
-# 成本指南
+# 成本與免費額度
 
-Novae 可以從各服務免費層起步，但不能保證永遠免費。雲端方案、額度與價格會改變；部署前應直接查看 Cloudflare、Vercel、Supabase、Firebase、Cloudinary、Upstash、Notion 的官方定價頁，不要把文件中的舊數字當合約。
+以下數字在 **2026-07-23** 依各平台官方文件核對。免費方案會調整，這份估算是容量規劃，不是供應商承諾。
 
-## 先估六個量
+## 先看結論
 
-1. 每月登入使用者與每日活躍使用者。
-2. 每月提案、公告、留言、附議與按讚次數。
-3. 每月上傳圖片張數與壓縮後平均大小。
-4. 每月圖片瀏覽流量。
-5. Edge Function 請求、Realtime 訊息與尖峰連線。
-6. Push、Notion 同步、outbox retry 與維護工作的額外請求。
+| 使用模式 | 每位 MAU／月 | 免費層建議容量 | 主要瓶頸 |
+| --- | ---: | ---: | --- |
+| 輕度 | 約 60 次後端操作、1.2 MB Supabase egress | 約 2,000 MAU | Realtime 同時連線、Cloudinary 長期累積 |
+| 典型校園 | 約 120 次後端操作、4.8 MB Supabase egress | **約 800–1,000 MAU** | Supabase 5 GB egress、200 條 Realtime 尖峰連線 |
+| 重度 | 約 240 次後端操作、14.4 MB Supabase egress | 約 300–350 MAU | Supabase egress |
 
-## 成本落在哪裡
+典型的 1,000 人部署可以先按 **160–200 人同時在線、兩個完整學年** 規劃。500 人部署約可保存三個完整學年。流量額度會每日或每月重置，真正會隨時間累積的是 Supabase database 與 Cloudinary 圖片。
 
-| 服務 | 主要成本驅動 |
-| --- | --- |
-| Vercel | 建置時間、前端流量、Functions（本專案主要後端不在 Vercel） |
-| Cloudflare | Worker requests、CPU time、logs／observability |
-| Supabase | database size、egress、Edge invocation、Realtime、備份／PITR |
-| Firebase | Authentication MAU、App Check／reCAPTCHA 相關用量；FCM 本身通常不是主要費用 |
-| Cloudinary | 儲存、轉換、delivery bandwidth／credits |
-| Upstash | Redis commands、儲存、egress |
-| Notion | workspace 方案與 API 使用限制；同步失敗重試也會增加請求 |
+## 估算模型
 
-## 一步一步估算
+典型 MAU 假設每月活躍 12 天，每個活躍日產生 8 次登入後操作，再加 25% 的預抓、重連與 retry，合計 `12 × 8 × 1.25 = 120` 次 Cloudflare Worker／Supabase Edge 請求。平均回應以 40 KB 規劃，因此每位 MAU 每月約使用 `120 × 40 KB = 4.8 MB` Supabase egress。
 
-1. 從一個月的實際校園人數與預估參與率開始，不要直接拿全校人數當每日活躍。
-2. 將每個使用動作乘上可能的 API 讀寫次數，並預留 30% retry 與尖峰空間。
-3. 圖片以「壓縮後大小 × 上傳張數」估儲存，以「大小 × 平均瀏覽次數」估流量。
-4. 對照每個供應商當下的免費額度與超額價格。
-5. 設定 50%、75%、90% 用量提醒；不要等超額才看帳單。
+媒體模型採每人每學年 5 張圖片、壓縮後平均 350 KB、每張圖片每月被讀取 4 次、每張產生 1 次 transformation。這比只算新上傳更保守，因為它把既有圖片的重複讀取也算進去。
 
-## 本地資料庫容量基準
+容量採免費額度的 80% 作為可營運上限，避免 retry、活動日尖峰和供應商統計差異直接造成停機。
 
-2026-07-18 在 WSL 以全新本地 Supabase 套用全部 migration 後產生一學年資料；不啟動 Edge Function，也不呼叫 Firebase、FCM、Cloudinary 或 Notion API。
+## 各平台逐一核對
 
-| 項目 | 500 人 | 1000 人 |
-| --- | ---: | ---: |
-| 提案／公告／設備 | 375／500／250 | 750／500／500 |
-| 提案／公告留言 | 45,000／60,000 | 90,000／60,000 |
-| 附議／公告讚／我也遇到 | 935／30,000／750 | 3,750／60,000／2,500 |
-| FCM token／圖片 metadata／Notion mapping | 450／513／1,125 | 900／775／1,750 |
-| 7 天通知／1 天 outbox／24 小時冪等資料 | 1,482／291／377 | 2,224／416／596 |
+### Supabase
 
-模型算式：提案 `ceil(人數 × 75%)`、設備 `ceil(人數 × 50%)`、公告固定 500；每則提案與公告有 `20 × (1 + 5) = 120` 筆留言。標題、正文、留言分別填到上限的 75%（23／750／53 字），50% 提案與公告、30% 設備附圖片 URL；附議、公告讚與「我也遇到」分別採 `max(5, ceil(人數 × 1%))`、`ceil(人數 × 12%)`、`max(3, ceil(人數 × 0.5%))`。
+[Free 方案](https://supabase.com/docs/guides/platform/billing-on-supabase)包含每 project 500 MB database、每月 5 GB uncached egress、5 GB cached egress、500,000 次 Edge Function invocation、2,000,000 則 Realtime message、200 條 Realtime peak connection，並提供 50,000 MAU。
 
-| 結果 | 500 人 | 1000 人 |
-| --- | ---: | ---: |
-| `VACUUM FULL` 後整庫活資料 | 87 MB | 125 MB |
-| 一般 `VACUUM` 後物理快照 | 212 MB | 164 MB |
-| 建議規劃值（活資料 × 1.5） | **131 MB** | **187 MB** |
+- Edge：`500,000 ÷ 120 ≈ 4,166 MAU`，不是典型情境的第一瓶頸。
+- Egress：`5,120 MB ÷ 4.8 MB ≈ 1,066 MAU`；保留 20% 餘裕後約 **850 MAU**。
+- Realtime：若每位 MAU 每月接收 240 則訊息，約可支援 8,333 MAU；但 200 條同時連線使尖峰更早成為限制。按 20% MAU 同時在線，約等於 1,000 MAU。
+- Database：本專案可重現的一學年資料模型為 500 人 131 MB、1,000 人 187 MB（已含 50% 規劃餘裕）。因此 1,000 人保守按兩學年、500 人按三學年規劃。
 
-物理快照會受 autovacuum 時機影響，因此不一定隨人數單調增加；容量規劃採可重現的活資料再加 50%。Firebase 帳號、Cloudinary 圖片檔、Notion 頁面正文、WAL、備份與 PITR 不在上述 database size 內。
+Free project [連續一週沒有活動可能被暫停](https://supabase.com/pricing)，但額度本身沒有「使用幾個月後到期」的期限；持續有正式流量就不屬於閒置情況。
 
-## 先做的節省措施
+### Cloudflare Workers
 
-- 保留瀏覽器 WebP 壓縮、圖片張數與來源大小上限。
-- 保留 Cloudinary 受控 upload preset，讓格式、檔案大小與尺寸在供應商開始後續處理前就被限制。
-- 不要把私密圖片改成公開或建立重複 Cloudinary webhook。
-- 維持 Cloudflare 原生 ingress／action burst limits，讓短時間刷取在產生 Supabase Edge invocation 前停止；Supabase 再以 Upstash 執行精確業務配額、驗證快取與背景 worker 限制。
-- 保留 Firebase 使用者短效快取與前端內容快取；不要為追求即時感把每次切頁都改成強制重抓。
-- 維持私有 Broadcast invalidation；不要改回讓每個 client 訂閱私有資料表變更或週期性輪詢。
-- 維持每位使用者 10 個 Push 裝置上限，避免單一帳號無限放大 FCM fan-out。
-- 修正失敗的 outbox 事件，不讓永久錯誤無限重試。
-- 監控 Supabase egress 與不必要的列表重抓。
-- development 測試站只在真的需要時建立，避免維護兩套閒置資源。
+[Workers Free](https://developers.cloudflare.com/workers/platform/limits/)提供每日 100,000 requests、每次 10 ms CPU、128 MB memory。Novae 的 Worker 只驗證來源、JWT、短時間 rate limit 並轉送，不執行資料庫工作。
 
-每月把供應商帳單、Dashboard、Functions 用量與實際參與量一起看，才能判斷成本是成長、濫用、錯誤重試還是設定造成。
+典型每日每人 10 次請求時，理論上約 10,000 DAU；保留餘裕後約 8,000 DAU。它明顯高於 Supabase egress 上限。正式環境 observability 已改為 10% head sampling，避免每個正常 request 都產生日誌。
 
-這些保護會降低正常重複操作的外部請求、Edge 執行時間與通知 fan-out，但不等於全域預算熔斷器。仍應在各供應商設定用量提醒並定期核對帳單。
+### Firebase
+
+[Firebase Spark](https://firebase.google.com/pricing)的 Google／Email 等非電話 Authentication 與 FCM 為 no-cost；升級 Identity Platform 前後的 no-cost Authentication 指標皆為 50,000 MAU。[Spark instrumentless limit](https://firebase.google.com/docs/auth/limits)另列 3,000 DAU。
+
+Novae 不使用 Phone Auth，因此簡訊費用不適用。FCM 本身不是容量瓶頸。Web App Check 使用 reCAPTCHA Enterprise，官方提供[每月 10,000 次免費 assessment](https://firebase.google.com/docs/app-check)；本專案只在通知設定／token 維護時初始化，不會為每次後端 API 呼叫做 assessment。若每位開啟推播的使用者每月初始化兩次，約可涵蓋 5,000 位推播使用者。
+
+### Cloudinary
+
+[Free 方案](https://cloudinary.com/documentation/billing_and_plans)每個 rolling 30-day window 有 25 credits。1 credit 等於 1,000 transformations、1 GB storage 或 1 GB image bandwidth，三者會相加。
+
+依本文件媒體模型，1,000 人第一學年約使用：
+
+- 1.75 GB storage = 1.75 credits。
+- 每月 7 GB delivery = 7 credits。
+- 約 417 次每月平均 transformation = 0.42 credits。
+- 合計約 9.2 credits；即使把第二學年的舊圖片視為同樣熱門，約 18.4 credits。
+
+因此 1,000 人約可安全支援兩學年。實際舊內容閱讀通常會下降，壽命可能更長；相反地，如果平均圖片接近 800 KB 上限或每張每月讀取超過 10 次，Cloudinary 可能提前成為瓶頸。
+
+### Upstash Redis
+
+[Free Redis](https://upstash.com/pricing/redis)提供 256 MB、每月 500,000 commands、10 GB bandwidth。Novae 只用它保存短效 Firebase 使用者驗證快取及寫入操作的精確業務配額，不存正式內容。
+
+以最保守的「每次後端操作都造成一次 auth cache command，再加 10% 寫入配額」計算，典型每位 MAU 約 132 commands，約可支援 3,787 MAU。實際 Edge warm isolate 現在會在記憶體重用最多 5 分鐘、且不超過 Redis 15 分鐘的絕對驗證期限，因此通常會比這個估算低很多。
+
+### Vercel
+
+[Hobby](https://vercel.com/docs/plans)提供每月 100 GB Fast Data Transfer；Novae 前端是靜態 PWA，不使用 Vercel Functions。即使一次完整冷啟動傳輸按 2 MB 計算，也約有 50,000 次冷啟動／月，遠高於典型校園使用量。
+
+Hobby 僅允許[個人或非商業用途](https://vercel.com/legal/terms)。無營利的校園部署通常符合「非商業」方向，但若部署涉及付費承包、營利或不確定的機構使用，應由部署單位確認條款或改用 Pro／其他靜態主機。
+
+### GitHub 與 GitHub Pages
+
+公開 repository 使用標準 GitHub-hosted runner 時，[GitHub Actions 不計費](https://docs.github.com/en/billing/concepts/product-billing/github-actions)。官方文件網站使用 GitHub Pages，其[每月 soft bandwidth limit 為 100 GB](https://docs.github.com/en/pages/getting-started-with-github-pages/github-pages-limits)，不影響 PWA 使用者容量。
+
+若文件站單次完整傳輸為 1 MB，約等於 100,000 次完整瀏覽／月。Actions 與 Pages 沒有「幾個月後到期」，但應維持公開 repository 並遵守 Pages 用途限制。
+
+### Notion（選用）
+
+[Notion API](https://developers.notion.com/guides/get-started/quick-start)平均限制為每秒 3 requests；Free workspace 對個人使用為 unlimited pages／blocks，檔案上限為[每個 5 MB](https://www.notion.com/pricing)。Novae 圖片上限為 800 KB，符合單檔限制。
+
+Notion 沒有公開的月 API request 配額；限制是吞吐量而不是人數。即使一次同步保守按 6 個 API requests，3 requests/s 理論上仍可處理約 43,000 個同步事件／日。它是選用營運副本，關閉後不影響任何核心流程，也是最直接的零成本與零維護選項。
+
+## 已落實的成本控制
+
+- 登入 bootstrap 合併角色、分類、版本、未讀提示與每日一次的 visit 紀錄；已刪除重複的 `recordPlatformVisit` action。
+- Visit 最多每日寫入一次，不再每 6 小時更新 `last_seen_at`。
+- Firebase 使用者 Redis cache 在 warm Edge isolate 內最多重用 5 分鐘，並保存絕對建立時間，避免延長 15 分鐘的撤銷檢查窗口。
+- Cloudflare 正式環境只抽樣 10% observability traces；錯誤仍由應用程式明確記錄。
+- 提案、設備與公告列表在 Firebase 驗證後，以 UID、Origin 與完整 request digest 隔離 30 秒 Cloudflare POP cache；命中時不呼叫 Supabase Edge，瀏覽器端仍是 `no-store`，不會跨帳號共用個人狀態。
+- 列表、詳情、留言、通知與圖片 URL 都有 account-scoped persistent cache、coalesced request 與 Realtime invalidation。
+- 作者公開資料以 50 筆批次讀取並保存 24 小時 IndexedDB cache；重按目前導覽 20 秒內合併，桌面詳情預抓需停留 180ms，省流／2G／背景頁與手機不做 hover 預抓。
+- Outbox 只保存通知與同步需要的識別欄位，不複製完整正文；留言正文只在 Worker 實際處理該事件時依 ID 精準補讀。
+- 圖片在瀏覽器先轉 WebP，限制 800 KB、2,000 px 與每種內容張數；Cloudinary preset 再做供應商端限制。
+- Notion 內容 hash 不變時不重送，outbox、通知與刪除工作皆有 bounded retry。
+- 已結案提案與設備保留完整資料 180 天，之後連同留言、個人關聯與 Cloudinary 圖片永久刪除；Notion 頁面保留作人工長期紀錄。公告永久保留，不納入這項清理。
+
+這套策略不會依 70%／80%／90% 等額度門檻自動停用功能。供應商警示只用於通知管理員，避免流量波動自行改變前台行為。
+
+## 何時升級
+
+以供應商 dashboard 的實際數字為準，在 50%、75%、90% 設提醒。典型 1,000 MAU 部署最先看 Supabase uncached egress、Realtime peak connection、database size，以及 Cloudinary bandwidth／storage。只要其中一項持續兩週高於 75%，就應先找出異常重抓、圖片流量或 retry，再決定升級。

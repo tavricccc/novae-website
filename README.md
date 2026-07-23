@@ -1,6 +1,6 @@
 # Novae Website
 
-Bilingual product site, documentation, changelog, and category configuration builder for [Novae](https://github.com/tavricccc/novae). Built with Vite for GitHub Pages.
+Bilingual product site, documentation, and changelog for [Novae](https://github.com/tavricccc/novae). Built with Vite for GitHub Pages.
 
 This repository is published independently so forks of the main application do not deploy a duplicate Novae introduction site.
 

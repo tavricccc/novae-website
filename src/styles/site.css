@@ -28,7 +28,7 @@
   --ease:cubic-bezier(.16,1,.3,1);
   --ease-press:cubic-bezier(.2,.8,.2,1);
   --ease-spring:linear(0,0.44 14%,0.78 27%,1.03 48%,0.985 66%,1.004 82%,1);
-  --press-scale:1.04;
+  --press-scale:1.07;
   --fast:.14s;
   --normal:.22s;
   --slow:.32s;
@@ -43,7 +43,7 @@ button,input,select,textarea{font:inherit}
 a{color:inherit;text-decoration:none}
 img{display:block;max-width:100%}
 button,a[href]{scale:1;-webkit-tap-highlight-color:transparent;transition:scale .3s var(--ease-spring),transform var(--normal) var(--ease),opacity var(--normal) var(--ease),box-shadow var(--normal) var(--ease),background-color var(--normal) ease,color var(--normal) ease}
-button:active:not(:disabled),a[href]:active,.is-pressing{scale:var(--press-scale);transition-duration:.14s;transition-timing-function:var(--ease-press)}
+button:active:not(:disabled),a[href]:active,.is-pressing{scale:var(--press-scale);filter:brightness(1.08) saturate(1.04);transition-duration:.16s;transition-timing-function:var(--ease-press)}
 :focus-visible{outline:2px solid rgba(70,70,70,.62);outline-offset:3px}
 ::selection{background:var(--lavender-soft);color:var(--ink)}
 
@@ -70,6 +70,8 @@ button:active:not(:disabled),a[href]:active,.is-pressing{scale:var(--press-scale
 .button-primary:hover,.button-dark:hover{transform:translateY(-2px);box-shadow:var(--shadow-card);background:#34312d}
 .button-secondary,.button-outline,.button-light{background:#fff;color:var(--ink);box-shadow:var(--shadow-control)}
 .button-secondary:hover,.button-outline:hover,.button-light:hover{transform:translateY(-2px);box-shadow:var(--shadow-card)}
+.button-primary:is(:active,.is-pressing),.button-dark:is(:active,.is-pressing){box-shadow:var(--shadow-card);filter:brightness(1.16) saturate(1.06)}
+.button-secondary:is(:active,.is-pressing),.button-outline:is(:active,.is-pressing),.button-light:is(:active,.is-pressing){background:#f0f0f0;box-shadow:var(--shadow-card)}
 .text-link{display:inline-flex;align-items:center;gap:8px;font-weight:700}
 .text-link:hover{opacity:.68}
 

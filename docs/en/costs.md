@@ -1,43 +1,92 @@
-# Costs
+# Costs and free-tier capacity
 
-Novae can start on free tiers, but pricing and quotas change. Always use current official pricing pages rather than old numbers in documentation.
+The figures below were checked against official provider documentation on **2026-07-23**. Free plans change; this is a planning model, not a provider guarantee.
 
-Estimate monthly active users, daily active users, proposals/comments/support actions, compressed image count and size, image views, Edge requests, Realtime messages and peak connections, Push/Notion sync, and retry overhead.
+## Executive estimate
 
-| Service | Main cost drivers |
-| --- | --- |
-| Vercel | Builds and frontend transfer |
-| Cloudflare | Worker requests, CPU time, and observability |
-| Supabase | Database, egress, Edge invocations, Realtime, backups |
-| Firebase | Authentication and App Check/reCAPTCHA-related usage |
-| Cloudinary | Storage, transformations, and delivery bandwidth/credits |
-| Upstash | Redis commands, storage, and transfer |
-| Notion | Workspace plan and API constraints |
+| Usage profile | Per MAU / month | Recommended free capacity | First constraint |
+| --- | ---: | ---: | --- |
+| Light | About 60 backend actions and 1.2 MB Supabase egress | About 2,000 MAU | Realtime concurrency and long-term media growth |
+| Typical campus | About 120 backend actions and 4.8 MB Supabase egress | **About 800–1,000 MAU** | Supabase 5 GB egress and 200 peak Realtime connections |
+| Heavy | About 240 backend actions and 14.4 MB Supabase egress | About 300–350 MAU | Supabase egress |
 
-## Local database capacity benchmark
+A typical 1,000-user deployment should plan for **160–200 concurrent users and two complete school years** on the free tiers. A 500-user deployment can conservatively retain about three school years. Traffic quotas reset daily or monthly; Supabase database size and Cloudinary media are the resources that accumulate over time.
 
-On 2026-07-18, a fresh local Supabase instance in WSL applied every migration and generated one school year of data. Edge Functions and remote Firebase, FCM, Cloudinary, and Notion APIs remained disabled.
+## Model
 
-| Item | 500 users | 1,000 users |
-| --- | ---: | ---: |
-| Proposals / announcements / facilities | 375 / 500 / 250 | 750 / 500 / 500 |
-| Proposal / announcement comments | 45,000 / 60,000 | 90,000 / 60,000 |
-| Supports / announcement likes / affected users | 935 / 30,000 / 750 | 3,750 / 60,000 / 2,500 |
-| FCM tokens / image metadata / Notion mappings | 450 / 513 / 1,125 | 900 / 775 / 1,750 |
-| 7-day notifications / 1-day outbox / 24-hour idempotency rows | 1,482 / 291 / 377 | 2,224 / 416 / 596 |
+A typical MAU is active on 12 days per month and performs eight signed-in actions per active day. Adding 25% for prefetching, reconnects, and retries gives `12 × 8 × 1.25 = 120` Cloudflare Worker and Supabase Edge requests. At a planned average response of 40 KB, one MAU consumes about `120 × 40 KB = 4.8 MB` of Supabase egress per month.
 
-Model: proposals are `ceil(users × 75%)`, facilities are `ceil(users × 50%)`, and announcements are fixed at 500. Every proposal and announcement has `20 × (1 + 5) = 120` comments. Titles, bodies, and comments use 75% of their limits (23 / 750 / 53 characters); 50% of proposals and announcements and 30% of facilities include an image URL. Supports, announcement likes, and affected-user rows use `max(5, ceil(users × 1%))`, `ceil(users × 12%)`, and `max(3, ceil(users × 0.5%))` respectively.
+The media model uses five new images per user per school year, 350 KB after compression, four deliveries per stored image per month, and one transformation per image. Capacity recommendations use 80% of a published allowance to leave room for peaks and measurement differences.
 
-| Result | 500 users | 1,000 users |
-| --- | ---: | ---: |
-| Live database after `VACUUM FULL` | 87 MB | 125 MB |
-| Physical snapshot after normal `VACUUM` | 212 MB | 164 MB |
-| Planning value (live data × 1.5) | **131 MB** | **187 MB** |
+## Provider-by-provider calculation
 
-The physical snapshot depends on autovacuum timing and may not increase monotonically. Planning therefore uses reproducible live data plus 50%. Firebase accounts, Cloudinary image binaries, Notion page bodies, WAL, backups, and PITR are outside this database-size result.
+### Supabase
 
-Keep browser image compression and the controlled Cloudinary upload preset. Native Cloudflare burst limits stop abusive traffic before Supabase Edge invocations; Supabase uses Upstash for precise business quotas, authentication caching, and backend worker protection.
+The [Free plan](https://supabase.com/docs/guides/platform/billing-on-supabase) includes a 500 MB database per project, 5 GB uncached plus 5 GB cached monthly egress, 500,000 Edge Function invocations, two million Realtime messages, 200 peak Realtime connections, and 50,000 MAU.
 
-Keep the short-lived Firebase user cache and frontend content cache instead of forcing every navigation to refetch. Private Broadcast invalidation avoids private-table subscriptions and periodic polling, while the 10-device Push cap bounds FCM fan-out. Fix permanently failing outbox events, monitor Supabase egress, and create a development stack only when it is actually maintained.
+- Edge: `500,000 ÷ 120 ≈ 4,166 MAU`, so invocations are not the first typical constraint.
+- Egress: `5,120 MB ÷ 4.8 MB ≈ 1,066 MAU`; after 20% headroom, about **850 MAU**.
+- Realtime messages: at 240 messages per MAU, about 8,333 MAU. Peak connections are earlier: at 20% simultaneous use, 200 connections map to about 1,000 MAU.
+- Database: the reproducible one-school-year benchmark is 131 MB for 500 users and 187 MB for 1,000 users, including 50% planning headroom. Plan for two years at 1,000 users or three years at 500 users.
 
-These controls reduce repeated provider calls, Edge execution time, and notification fan-out, but they are not a global budget circuit breaker. Set usage alerts around 50%, 75%, and 90% of each relevant allowance and review bills regularly.
+A free project [may pause after one week of inactivity](https://supabase.com/pricing), but its allowance does not expire after a fixed number of months.
+
+### Cloudflare Workers
+
+[Workers Free](https://developers.cloudflare.com/workers/platform/limits/) includes 100,000 requests per day, 10 ms CPU per invocation, and 128 MB memory. Novae only validates origin, JWT, burst limits, and forwards the request.
+
+At ten typical daily requests per user, the theoretical ceiling is about 10,000 DAU, or 8,000 with headroom. Production observability now samples 10% of traces instead of logging every normal request.
+
+### Firebase
+
+[Firebase Spark](https://firebase.google.com/pricing) provides no-cost non-phone Authentication and FCM; the no-cost Authentication measure is 50,000 MAU. The [Spark instrumentless limit](https://firebase.google.com/docs/auth/limits) also lists 3,000 DAU.
+
+Novae does not use Phone Auth. Web App Check uses reCAPTCHA Enterprise, which includes [10,000 assessments per month](https://firebase.google.com/docs/app-check). App Check is initialized only for notification settings and token maintenance, not for every backend action. At two initializations per push user per month, it covers about 5,000 push users.
+
+### Cloudinary
+
+The [Free plan](https://cloudinary.com/documentation/billing_and_plans) supplies 25 credits in a rolling 30-day window. One credit is 1,000 transformations, 1 GB storage, or 1 GB image bandwidth, and all three are added together.
+
+Under this model, 1,000 users in the first school year consume about 1.75 storage credits, seven delivery credits, and 0.42 monthly transformation credits: about 9.2 credits. Treating second-year archived images as equally popular gives about 18.4 credits. That supports two years conservatively; larger images or more than ten monthly deliveries per image can make Cloudinary the earlier constraint.
+
+### Upstash Redis
+
+[Free Redis](https://upstash.com/pricing/redis) includes 256 MB, 500,000 monthly commands, and 10 GB bandwidth. Novae stores only short-lived Firebase verification data and precise write quotas there.
+
+The pessimistic assumption of one auth-cache command per backend action plus 10% write-limit commands is 132 commands per MAU, or about 3,787 MAU. Warm Edge isolates now reuse verified users in memory for up to five minutes without exceeding the Redis record's absolute 15-minute validity, so normal use should be lower.
+
+### Vercel
+
+[Hobby](https://vercel.com/docs/plans) includes 100 GB Fast Data Transfer. Novae is a static PWA and does not use Vercel Functions. At a two-megabyte complete cold load, the allowance is about 50,000 cold loads per month.
+
+Hobby is limited to [personal or non-commercial use](https://vercel.com/legal/terms). A non-profit campus deployment generally points in the non-commercial direction, but institutions involving paid contracting or uncertain usage should confirm the terms or choose Pro or another static host.
+
+### GitHub and GitHub Pages
+
+Standard GitHub-hosted runners are [free for public repositories](https://docs.github.com/en/billing/concepts/product-billing/github-actions). The documentation site uses GitHub Pages, which has a [100 GB monthly soft bandwidth limit](https://docs.github.com/en/pages/getting-started-with-github-pages/github-pages-limits). At one megabyte per complete docs visit, that is roughly 100,000 visits per month and does not affect PWA capacity.
+
+### Optional Notion copy
+
+The [Notion API](https://developers.notion.com/guides/get-started/quick-start) averages three requests per second. An individual Free workspace has unlimited pages and blocks, with a [5 MB per-file limit](https://www.notion.com/pricing); Novae images are capped at 800 KB.
+
+Notion publishes no monthly API request quota, so throughput—not user count—is the constraint. Even at six API requests per sync event, three requests per second is roughly 43,000 events per day. Notion is optional; disabling it removes this cost and maintenance surface without changing any core workflow.
+
+## Cost controls already implemented
+
+- Session bootstrap combines access, categories, revisions, unread status, and a once-daily visit write; the obsolete `recordPlatformVisit` action is removed.
+- Visit writes now occur at most daily instead of every six hours.
+- The Firebase Redis record keeps an absolute creation time while warm Edge isolates reuse it for up to five minutes, preserving the 15-minute revocation window.
+- Production Cloudflare observability samples 10% of traces.
+- After Firebase authentication, issue, facility, and announcement lists use a 30-second Cloudflare POP cache isolated by UID, Origin, and the complete request digest. Hits skip Supabase Edge while browser responses remain `no-store`.
+- Lists, details, comments, notifications, and image URLs use account-scoped persistent caching, request coalescing, and Realtime invalidation.
+- Public author profiles are fetched in batches of 50 and kept in IndexedDB for 24 hours. Re-tapping active navigation is coalesced for 20 seconds, while desktop detail prefetch requires a 180 ms dwell and is disabled for data saver, 2G, background tabs, and mobile pointers.
+- Outbox rows retain identifiers required for delivery and synchronization instead of duplicating full content. Comment text is fetched by ID only when a worker processes that event.
+- Browser WebP compression and the Cloudinary preset cap images at 800 KB and 2,000 px.
+- Unchanged Notion content hashes are skipped, while outbox, notification, and deletion retries remain bounded.
+- Closed issues and facility reports retain their full data for 180 days from closure, then their comments, per-user relations, database rows, and Cloudinary images are permanently deleted. Notion pages remain as a manual long-term record. Announcements are retained indefinitely.
+
+This design does not automatically disable features at 70%, 80%, 90%, or any other quota threshold. Provider alerts notify administrators without silently changing product behavior.
+
+## Upgrade signal
+
+Set alerts at 50%, 75%, and 90%. For a typical 1,000-MAU deployment, watch Supabase uncached egress, Realtime peak connections, database size, and Cloudinary bandwidth/storage first. If a metric remains above 75% for two weeks, investigate duplicate reads, image traffic, and retries before upgrading.

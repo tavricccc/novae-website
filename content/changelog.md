@@ -1,6 +1,66 @@
 # 更新紀錄
 
-累計更新：805 次
+累計更新：812 次
+
+## v2.0.273｜資料庫函式解析路徑安全加固
+
+2026-07-23
+
+- 固定 Security Advisor 列出的 12 個 `app_private` 函式 `search_path`，只允許 PostgreSQL 系統目錄與受控 private schema 參與名稱解析，消除呼叫端以同名物件影響函式行為的風險。
+- `app_private` 資料表的 RLS 無 policy 提示屬於刻意的 deny-by-default 邊界；維持前端完全無權直接讀寫，並重新撤銷 `public`、`anon`、`authenticated` 權限，不為消除資訊提示而新增寬鬆 policy。
+
+## v2.0.272｜Dialog 期間 Toast 尺寸修正
+
+2026-07-23
+
+- 修正桌面 Dialog 開啟時，Toast 同時套用手機頂部定位與桌面底部定位，導致固定容器填滿垂直空間、浮動表面被 flex 拉成大型面板的問題。
+- Dialog 期間的頂部避讓現在只套用於手機；桌面 Toast 維持右下角既有寬度與內容高度，所有進度、成功與錯誤回饋共用同一修正。
+
+## v2.0.271｜180 天內容保存與免費額度防線
+
+2026-07-23
+
+- 已結案提案與設備案件改為自結案日起完整保留 180 天；到期後永久刪除資料庫內的案件、留言、附議／遇到關聯與 Cloudinary 圖片，公告則永久保留。
+- 排程到期清理不再把 Notion 頁面標成已刪除；只移除本機 mapping，讓 Notion 繼續作為人工查閱的長期營運紀錄。使用者主動刪除內容仍維持既有刪除語意。
+- outbox 不再複製提案、公告與留言完整正文；通知或 Notion 處理留言時才依留言 ID 精準補讀，降低資料庫暫存量與重複寫入。
+- 提案、設備與公告列表加入驗證後、依帳號與完整請求隔離的 30 秒 Cloudflare POP cache；使用者 profile 改為 24 小時 IndexedDB cache，重按目前導覽 20 秒內不再重抓。
+- 桌面卡片改為滑鼠停留 180ms 後才預抓詳情，省流模式、2G、背景頁與手機 pointer 不預抓；未加入依額度百分比自動停用功能，避免系統自行改變產品行為。
+
+## v2.0.270｜免費額度模型與文件網站精簡
+
+2026-07-23
+
+- 完整移除已退役的網站分類產生器頁面、Vite entry、內容驗證與所有導覽入口；首頁規則展示保留為產品說明，分類操作統一導向正式系統設定文件。
+- 文件頁 header、三欄閱讀區與 footer 改為直接使用完整螢幕寬度，只保留固定 gutter；品牌副標改為 Docs，不再重複顯示 Novae。
+- 逐一核對 Supabase、Cloudflare、Firebase、Cloudinary、Upstash、Vercel、GitHub Pages／Actions 與選用 Notion 的 2026-07-23 官方免費額度，加入輕度、典型、重度 MAU 與跨學年容量公式。
+- 典型免費容量以約 800–1,000 MAU、160–200 同時在線、兩個完整學年規劃；同時刪除已由 session bootstrap 取代的舊 visit action，visit 降為每日一次、Firebase 驗證 warm cache 延長至安全的 5 分鐘，production Worker traces 改為 10% 抽樣。
+
+## v2.0.269｜全域動態流暢度與 Dialog 進場修正
+
+2026-07-22
+
+- 修正 Vue 只檢測 Transition 根節點而提前移除 Dialog 進場 class 的問題；Dialog 現在會先完成觸發按鈕的按壓反饋，再以較完整的 scale／fade 曲線顯示 surface，背景 backdrop 隨後漸進壓暗。
+- Backdrop 維持固定 12px 模糊、只動畫合成層 opacity，不再逐幀動畫昂貴的 `backdrop-filter`；Bottom Sheet 拖曳也改成每個 animation frame 合併 pointer 更新，並以 opacity 淡出背景。
+- Route 換頁移除會逐幀觸發 layout 的 logical inset 位移，改用較長的 Grid 疊層 crossfade；同時避免整頁 transform／backface，防止 iOS WebKit 再次出現 viewport 裁切與陰影殘影。
+- 放寬全域 motion 時間尺度，統一 Dialog、popover、通知回饋、手機 Bottom Tab、Header 返回鍵、側欄與圖片解碼淡入的 spring-like 節奏；提案附議進度改以 GPU `scaleX` 動畫，不再動畫寬度或使用 `transition-all`。
+
+## v2.0.268｜Dialog 景深與提案詳情預抓
+
+2026-07-22
+
+- Dialog 改用獨立全螢幕 backdrop，背景以 12px 模糊與較深 scrim 聚焦內容；backdrop 延後漸進進場，不再在觸發按鈕尚未完成回彈時突然讓整頁失焦。
+- 按鈕點擊後即使立刻進入 busy／disabled，仍會保留已捕捉的按壓表面直到回彈結束；Dialog surface、backdrop 與按壓狀態各自管理動畫，不互相截斷。
+- 提案卡片在 pointer、hover 或鍵盤 focus 顯示操作意圖時預抓單筆完整詳情；點擊後先以列表摘要立即顯示標題、狀態與正文／留言骨架，再原地補上完整內容。
+- 列表預抓與 Detail 頁共用相同的權限範圍快取 key 及 coalesced request；`getIssue` 的分類與政策前置查詢改為平行執行，不改變原有分類權限判斷。
+
+## v2.0.267｜按壓回饋清晰度與一致性
+
+2026-07-22
+
+- 小型按鈕的按壓膨起提高到 7%，並加強亮度與陰影；底部導覽、切換開關、導覽項目、下拉選單與內容操作依尺寸使用較合適的幅度。
+- 中性按鈕、list action bar 與互動列表列統一顯示灰色表面和卡片陰影；原色與危險操作維持既有色彩，以提亮取代不一致的灰底。
+- 共用 pointer 狀態改為每次放開後固定保留 160ms，不再因按住時間較長而立即消失；原生 `:active` 與程式保留狀態現在套用完全相同的視覺規則。
+- 手指移動超過 12px 仍會立即取消回饋，避免捲動列表時殘留放大狀態；減少動態效果設定繼續停用縮放。
 
 ## v2.0.266｜全域彈性按壓回饋
 

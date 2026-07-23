@@ -269,12 +269,11 @@ function renderShell({ lang, id, title, bodyHtml, outRel }) {
     <header class="site-header">
       <a class="brand" href="${assetPrefix}" aria-label="Novae">
         <span class="brand-mark" aria-hidden="true"><img src="${assetPrefix}logo.svg" alt="" /></span>
-        <span><strong>Novae</strong><small>Novae</small></span>
+        <span><strong>Novae</strong><small>Docs</small></span>
       </a>
       <nav aria-label="primary">
         <a href="${assetPrefix}">${isEn ? 'Home' : '首頁'}</a>
         <a class="is-active" href="${docsHomeHref}">${isEn ? 'Docs' : '文件'}</a>
-        <a href="${assetPrefix}category-builder.html">${isEn ? 'Category builder' : '設定產生器'}</a>
       </nav>
       <div class="header-actions">
         <a class="language-toggle" href="${altLangHref}" aria-label="${isEn ? 'Switch to Chinese' : 'Switch to English'}">${isEn ? '中' : 'EN'}</a>
@@ -302,7 +301,7 @@ function renderShell({ lang, id, title, bodyHtml, outRel }) {
     <footer class="site-footer">
       <a class="brand" href="${assetPrefix}" aria-label="Novae">
         <span class="brand-mark" aria-hidden="true"><img src="${assetPrefix}logo.svg" alt="" /></span>
-        <span><strong>Novae</strong><small>Novae</small></span>
+        <span><strong>Novae</strong><small>Docs</small></span>
       </a>
       <p>${isEn ? 'Open source for transparent campus participation.' : '為更透明、可追蹤的校園參與而開源。'}</p>
       <div>

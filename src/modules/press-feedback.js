@@ -1,5 +1,6 @@
 const selector = 'button:not(:disabled),a[href]:not([aria-disabled="true"]),[role="button"]:not([aria-disabled="true"])';
 const active = new Map();
+const RELEASE_VISIBLE_MS = 160;
 
 export function initializePressFeedback() {
   document.addEventListener('pointerdown', (event) => {
@@ -7,7 +8,7 @@ export function initializePressFeedback() {
     const element = event.target instanceof Element ? event.target.closest(selector) : null;
     if (!element) return;
     element.classList.add('is-pressing');
-    active.set(event.pointerId, { element, startedAt: performance.now(), x: event.clientX, y: event.clientY });
+    active.set(event.pointerId, { element, x: event.clientX, y: event.clientY });
   }, { capture: true, passive: true });
 
   document.addEventListener('pointermove', (event) => {
@@ -21,7 +22,7 @@ export function initializePressFeedback() {
     const press = active.get(event.pointerId);
     if (!press) return;
     active.delete(event.pointerId);
-    const remaining = immediate ? 0 : Math.max(0, 120 - (performance.now() - press.startedAt));
+    const remaining = immediate ? 0 : RELEASE_VISIBLE_MS;
     window.setTimeout(() => {
       const stillPressed = [...active.values()].some((value) => value.element === press.element);
       if (!stillPressed) press.element.classList.remove('is-pressing');

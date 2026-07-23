@@ -90,7 +90,7 @@ function validateNavigation() {
 
 function validateSiteLinkKeys() {
   const errors = [];
-  for (const file of ['index.html', 'category-builder.html']) {
+  for (const file of ['index.html']) {
     const source = fs.readFileSync(path.join(root, file), 'utf8');
     for (const match of source.matchAll(/data-site-href="([^"]+)"/g)) {
       for (const language of ['zh', 'en']) {

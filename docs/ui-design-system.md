@@ -74,16 +74,17 @@ Route view 不得自行增加另一套頁面級 `px-*`、`left-*`、`right-*`、
 
 ## 動態與頁面連續性
 
-- 全域可點擊元素使用無位移的輕微放大與 spring-like 回彈；小型控制幅度較大，大型卡片／列表幅度較小。共用 pointer 狀態至少保留 120ms，移動超過 12px 視為捲動並取消。不使用縮小、下沉、變暗或 inset shadow，也不模擬 Liquid Glass。
-- Route 換頁使用固定 Grid 儲存格疊放新舊頁；前進／返回以短距離 logical inset 搭配 opacity，同層 route 使用純 crossfade。不在離場時切換 absolute 定位，不使用會產生空白幀的 `out-in`，也不對包含陰影的整頁套用 transform。
+- 全域可點擊元素使用無位移的放大與 spring-like 回彈；小型控制使用更明顯的 7% 膨起與提亮，大型卡片／列表降低幅度。共用 pointer 狀態在放開後固定保留 160ms，移動超過 12px 視為捲動並取消；中性控制統一顯示灰色表面與卡片陰影，填色控制維持原色並提亮。不使用縮小、下沉、變暗或 inset shadow，也不模擬 Liquid Glass。
+- Route 換頁使用固定 Grid 儲存格疊放新舊頁，並以較完整的 opacity crossfade 表達連續性；不得動畫會逐幀觸發 layout 的 inset／margin，也不在離場時切換 absolute 定位、不使用會產生空白幀的 `out-in`、不對包含陰影的整頁套用 transform／backface，避免 iOS viewport 裁切與殘影。
 - Persistent Header 的控制項不得用立即移除造成文字跳位；返回鍵保留單一 DOM 並以寬度與 opacity 收合，標題維持單一內容實例，不做 keyed 雙層排版。
-- 頁內互斥分頁只使用短 opacity crossfade，並一律尊重 `prefers-reduced-motion`。
+- 頁內互斥分頁使用 opacity crossfade；Dialog、popover、通知回饋與導覽浮層可在自身局部合成層使用 `translate3d`／scale。所有動態一律尊重 `prefers-reduced-motion`，且不得以 `transition-all` 代替明確屬性。
 - 遠端圖片與本機預覽統一使用 block-level `DecodedImage`：原生圖片在 `load` 與 `decode()` 完成前維持透明並顯示 spinner，禁止直接露出瀏覽器的漸進式掃描繪製，也不得因 inline baseline 留下底部白邊；錯誤時必須結束 loading 並提供 fallback。
 - 觸控介面以 `touch-action: manipulation` 搭配 capture touchend 座標判斷阻止雙擊縮放，且保留雙指 pinch zoom；不得依賴兩次點擊命中完全相同的子節點。
 
 ## Dialog、表單與回饋
 
-- Dialog 統一由 `DialogShell` 管理 overlay、focus trap、body scroll lock、ARIA、dismiss 與 persistent 行為。
+- Dialog 統一由 `DialogShell` 管理 overlay、獨立全畫面 backdrop、focus trap、body scroll lock、ARIA、dismiss 與 persistent 行為。Transition 根節點必須提供可量測的生命週期，避免 Vue 提前移除子層 class；surface 與 backdrop 分開進場，按壓回彈先開始，再以延遲漸進壓暗背景。Backdrop 的 blur 固定，只動畫 opacity；不得逐幀動畫 `backdrop-filter` 或直接在整個 overlay 套 opacity。
+- Bottom Sheet 的 pointer move 必須以 `requestAnimationFrame` 合併，拖曳只更新局部 transform 與 backdrop opacity；進度條等長度變化優先使用固定寬度加 `scaleX`，避免動畫 width。
 - 桌面 Popup 不顯示拖曳把手，也不套用 Bottom Sheet 的頂部補償；外層 padding 應保持緊湊，卡片陰影空間由內層 scroll container 預留，避免以大量外距掩蓋裁切問題。
 - 沉浸式新增頁沿用 AppShell 的手機側距；底部動作列須扣除 safe area 的重複空白但仍避開 Home Indicator，桌面則在捲動內容內側預留控制項陰影空間。
 - 手機 `RoutePageFrame` 的 bottom-safe 內容與 Bottom Tab 使用同一個動態螢幕底距；Detail 頁底部操作列到 Tab、Tab 到螢幕底部應形成相同間距。

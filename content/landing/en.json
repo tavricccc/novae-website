@@ -6,8 +6,7 @@
   "skip": "Skip to content",
   "nav": {
     "home": "Home",
-    "docs": "Docs",
-    "builder": "Category setup"
+    "docs": "Docs"
   },
   "sectionNav": {
     "label": "Page chapters",
@@ -170,7 +169,7 @@
       "number": "03 / ADJUSTABLE RULES",
       "title": "Do not pick a preset.<br><em>Compose the right rules.</em>",
       "lede": "Configure during first sign-in and in System settings—no code changes required",
-      "builderCta": "See in-app category setup",
+      "docsCta": "Read the system settings guide",
       "stepLabel": "Rule module",
       "dimensions": [
         {
