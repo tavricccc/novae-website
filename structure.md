@@ -7,7 +7,7 @@
 - `content/landing/zh.json` / `en.json`：首頁雙語文案，兩邊資料結構必須一致。
 - `content/docs-navigation.mjs`：文件側邊欄、順序、上一頁／下一頁與部署教學清單。
 - `content/changelog.md`：網站顯示的產品更新紀錄。
-- `docs/` / `docs/en/`：繁中與英文 Markdown 文件來源；`configuration.md`、`admin-guide.md` 與 `user-guide.md` 維護語言優先 Setup、動態提案／設備分類、分類優先授權與通知收件矩陣；`costs.md` 以同一組 2026-07-23 官方額度與 MAU／學年模型逐平台估算免費容量，並記錄 180 天結案硬刪除、Notion 長期副本、驗證後 Worker 列表快取與不自動停用功能的成本防線；`ui-design-system.md` 定義 Atomic Design、可復用元件、三階陰影、全域 motion、獨立 Dialog backdrop 與新 UI 交付清單；`contributing.md` 集中 `test:env`、`verify:stress` 與一般驗證規則；`architecture.md` 說明前端邊界、Detail intent 預抓與一次性摘要 seed；`deployment/cloudflare.md` 說明 Worker、workers.dev、API token 與 CORS 設定。
+- `docs/` / `docs/en/`：繁中與英文 Markdown 文件來源；`configuration.md`、`admin-guide.md` 與 `user-guide.md` 維護語言優先 Setup、動態提案／設備分類、分類優先授權與通知收件矩陣；`costs.md` 以同一組 2026-07-23 官方額度與 MAU／學年模型逐平台估算免費容量，並記錄 180 天結案硬刪除、Notion 長期副本、驗證後 Worker 列表／媒體快取與不自動停用功能的成本防線；`ui-design-system.md` 定義 Atomic Design、可復用元件、三階陰影、全域 motion、獨立 Dialog backdrop 與新 UI 交付清單；`contributing.md` 集中 `test:env`、`verify:stress` 與一般驗證規則；`architecture.md` 說明前端邊界、統一 Media Gateway、Detail intent 預抓與一次性摘要 seed；`deployment/cloudflare.md` 說明 Worker、workers.dev、API token、媒體入口與 CORS 設定。
 
 ## 頁面與互動
 

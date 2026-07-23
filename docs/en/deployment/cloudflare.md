@@ -74,6 +74,8 @@ EDGE_ORIGIN_SECRET
 
 Do not duplicate these values manually in Cloudflare Worker Settings or Supabase. After changing a GitHub secret, rerun `Deploy Supabase Backend`; Actions synchronizes and deploys everything automatically.
 
-Rate Limiting bindings and their `namespace_id` values are declared in the application repository's `cloudflare/wrangler.toml`. Worker deployment creates them automatically: there is no separate Dashboard service to register and no additional secret. Production and development use separate namespaces so test traffic cannot consume production counters.
+Rate Limiting bindings and their `namespace_id` values are declared in the application repository's `cloudflare/wrangler.toml`, including a separate burst limit for media delivery. Worker deployment creates them automatically: there is no separate Dashboard service to register and no additional secret. Production and development use separate namespaces so test traffic cannot consume production counters.
+
+The same Worker exposes `/v1/media/...`. The backend workflow synchronizes the existing Cloudinary cloud name/API secret and `EDGE_ORIGIN_SECRET` to it. Cloudinary credentials are used only to construct the authenticated origin URL inside the Worker; the origin secret signs and verifies domain-separated media capabilities. Reuse the GitHub secrets already created by the Cloudinary and Edge setup pages—do not add a second media secret or duplicate values manually in the Cloudflare Dashboard.
 
 All eight service setups are now complete. Next, use the [credential worksheet](../environment-configuration.md) to add every value to GitHub `production` Environment secrets.

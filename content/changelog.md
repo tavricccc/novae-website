@@ -1,6 +1,30 @@
 # 更新紀錄
 
-累計更新：812 次
+累計更新：815 次
+
+## v2.0.276｜圖片統一改由 Cloudflare Media Gateway 傳送
+
+2026-07-23
+
+- 提案、留言、公告、設備附件、使用者頭像與 Notion 圖片匯入不再暴露 Cloudinary delivery URL，統一經過既有 Cloudflare Worker。
+- Worker 驗證公開或 15 分鐘私人媒體簽章後，先讀共享 edge cache；只有首次未命中才向 Cloudinary 取得私有原圖，私人圖片仍會在每次重新取得網址時由後端確認權限。
+- 圖片列改載固定 320×240 縮圖，正文與燈箱才使用完整圖片；頭像固定 96×96。Cloudinary 上傳 preset 移除重複 incoming resize transformation，舊 delivery URL 資料欄位與過期清理流程同步刪除。
+
+## v2.0.275｜Firebase Auth 部署同步範圍修正
+
+2026-07-23
+
+- 後端部署不再使用會連帶推送 API、資料庫、一般 Auth、Storage 與付費 Vector Bucket 預設值的全量 Supabase config push。
+- 改由官方 Management API 只同步 Firebase Third-Party Auth issuer，部署會先查詢、缺少時建立、清除過期 Firebase issuer，再重新讀取確認唯一正確設定；免費方案不再因 Vector Bucket 收到 402。
+- Supabase CLI 鎖定為與專案依賴一致的版本，避免 CI 使用 `latest` 時因未預告的 CLI 行為變動影響部署。
+
+## v2.0.274｜Realtime Firebase JWT／JWKS 授權修正
+
+2026-07-23
+
+- private Realtime channel 現在會先等待 Firebase token 寫入 Realtime client，再訂閱內容、公告與通知 topic，避免啟動時以未授權身分加入後持續重連。
+- Firebase 新帳號同步取得 `authenticated` claim 後會清除舊 token 快取，防止 Realtime 在一小時內持續沿用尚未帶角色的登入前 token。
+- Supabase 設定正式納入 Firebase Third-Party Auth，後端部署會同步推送 Auth configuration，讓 Hosted Realtime 從正確的 Google JWKS 驗證 Firebase `kid`；原有 private channel RLS 範圍維持不變。
 
 ## v2.0.273｜資料庫函式解析路徑安全加固
 

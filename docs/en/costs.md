@@ -16,7 +16,7 @@ A typical 1,000-user deployment should plan for **160–200 concurrent users and
 
 A typical MAU is active on 12 days per month and performs eight signed-in actions per active day. Adding 25% for prefetching, reconnects, and retries gives `12 × 8 × 1.25 = 120` Cloudflare Worker and Supabase Edge requests. At a planned average response of 40 KB, one MAU consumes about `120 × 40 KB = 4.8 MB` of Supabase egress per month.
 
-The media model uses five new images per user per school year, 350 KB after compression, four deliveries per stored image per month, and one transformation per image. Capacity recommendations use 80% of a published allowance to leave room for peaks and measurement differences.
+The media model uses five new images per user per school year, 350 KB after compression, and four views per stored image per month. Image strips first load a 320×240 thumbnail and fetch the full image only for document display or the lightbox. Cloudflare counts each original plus fixed variant as a unique transformation; Cloudinary delivery occurs only when the Worker edge cache misses.
 
 ## Provider-by-provider calculation
 
@@ -33,7 +33,9 @@ A free project [may pause after one week of inactivity](https://supabase.com/pri
 
 ### Cloudflare Workers
 
-[Workers Free](https://developers.cloudflare.com/workers/platform/limits/) includes 100,000 requests per day, 10 ms CPU per invocation, and 128 MB memory. Novae only validates origin, JWT, burst limits, and forwards the request.
+[Workers Free](https://developers.cloudflare.com/workers/platform/limits/) includes 100,000 requests per day, 10 ms CPU per invocation, and 128 MB memory. API actions and every media request count as Worker requests; a media cache hit still counts as a request but avoids a Cloudinary origin fetch. The Worker does not perform database work.
+
+[Cloudflare Images Free](https://developers.cloudflare.com/images/pricing/) includes 5,000 unique transformations per month. Novae uses only a fixed 320×240 thumbnail and 96×96 avatar variant; repeat reads of the same original and parameters in the same month do not count again.
 
 At ten typical daily requests per user, the theoretical ceiling is about 10,000 DAU, or 8,000 with headroom. Production observability now samples 10% of traces instead of logging every normal request.
 
@@ -47,7 +49,7 @@ Novae does not use Phone Auth. Web App Check uses reCAPTCHA Enterprise, which in
 
 The [Free plan](https://cloudinary.com/documentation/billing_and_plans) supplies 25 credits in a rolling 30-day window. One credit is 1,000 transformations, 1 GB storage, or 1 GB image bandwidth, and all three are added together.
 
-Under this model, 1,000 users in the first school year consume about 1.75 storage credits, seven delivery credits, and 0.42 monthly transformation credits: about 9.2 credits. Treating second-year archived images as equally popular gives about 18.4 credits. That supports two years conservatively; larger images or more than ten monthly deliveries per image can make Cloudinary the earlier constraint.
+If every view is conservatively treated as a first request from a new Cloudflare location, 1,000 users in the first school year still cap at about 9.2 Cloudinary credits. Real Worker cache hits reduce Cloudinary delivery bandwidth. Treating second-year archived images as equally popular leaves the same conservative ceiling of about 18.4 credits.
 
 ### Upstash Redis
 
@@ -78,10 +80,10 @@ Notion publishes no monthly API request quota, so throughput—not user count—
 - The Firebase Redis record keeps an absolute creation time while warm Edge isolates reuse it for up to five minutes, preserving the 15-minute revocation window.
 - Production Cloudflare observability samples 10% of traces.
 - After Firebase authentication, issue, facility, and announcement lists use a 30-second Cloudflare POP cache isolated by UID, Origin, and the complete request digest. Hits skip Supabase Edge while browser responses remain `no-store`.
-- Lists, details, comments, notifications, and image URLs use account-scoped persistent caching, request coalescing, and Realtime invalidation.
+- Lists, details, comments, and notifications use account-scoped persistent caching, request coalescing, and Realtime invalidation. Edge signs media URLs in batches, while the Worker shares cached image bytes.
 - Public author profiles are fetched in batches of 50 and kept in IndexedDB for 24 hours. Re-tapping active navigation is coalesced for 20 seconds, while desktop detail prefetch requires a 180 ms dwell and is disabled for data saver, 2G, background tabs, and mobile pointers.
 - Outbox rows retain identifiers required for delivery and synchronization instead of duplicating full content. Comment text is fetched by ID only when a worker processes that event.
-- Browser WebP compression and the Cloudinary preset cap images at 800 KB and 2,000 px.
+- Browser WebP compression caps images at 800 KB and 2,000 px. The Cloudinary preset retains format and file-size validation without a duplicate incoming resize transformation.
 - Unchanged Notion content hashes are skipped, while outbox, notification, and deletion retries remain bounded.
 - Closed issues and facility reports retain their full data for 180 days from closure, then their comments, per-user relations, database rows, and Cloudinary images are permanently deleted. Notion pages remain as a manual long-term record. Announcements are retained indefinitely.
 

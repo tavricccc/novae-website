@@ -9,7 +9,10 @@ flowchart LR
   E --> R[Upstash business quotas and auth cache]
   E --> P[Postgres + RLS + RPC]
   P -->|Private Broadcast| U
-  U --> C[Signed Cloudinary upload]
+  U --> CLD[Signed upload to private Cloudinary original]
+  U -->|public or short-lived private media URL| C
+  C -->|verify, then shared edge cache| MC[Cloudflare Media Cache]
+  MC -->|origin miss only| CLD
   P --> O[Outbox]
   O --> W[Notifications + FCM + Notion]
   G[GitHub Actions] --> E
@@ -45,13 +48,17 @@ Outbox, deletion, Push delivery, and maintenance tables store only `error_trace_
 
 ## Cold-start reads and Edge invocations
 
-The public gateway remains the Cloudflare Worker. Each forwarded action still counts as one Supabase Edge Function invocation. Production browser Google sign-in uses the Google Identity Services Token Client, then Firebase `signInWithCredential`; there is no production Firebase redirect recovery path. After sign-in, the client prefers a single `getSessionBootstrap` read for role and permissions, category catalog, content revisions, and notification unread state, and may record the platform visit in the same call. Navigation chrome and leaving the login page wait for that bootstrap so the default proposal category is seeded before the bottom bar or sidebar appears; the sign-in control stays busy until bootstrap settles. Granular actions remain for partial refresh and management writes. Cost control comes from merged reads and client caches, not from moving domain logic into the Worker.
+The public gateway remains the Cloudflare Worker. Each forwarded action still counts as one Supabase Edge Function invocation. Production browser Google sign-in uses the Google Identity Services Token Client, then Firebase `signInWithCredential`; there is no production Firebase redirect recovery path. After sign-in, the client prefers a single `getSessionBootstrap` read for role and permissions, category catalog, content revisions, and notification unread state, and may record the platform visit in the same call. Navigation chrome and leaving the login page wait for that bootstrap so the default proposal category is seeded before the bottom bar or sidebar appears; the sign-in control stays busy until bootstrap settles. Granular actions remain for partial refresh and management writes. The Media Gateway only verifies signed media capabilities, applies fixed variants, and serves edge-cached bytes; Edge still decides whether a user may receive a private URL.
 
 ## One runtime category source
 
 Guided setup and System settings share the same category selection and editor structure and write feature switches and categories through controlled backend actions to Postgres; setup explicitly defers manager assignment until those people have registered. Proposal and facility boards both select from the same runtime catalog, and creation plus list queries preserve the category scope; disabled features are hidden from navigation while existing records remain manageable. Categories have no archive state, and the database forces every retained category to remain available. Category deletion permanently removes its records, relations, notifications, and image references in one controlled flow and queues external image deletion. Edge authorization, workflows, manager assignments, and notifications use those records. Feature switches and category drafts are saved together so a partial update cannot leave only one side applied. Proposal creation snapshots privacy, comments, support, and deadlines onto the proposal. Database triggers permanently lock read access and author visibility after category creation.
 
 Platform-administrator identity comes only from `ADMIN_EMAILS`; category assignments are separate scoped data. New proposals and facility reports create personal notifications for explicitly assigned managers rather than an administrator broadcast, so platform administrators are not implicit recipients. Author display for content and comments is loaded by UID so the client does not keep a drifting author copy.
+
+## Unified media delivery
+
+The browser still uploads directly to Cloudinary with a controlled signature, while Cloudinary stores authenticated originals. Every read—content attachments, avatars, and Notion imports—uses the Cloudflare Media Gateway instead of exposing a Cloudinary delivery URL. Edge issues stable public URLs or private URLs valid for about 15 minutes. After validating the signature, the Worker checks its shared edge cache and contacts Cloudinary only on a miss. Image strips load one fixed 320×240 thumbnail; document images and the lightbox load the full image. Private responses are not retained in the browser, but authorized users can share the Worker-side cached bytes.
 
 ## Realtime updates and authentication cache
 

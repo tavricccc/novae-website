@@ -129,7 +129,9 @@ EDGE_ORIGIN_SECRET
 
 不用在 Cloudflare Worker Settings 或 Supabase Dashboard 再手動填一次。修改 GitHub secret 後，重新執行 `Deploy Supabase Backend`，Action 就會自動同步並部署。
 
-Rate Limiting bindings 與各自的 `namespace_id` 已宣告在主程式 `cloudflare/wrangler.toml`。它們會隨 Worker 自動建立，不需要在 Cloudflare Dashboard 另外註冊服務，也不需要新增 secret。production 與 development 使用不同 namespace，測試流量不會消耗正式環境計數。
+Rate Limiting bindings 與各自的 `namespace_id` 已宣告在主程式 `cloudflare/wrangler.toml`，其中包含 API、同步、webhook 與圖片入口的獨立 burst limit。它們會隨 Worker 自動建立，不需要在 Cloudflare Dashboard 另外註冊服務，也不需要新增 secret。production 與 development 使用不同 namespace，測試流量不會消耗正式環境計數。
+
+同一個 Worker 也提供 `/v1/media/...` 圖片入口。部署 workflow 會把 Cloudinary cloud name／API secret 與既有 `EDGE_ORIGIN_SECRET` 同步給 Worker：前者只在 Worker 內組出 authenticated 原圖網址，後者以用途隔離的 HMAC 簽發／驗證媒體網址。這些值沿用 Cloudinary 與 Edge 設定頁已建立的 GitHub secrets，不需要新增另一組媒體 secret，也不要手動貼到 Cloudflare Dashboard。
 
 ## 完成檢查
 
@@ -138,6 +140,7 @@ Rate Limiting bindings 與各自的 `namespace_id` 已宣告在主程式 `cloudf
 - [ ] Account ID 來自正確 Cloudflare 帳號。
 - [ ] API token 只授權需要的帳號與 Workers 部署。
 - [ ] `ALLOWED_ORIGINS` 含 `https://`，且最後沒有 `/`。
+- [ ] `Deploy Supabase Backend` 已重新執行，讓 Worker 同步取得 Cloudinary delivery secrets 並建立圖片限流 binding。
 - [ ] namespace 與 origin secret 是兩個獨立隨機值。
 
 八項服務到此準備完成。下一步開啟[憑證填寫表](../environment-configuration.md)，一次核對並填入 GitHub `production` Environment secrets。
