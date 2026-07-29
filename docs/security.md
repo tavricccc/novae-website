@@ -17,7 +17,7 @@ Novae 的安全模型是假設瀏覽器、使用者輸入與公開網路都不�
 
 | 邊界 | 控制 |
 | --- | --- |
-| 瀏覽器 | 只持有公開 config；內容清理、CSP、無敏感憑證 |
+| 瀏覽器 | 只持有公開 config；內容清理、依部署 origin 產生的精確 CSP、無敏感憑證 |
 | Firebase | token signature、project/audience、verified Email、允許網域 |
 | Cloudflare Worker | 固定公開入口、CORS、Firebase token、webhook 簽章、原生 Rate Limiting bindings |
 | Edge Functions | 私密隨機名稱、origin secret、action allowlist、角色、schema、冪等與 request ID |
@@ -41,6 +41,8 @@ Novae 的安全模型是假設瀏覽器、使用者輸入與公開網路都不�
 - 一般 JSON 與 webhook request body 上限為 64 KB，避免大型無效內容消耗解析記憶體與執行時間。
 - Supabase 透過 Upstash 精確限制建立、留言、附議、按讚、「我也遇到」、管理、刪除、偏好與 Push 等業務操作；Postgres 關係表與 transaction counter 仍是正式數量來源。
 - 每位使用者最多保留 10 個 Push 裝置；既有裝置可以更新 token，但新裝置不能無限增加通知 fan-out。
+- `localStorage`／`sessionStorage` 只保存非敏感偏好、快取與裝置識別，且所有讀寫都允許安全失敗；授權不能依賴瀏覽器 storage。
+- Push payload 只在待送與可重試期間保留，成功後清空；worker 以租約避免同一 delivery 被同時處理。
 - Realtime 只允許訂閱經 RLS 授權的私有 Broadcast topics，登入者不能直接讀取通知與即時事件私有表。
 - 新提案與新設備回報使用個人通知，只送給該分類明確指派且符合通知設定的負責人；平台總管理員不因角色自動收件，避免無關個資擴散。
 - Cloudinary preset 在供應商端強制 authenticated WebP、800 KB 與最長邊 2000 px；webhook 仍會再次驗證結果並排程刪除不合規資源。

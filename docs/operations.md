@@ -16,7 +16,7 @@
 | 頻率 | 依序檢查 |
 | --- | --- |
 | 每日 | 待審核、未回覆、Dashboard 錯誤、outbox backlog、Functions 失敗 |
-| 每週 | 圖片 pending／刪除工作、Notion／FCM 失敗、Redis 與資料庫用量 |
+| 每週 | 圖片 pending／刪除工作、Notion reservation、Push delivery 重試、Redis 與資料庫用量 |
 | 每月 | GitHub/Cloudflare/Vercel/Supabase/Firebase/Cloudinary/Upstash/Notion 帳單與 token、備份還原演練 |
 | 每學期 | 網域、管理員、分類、附議人數與天數、回應期限、隱私告知 |
 
@@ -35,6 +35,8 @@
 - 圖片在 Cloudinary；資料庫保存受控識別與狀態。復原要一起驗證兩邊的一致性。
 - 刪除經 deletion job 處理；不要手動刪 Cloudinary 後留下資料庫引用。
 - 保留期清理會在刪除提案／設備時一併排入既有 Notion 頁面的刪除標記，不會對使用者產生一般刪除通知；應從 maintenance details 與 outbox 狀態確認完成。
+- Push delivery 暫時失敗時應保留 payload、增加 attempts 並設定下次執行時間；成功後狀態為 sent 且 payload 清空。不要手動把 failed row 標成 sent，先依 `error_trace_id` 查 FCM／worker log。
+- Notion mapping 若短暫顯示 `pending:<uuid>`，先確認 worker 是否仍在重試；超過 reservation 時限會由後續工作接手並以 `Novae ID` 找回遠端頁面，不要人工再建一頁。
 - 已部署 migration 不回改；schema 變更新增後續 migration。
 
 ## 變更分類前
@@ -42,7 +44,7 @@
 1. 在「系統設定 → 分類與處理流程」確認分類是否已有提案、報修或管理員指派。
 2. 已建立的 ID、閱讀範圍與作者顯示不能修改；需要不同隱私規則時新增分類。刪除舊分類會永久刪除其中所有案件與關聯資料，不是封存，操作前必須確認資料確實不需保留。
 3. 留言、附議與期限只影響新提案，先記錄生效時間。
-4. 功能開關與分類草稿會一次儲存；儲存前確認提案／設備是否仍應啟用，以及每個已啟用功能都有可用分類。
+4. 功能開關與提案／設備分類的新增、修改、刪除草稿會在同一交易儲存；儲存前確認提案／設備是否仍應啟用，以及每個已啟用功能都有可用分類。若畫面回報失敗，整批都不應生效，重新整理確認後再重試。
 5. 修改後逐分類建立多件提案與設備測試案件，確認建立、列表篩選、留言、狀態與刪除都維持分類範圍。
 6. 確認新提案只通知提案分類負責人，新報修只通知已開啟通知的設備分類負責人；未指派的平台總管理員不得收到。
 7. 在「人員與管理權限」確認每個分類的既有負責人、多人指派、修改通知設定與撤銷都正確；查找可用姓名、Email 或 UID。

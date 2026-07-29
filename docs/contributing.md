@@ -49,6 +49,8 @@ npm run db:lint:local
 npm run verify:local
 ```
 
+這個入口會依序執行型別與未使用宣告檢查、雙語與 UI primitive 規則、lint、production build、建置體積預算、Worker／Edge 型別、Vitest 單元測試、架構測試與完整 npm audit。建置預算目前限制 production 字型最多 160 個／9.2 MiB、JavaScript 1.3 MiB、CSS 550 KiB；若確實需要調高，PR 必須說明產品理由與量測結果，不可直接移除門檻。
+
 若修改後端 action、權限、RPC、RLS、migration、Edge Function 或 worker：
 
 ```bash
@@ -71,7 +73,7 @@ npm run verify:stress
 
 PR CI 會自動執行兩套驗證。Windows 直接在 PowerShell 執行 npm 指令即可；整合驗證會自動轉入 WSL。Windows 需要 WSL 2、Docker，以及 WSL `PATH` 內的 Supabase CLI 與 Deno；Linux 與 CI 不需要 WSL。
 
-整合驗證會重建隔離的本地 Supabase、套用全部 migration、執行 database lint，再檢查 action、權限、RLS、冪等與 worker lifecycle。`.env.local` 可省略；即使存在，Supabase 網址與金鑰也會強制換成本地值，不會寫入遠端資料。
+整合驗證會重建隔離的本地 Supabase、套用全部 migration、執行 database lint，再檢查 action、權限、RLS、冪等與 worker lifecycle。外部服務測試器可注入 FCM 暫時失敗，必須實際斷言 delivery 留在持久化佇列、退避後重試成功且 payload 清除。`.env.local` 可省略；即使存在，Supabase 網址與金鑰也會強制換成本地值，不會寫入遠端資料。
 
 ### 何時補整合測試
 
@@ -83,6 +85,7 @@ PR CI 會自動執行兩套驗證。Windows 直接在 PowerShell 執行 npm 指�
 | RLS | 依適用範圍測 anon、authenticated、service role |
 | 冪等寫入 | 缺少 request ID、首次執行、相同 ID replay |
 | worker／outbox／刪除工作 | claim、完成或失敗、retry／deduplication |
+| composable／瀏覽器儲存／元件互動 | 在 `tests/unit/` 補 Vitest 成功與失敗情境 |
 | 純前端版面 | 通常不需補整合測試，跑 `verify:local` |
 
 不得只加入沒有 assertion 的 action 呼叫來通過 coverage guard。新增案例放進 `tests/integration/` 最接近的領域檔案；若建立新領域檔，也要加入 `action-coverage.test.ts` 的掃描清單。

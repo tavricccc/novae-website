@@ -24,6 +24,8 @@ Novae treats the browser, user input, and public network as untrusted. Authentic
 - JSON and webhook request bodies are capped at 64 KB.
 - Supabase uses Upstash for precise quotas covering creation, comments, support, likes, affected reports, administration, deletion, preferences, Push tokens, and images. PostgreSQL relationships and transactional counters remain authoritative.
 - Each user may keep at most 10 Push devices. Existing devices can refresh tokens, but new devices cannot grow notification fan-out indefinitely.
+- `localStorage` and `sessionStorage` contain only non-sensitive preferences, caches, and device identifiers, and every access may fail safely; authorization never depends on browser storage.
+- Push payloads persist only while pending or retryable, are cleared after success, and use leases to prevent concurrent processing of one delivery.
 - Realtime subscriptions are limited by RLS to authorized private Broadcast topics; authenticated clients cannot directly read private notification and realtime-event tables.
 - New proposals and facility reports use personal notifications for explicitly assigned category managers whose notification preference applies. Platform administrators are not implicit recipients, limiting unnecessary exposure of record details.
 - The Cloudinary preset enforces authenticated WebP images, 800 KB maximum size, and a 2,000 px long edge at the provider. The webhook validates the result again and schedules non-compliant assets for deletion.

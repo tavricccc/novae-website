@@ -29,6 +29,8 @@ It starts local Supabase, Edge Functions, Firebase Auth Emulator, the Cloudflare
 npm run verify:local
 ```
 
+This entry point runs type and unused-declaration checks, bilingual and UI-primitive validation, lint, a production build, build budgets, Worker/Edge type checks, Vitest unit tests, architecture tests, and a full npm audit. Current production budgets allow at most 160 font files / 9.2 MiB of fonts, 1.3 MiB of JavaScript, and 550 KiB of CSS. A pull request may raise a budget only with a measured product reason; do not remove the gate.
+
 For backend actions, permissions, RPCs, RLS, migrations, Edge Functions, or workers:
 
 ```bash
@@ -51,7 +53,7 @@ It expands from the runtime catalog and covers every proposal and facility categ
 
 PR CI runs both suites. On Windows, run the npm command from PowerShell; the integration launcher enters WSL automatically. Windows requires WSL 2, Docker, and Supabase CLI plus Deno in the WSL `PATH`. Linux and CI do not need WSL.
 
-The integration suite rebuilds an isolated local Supabase stack, applies every migration, runs database lint, and checks actions, permissions, RLS, idempotency, and worker lifecycles. `.env.local` is optional. Supabase URLs and keys are always replaced by local values, so the suite does not write remote application data.
+The integration suite rebuilds an isolated local Supabase stack, applies every migration, runs database lint, and checks actions, permissions, RLS, idempotency, and worker lifecycles. Its external-provider receiver can inject a transient FCM failure; the test must assert that delivery remains durable, retries after backoff, succeeds, and clears its payload. `.env.local` is optional. Supabase URLs and keys are always replaced by local values, so the suite does not write remote application data.
 
 Add integration assertions when introducing or changing:
 
@@ -61,6 +63,7 @@ Add integration assertions when introducing or changing:
 - RLS: anon, authenticated, and service-role access as applicable;
 - idempotent writes: missing request ID, first execution, and replay;
 - workers, outbox, or deletion jobs: claim, completion/failure, retry, and deduplication.
+- composables, browser storage, or component interactions: successful and failure behavior in `tests/unit/`.
 
 Pure frontend layout work normally needs only `verify:local`. The action coverage guard rejects registered actions that are not referenced by a domain integration test. Do not bypass it with a call that has no assertion.
 

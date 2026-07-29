@@ -47,6 +47,8 @@ flowchart LR
 
 手機底部導覽在已登入且角色 bootstrap 完成後的根頁與一般子頁持續顯示；提案、設備與公告的新增路由是專注輸入頁，會暫時隱藏底欄並以 Visual Viewport 避免鍵盤擠壓。登入過程中不提前露出底欄與側欄，避免半登入狀態。`AppShell` 讓一般頁面的捲動視窗延伸到導覽背後，`RoutePageFrame` 與 `route-scroll-through` 再把 safe area、浮動間距及導覽高度放進內容尾端；內容可穿透導覽所在區域，捲到底時最後一項仍能完整露出。路由來源只負責返回目的地，導覽 shell 與內容狀態保持分離。正式環境 Google 登入使用 Google Identity Services Token Client，再以 Firebase credential 建立 session；登入頁在使用者就緒後會等角色與分類目錄再導向預設提案分類，過程中登入按鈕維持 busy，避免重複送出。
 
+前端對 `localStorage` 與 `sessionStorage` 的存取統一經過安全 helper；瀏覽器封鎖 storage、無痕模式、quota 或 SSR 都只能讓快取退化，不能阻止登入、更新或 Push 裝置流程。Production HTML 依目前 API 與 Supabase origins 產生精確 CSP，與 Vercel header 共同限制 script、frame、connect、image 與 worker 來源。HarmonyOS Sans TC 只打包實際使用的 400／500／600／700，字族與視覺權重不變。
+
 ## 本地化與錯誤契約
 
 前端語系目錄使用 `src/i18n/messages/<locale>/<domain>.ts`，每個檔案只維護自己的功能領域，key 採短而穩定的語意名稱。繁中與英文必須擁有相同 key；前端只能用 key 查詢字串，不以中文原文反查翻譯。
@@ -81,13 +83,15 @@ flowchart LR
 
 分類、設備分類、平台功能開關與管理員指派以 Postgres 為單一來源。首次設定與系統設定共用相同的分類選擇與編輯結構；首次完成時先略過尚未註冊人員的負責人指派。提案與設備看板都從同一 runtime catalog 選擇分類，建立與列表查詢都保存分類範圍；關閉的功能不會出現在導覽，但既有資料仍可管理。分類沒有封存狀態，資料庫強制既有分類保持可用；刪除分類會在同一受控流程永久刪除其中案件、關聯、通知與圖片引用並排入外部圖片刪除工作。建立提案時會把隱私、留言、附議與期限規則快照到案件；分類日後調整只影響新案件。閱讀範圍與作者顯示由資料庫 trigger 鎖定，前端條件不承擔安全責任。
 
-系統設定將功能開關與兩邊分類草稿一次寫入受控 backend action，避免只更新其中一部分。平台總管理員只由 `ADMIN_EMAILS` 產生；分類指派則是獨立的 scope 資料。新提案與新設備回報寫入個人通知給該分類明確負責人，不使用管理員廣播，因此平台總管理員不會因角色自動成為收件人。
+系統設定先在前端暫存變更，最後將功能開關、兩邊分類的新增／修改／刪除草稿一次寫入受控 backend action 與單一 Postgres 交易；驗證或任一步驟失敗時全部回滾，不會留下部分分類或功能狀態。平台總管理員只由 `ADMIN_EMAILS` 產生；分類指派則是獨立的 scope 資料。新提案與新設備回報寫入個人通知給該分類明確負責人，不使用管理員廣播，因此平台總管理員不會因角色自動成為收件人。
 
 內容與留言的作者顯示改以 UID 讀取使用者資料，避免前端另外保存可漂移的作者副本。
 
 ## 資料與副作用
 
-Postgres 是 source of truth。需要通知、Push、Notion 或其他外部服務的交易，先在同一資料庫交易寫入 outbox，再由 worker 執行。這讓主要資料成功不依賴第三方當下是否在線，也讓失敗可以重試與追蹤。
+Postgres 是 source of truth。需要通知、Push、Notion 或其他外部服務的交易，先在同一資料庫交易寫入 outbox，再由 worker 執行。Push 另以 delivery key 建立持久化工作，由短租約 claim；暫時性 FCM 錯誤會記錄 attempts 與下次執行時間並指數退避，擁有它的 outbox 事件保持失敗狀態以讓既有排程再次喚醒 worker。成功後清除 payload，永久無效的 token 會移除。
+
+Notion 建立頁面前先在 Postgres 取得 `pending:<uuid>` reservation，頁面帶有穩定的 `Novae ID`。若遠端建立成功後本機 mapping 寫入中斷，重試會先依 ID 找回同一頁再完成 mapping；過期 reservation 可被安全接手，避免重複頁面。
 
 保留期清理提案或設備時，若存在 Notion 對應頁面，會在刪除主資料的同一交易排入刪除同步事件；這類排程清理不會另發使用者通知，但仍會由正常 outbox 重試與追蹤。
 

@@ -15,6 +15,8 @@ Do not create `NOTION_TOKEN`, `NOTION_DATABASE_ID`, or `NOTION_DATA_SOURCE_ID` i
 5. For a database with one data source, Novae discovers and caches the data source ID automatically. For multiple data sources, copy the intended ID from `Manage data sources` and store it as `NOTION_DATA_SOURCE_ID`.
 6. Do not create `NOTION_VERSION`. The application is pinned to Notion API `2026-03-11`, uses data source endpoints for schema changes, and creates pages with a `data_source_id` parent.
 
+Novae automatically maintains a `Novae ID` rich-text property so retries can recover a remotely created page whose local mapping was interrupted. Do not delete, rename, duplicate, or manually edit this property; it is not an operator-facing sequence number. A temporary `pending:<uuid>` mapping is the worker reservation and can be reclaimed after it becomes stale.
+
 Supabase remains the source of truth. Notion is an operations copy, not an authorization database or backup replacement.
 
 `NOTION_TOKEN` and `NOTION_DATABASE_ID` must be supplied together. A partial pair is rejected during deployment. `NOTION_DATA_SOURCE_ID` is accepted only with that pair, and the runtime verifies that it belongs to the configured database.

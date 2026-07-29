@@ -24,12 +24,15 @@ Novae 可以透過 outbox worker 把提案與公告同步成營運副本。這�
 
 程式固定使用 Notion API `2026-03-11`，schema 由 data source API 管理，建立頁面也以 `data_source_id` 為 parent。不要建立 `NOTION_VERSION` secret；版本需與程式資料模型一起更新。
 
+Novae 會自動維護 `Novae ID` rich text 欄位，用來在重試時找回已建立但尚未完成本機 mapping 的頁面。請勿刪除、改名或手動重複這個欄位；它不是給管理員編輯的顯示編號。短暫的 `pending:<uuid>` mapping 是 worker reservation，過期後可由後續重試安全接手。
+
 ## 完成檢查
 
 - [ ] integration 是 internal integration。
 - [ ] 原始 database 已分享給 integration。
 - [ ] token 與 database ID 屬於同一 workspace。
 - [ ] 多 data source database 已設定正確的 `NOTION_DATA_SOURCE_ID`；單一來源則可省略。
+- [ ] 保留程式管理的 `Novae ID` 欄位，不人工修改。
 - [ ] 了解 Notion 是營運副本，不能取代 Supabase 備份。
 
 若啟用，`NOTION_TOKEN` 與 `NOTION_DATABASE_ID` 必須一起填；只填其中一個會被 workflow 拒絕。`NOTION_DATA_SOURCE_ID` 只能在這兩者都存在時設定，程式也會驗證它確實屬於指定 database。
