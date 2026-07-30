@@ -1,82 +1,8 @@
-@font-face{
-  font-family:'tabler-icons';
-  src:url('../../node_modules/@tabler/icons-webfont/dist/fonts/tabler-icons.woff2') format('woff2');
-  font-style:normal;
-  font-weight:400;
-  font-display:block
-}
-
 .ti{
   display:inline-block;
-  font-family:'tabler-icons'!important;
-  font-style:normal;
-  font-weight:400;
+  width:1em;
+  height:1em;
+  flex:none;
   line-height:1;
-  speak:none;
-  -webkit-font-smoothing:antialiased;
-  -moz-osx-font-smoothing:grayscale
+  stroke-width:1.8
 }
-
-/* Marketing + chrome */
-.ti-external-link:before{content:'\ea99'}
-.ti-arrow-right:before{content:'\ea1f'}
-.ti-arrow-left:before{content:'\ea19'}
-.ti-code:before{content:'\ea77'}
-.ti-menu-2:before{content:'\ec42'}
-.ti-home:before{content:'\eac1'}
-.ti-sparkles:before{content:'\f6d7'}
-.ti-school:before{content:'\ecf7'}
-.ti-users:before{content:'\ebf2'}
-.ti-book-2:before{content:'\efc5'}
-.ti-bulb:before{content:'\ea51'}
-.ti-progress-check:before{content:'\fa09'}
-.ti-shield-lock:before{content:'\ed58'}
-.ti-adjustments-horizontal:before{content:'\ec38'}
-.ti-trending-up:before{content:'\eb43'}
-.ti-login-2:before{content:'\fc76'}
-.ti-eye:before{content:'\ea9a'}
-.ti-user-shield:before{content:'\f7d0'}
-.ti-clock-hour-4:before{content:'\f319'}
-.ti-route:before{content:'\eb17'}
-.ti-check:before{content:'\ea5e'}
-.ti-braces:before{content:'\ebcc'}
-.ti-circle-check:before{content:'\ea67'}
-.ti-download:before{content:'\ea96'}
-.ti-file-code:before{content:'\ebd0'}
-.ti-file-upload:before{content:'\ec91'}
-.ti-lock:before{content:'\eae2'}
-.ti-trash:before{content:'\eb41'}
-.ti-message-circle:before{content:'\eaed'}
-.ti-speakerphone:before{content:'\ed61'}
-.ti-bell:before{content:'\ea35'}
-.ti-photo:before{content:'\eb0a'}
-.ti-search:before{content:'\eb1c'}
-.ti-git-branch:before{content:'\eab2'}
-.ti-lock-heart:before{content:'\f92c'}
-.ti-messages:before{content:'\eb6c'}
-.ti-chart-dots:before{content:'\ee2f'}
-.ti-gauge:before{content:'\eab1'}
-.ti-chart-bar:before{content:'\ea59'}
-.ti-device-mobile-down:before{content:'\f8b3'}
-.ti-devices:before{content:'\eb87'}
-.ti-refresh:before{content:'\eb13'}
-.ti-bell-ringing:before{content:'\ed07'}
-.ti-shield-check:before{content:'\eb22'}
-
-/* Mock interface board */
-.ti-thumb-up:before{content:'\eb3c'}
-.ti-message:before{content:'\eaef'}
-.ti-dots:before{content:'\ea95'}
-.ti-list-details:before{content:'\ef40'}
-.ti-archive:before{content:'\ea0b'}
-.ti-sort-descending:before{content:'\eb27'}
-.ti-plus:before{content:'\eb0b'}
-.ti-chevron-down:before{content:'\ea5f'}
-.ti-chevron-left:before{content:'\ea60'}
-.ti-chevron-right:before{content:'\ea61'}
-.ti-list:before{content:'\eb6b'}
-.ti-pencil:before{content:'\eb04'}
-.ti-send:before{content:'\eb1e'}
-.ti-share-2:before{content:'\f799'}
-.ti-switch-horizontal:before{content:'\eb31'}
-.ti-user:before{content:'\eb4d'}

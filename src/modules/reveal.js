@@ -1,3 +1,5 @@
+import { animate } from 'motion/mini';
+
 const SELECTOR = [
   '.chapter-copy',
   '.chapter-visual',
@@ -12,70 +14,54 @@ const SELECTOR = [
   '.cta-section > *'
 ].join(',');
 
-export function initializeParallax() {
-  if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
-  const stages = [...document.querySelectorAll('[data-parallax-stage]')];
-  stages.forEach((stage) => {
-    const layers = [...stage.querySelectorAll('[data-parallax-depth]')];
-    const reset = () => layers.forEach((layer) => {
-      layer.style.setProperty('--parallax-x', '0px');
-      layer.style.setProperty('--parallax-y', '0px');
-    });
-    stage.addEventListener('pointermove', (event) => {
-      if (event.pointerType === 'touch') return;
-      const rect = stage.getBoundingClientRect();
-      const x = (event.clientX - rect.left) / rect.width - .5;
-      const y = (event.clientY - rect.top) / rect.height - .5;
-      layers.forEach((layer) => {
-        const depth = Number(layer.dataset.parallaxDepth || 1);
-        layer.style.setProperty('--parallax-x', `${x * 16 * depth}px`);
-        layer.style.setProperty('--parallax-y', `${y * 13 * depth}px`);
-      });
-    });
-    stage.addEventListener('pointerleave', reset);
-  });
-}
+const EASE = [0.16, 1, 0.3, 1];
 
 function isInViewport(node) {
   const rect = node.getBoundingClientRect();
-  // Slightly generous so near-fold content does not start hidden.
   return rect.top < window.innerHeight * 0.92 && rect.bottom > 0;
 }
 
-/**
- * Scroll-in animation without the common FOUC:
- * never force opacity:0 on content already on screen (that flashes white/empty).
- */
 export function initializeReveal() {
-  const targets = [...document.querySelectorAll(SELECTOR)];
-  if (!targets.length) return;
-
   if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
     return;
   }
+
+  document.querySelectorAll('.hero-copy > *').forEach((node, index) => {
+    animate(
+      node,
+      { opacity: [0, 1], transform: ['translateY(18px)', 'translateY(0px)'] },
+      { duration: 0.72, delay: 0.08 + index * 0.065, ease: EASE }
+    );
+  });
+  animate(
+    '.hero-stage',
+    { opacity: [0, 1], transform: ['translateX(22px)', 'translateX(0px)'] },
+    { duration: 0.9, delay: 0.15, ease: EASE }
+  );
+  animate('.site-header', { opacity: [0, 1] }, { duration: 0.48, ease: EASE });
 
   const observer = new IntersectionObserver(
     (entries) => {
       entries.forEach((entry) => {
         if (!entry.isIntersecting) return;
-        requestAnimationFrame(() => entry.target.classList.add('reveal-visible'));
         observer.unobserve(entry.target);
+        animate(
+          entry.target,
+          { opacity: 1, transform: 'translateY(0px)' },
+          { duration: 0.76, ease: EASE }
+        ).then(() => {
+          entry.target.style.removeProperty('will-change');
+        });
       });
     },
-    { threshold: 0.08, rootMargin: '0px 0px -4% 0px' }
+    { threshold: 0.1, rootMargin: '0px 0px -5% 0px' }
   );
 
-  targets.forEach((node) => {
+  document.querySelectorAll(SELECTOR).forEach((node) => {
     if (isInViewport(node)) return;
-    node.classList.add('reveal');
+    node.style.opacity = '0';
+    node.style.transform = 'translateY(24px)';
+    node.style.willChange = 'opacity, transform';
     observer.observe(node);
-  });
-}
-
-/** Language replacement should never replay a scroll animation. */
-export function revealNewContent(root = document) {
-  root.querySelectorAll(SELECTOR).forEach((node) => {
-    node.classList.remove('reveal');
-    node.classList.add('reveal-visible');
   });
 }

@@ -1,6 +1,6 @@
 import { getCatalog, getLanguage } from './i18n.js';
+import { icon } from './icons.js';
 
-const icon = (name) => `<i class="ti ti-${name}" aria-hidden="true"></i>`;
 const words = {
   zh: {
     proposals: '提案', public: '公共議題', active: '進行中', closed: '已結案', latest: '最新',

@@ -92,6 +92,10 @@ h1,h2,h3,p{overflow-wrap:anywhere}
 .hero-compact-facts small{font-size:inherit;white-space:nowrap}
 .hero-stage{position:relative;min-height:610px;isolation:isolate}
 .hero-stage::before{position:absolute;z-index:0;inset:8% 0 4% 8%;border-radius:44% 56% 48% 52%;background:radial-gradient(circle at 42% 38%,rgba(236,231,240,.82),rgba(229,235,240,.38) 48%,transparent 74%);content:'';pointer-events:none}
+.hero-space{position:absolute;z-index:1;inset:-3% -2% 2% 0;overflow:hidden;pointer-events:none;-webkit-mask-image:linear-gradient(100deg,transparent 0,#000 16%,#000 82%,transparent 100%);mask-image:linear-gradient(100deg,transparent 0,#000 16%,#000 82%,transparent 100%)}
+.hero-space::before,.hero-space::after{position:absolute;inset:18% 10%;border:1px solid rgba(123,143,162,.13);border-radius:50%;content:'';transform:rotate(-14deg)}
+.hero-space::after{inset:27% 18%;border-color:rgba(139,124,159,.12);transform:rotate(24deg)}
+.hero-space__canvas{display:block;width:100%;height:100%;opacity:0;animation:hero-space-in 1.1s .12s var(--ease) forwards;mix-blend-mode:multiply}
 .color-plane{position:absolute;display:block;border-radius:36px;opacity:.78;pointer-events:none}
 .color-plane--blue{background:var(--blue-soft)}
 .color-plane--lavender{background:var(--lavender-soft)}
@@ -169,11 +173,10 @@ h1,h2,h3,p{overflow-wrap:anywhere}
 .site-footer{display:grid;grid-template-columns:auto 1fr auto;align-items:center;gap:32px;width:min(calc(100% - 48px),1240px);margin:0 auto;padding:36px 0 48px;border-top:1px solid var(--line)}
 .site-footer p{margin:0;color:var(--muted);font-size:12px}.site-footer>div{display:flex;gap:20px}.site-footer>div a{color:var(--muted);font-size:12px;font-weight:650}
 
-.reveal{opacity:0;transform:translateY(18px);transition:opacity .46s ease,transform .64s var(--ease);will-change:opacity,transform}
-.reveal.reveal-visible{opacity:1;transform:none}
 .is-i18n-switching body{opacity:.72;transition:opacity .1s ease}
 
 @keyframes section-enter{from{opacity:.01;transform:translateY(22px) scale(.994)}to{opacity:1;transform:none}}
+@keyframes hero-space-in{to{opacity:.78}}
 
 @media(min-width:1321px){.hero,.name-story,.landing-chapter,.cta-section{width:min(calc(100% - 240px),1240px)}}
 
@@ -202,4 +205,4 @@ h1,h2,h3,p{overflow-wrap:anywhere}
 
 @media(max-width:470px){.hero-stage{min-height:420px}.hero-sculpture{width:43%}.hero-actions{grid-template-columns:1fr}.hero-compact-facts{grid-template-columns:1fr 1fr}}
 
-@media(prefers-reduced-motion:reduce){html{scroll-behavior:auto}*,*::before,*::after{scroll-behavior:auto!important;transition-duration:.01ms!important;animation-duration:.01ms!important;animation-iteration-count:1!important}button:active:not(:disabled),a[href]:active,.is-pressing{scale:1!important}.product-frame--hero,.hero-sculpture{transform:none!important}.reveal{opacity:1;transform:none}}
+@media(prefers-reduced-motion:reduce){html{scroll-behavior:auto}*,*::before,*::after{scroll-behavior:auto!important;transition-duration:.01ms!important;animation-duration:.01ms!important;animation-iteration-count:1!important}button:active:not(:disabled),a[href]:active,.is-pressing{scale:1!important}.product-frame--hero,.hero-sculpture{transform:none!important}.hero-space__canvas{display:none}}

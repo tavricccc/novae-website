@@ -1,4 +1,5 @@
 import { getCatalog, getLanguage } from './i18n.js';
+import { icon } from './icons.js';
 import { initializeRuleStudio } from './rule-studio.js';
 
 function renderFeatures(catalog) {
@@ -7,7 +8,7 @@ function renderFeatures(catalog) {
   root.innerHTML = catalog.features.cards
     .map(
       (card) => `<article class="capability-card">
-      <div class="feature-icon"><i class="ti ti-${card.icon}" aria-hidden="true"></i></div>
+      <div class="feature-icon">${icon(card.icon)}</div>
       <h3>${card.title}</h3>
       <p>${card.body}</p>
     </article>`
@@ -41,7 +42,7 @@ function renderConfig(catalog) {
         (item, index) => `<button type="button" data-rule-tab="${item.key}" role="tab"
           aria-selected="${index === 0 ? 'true' : 'false'}" aria-controls="rule-panel-${item.key}"
           class="${index === 0 ? 'active' : ''}">
-          <span><i class="ti ti-${item.icon}" aria-hidden="true"></i></span>
+          <span>${icon(item.icon)}</span>
           <strong>${item.label}</strong><small>${String(index + 1).padStart(2, '0')}</small>
         </button>`
       )
@@ -54,10 +55,10 @@ function renderConfig(catalog) {
       .map(
         (item, index) => `<article id="rule-panel-${item.key}" class="config-dimension-panel"
           data-rule-panel="${item.key}" role="tabpanel" ${index === 0 ? '' : 'hidden'}>
-          <span class="config-dimension-panel__icon"><i class="ti ti-${item.icon}" aria-hidden="true"></i></span>
+          <span class="config-dimension-panel__icon">${icon(item.icon)}</span>
           <h3>${item.title}</h3><p>${item.body}</p>
           <div class="config-option-grid">${item.options
-            .map((option) => `<div><i class="ti ti-check" aria-hidden="true"></i><strong>${option.title}</strong><p>${option.body}</p></div>`)
+            .map((option) => `<div>${icon('check')}<strong>${option.title}</strong><p>${option.body}</p></div>`)
             .join('')}</div>
         </article>`
       )
@@ -72,7 +73,7 @@ function renderPwa(catalog) {
   root.innerHTML = catalog.pwa.cards
     .map(
       (card) => `<article>
-      <span class="pwa-icon"><i class="ti ti-${card.icon}" aria-hidden="true"></i></span>
+      <span class="pwa-icon">${icon(card.icon)}</span>
       <div>
         <h3>${card.title}</h3>
         <p>${card.body}</p>
