@@ -43,6 +43,15 @@ Before merging a large change:
 npm run verify:all
 ```
 
+Run the real Chromium user-flow suite directly for permissions, categories, proposals, facilities, announcements, or feature switches:
+
+```bash
+npm run test:e2e:install
+npm run test:e2e
+```
+
+The browser installation is needed only once. E2E rebuilds the isolated stack, completes Setup through the real UI, creates multiple accounts and two category scopes, then checks desktop and mobile button visibility, click results, cross-category isolation, grant/revoke recovery, category lifecycles, and all four proposal/facility switch combinations. Its sign-in bridge is restricted to development mode, a loopback Auth Emulator, and `@integration.invalid` accounts; production builds cannot expose it.
+
 For the multi-user, multi-category, overlapping-permission stress matrix:
 
 ```bash
@@ -51,7 +60,7 @@ npm run verify:stress
 
 It expands from the runtime catalog and covers every proposal and facility category, images, nested comments, support/affected reports, notifications, status, multiple managers, and category creation/deletion. Do not replace it with fixed category counts or a single test account.
 
-PR CI runs both suites. On Windows, run the npm command from PowerShell; the integration launcher enters WSL automatically. Windows requires WSL 2, Docker, and Supabase CLI plus Deno in the WSL `PATH`. Linux and CI do not need WSL.
+PR CI runs three layers: local static/unit verification, backend integration, and real-browser E2E. On Windows, run the npm command from PowerShell; integration and E2E environment launchers enter WSL automatically. Windows requires WSL 2, Docker, and Supabase CLI plus Deno in the WSL `PATH`. Linux and CI do not need WSL.
 
 The integration suite rebuilds an isolated local Supabase stack, applies every migration, runs database lint, and checks actions, permissions, RLS, idempotency, and worker lifecycles. Its external-provider receiver can inject a transient FCM failure; the test must assert that delivery remains durable, retries after backoff, succeeds, and clears its payload. `.env.local` is optional. Supabase URLs and keys are always replaced by local values, so the suite does not write remote application data.
 
@@ -59,13 +68,19 @@ Add integration assertions when introducing or changing:
 
 - backend actions: successful behavior and relevant denial paths;
 - roles or permissions: allowed and denied actors, plus in-scope and out-of-scope resources;
+- access grants and revocations: allowed after grant, immediately denied after revoke, unrelated scopes preserved, and removal from the assignee list;
 - RPCs, schemas, or migrations: real local-database results;
 - RLS: anon, authenticated, and service-role access as applicable;
 - idempotent writes: missing request ID, first execution, and replay;
 - workers, outbox, or deletion jobs: claim, completion/failure, retry, and deduplication.
 - composables, browser storage, or component interactions: successful and failure behavior in `tests/unit/`.
+- permission-driven UI and feature switches: table-driven visible, hidden, disabled, and click/emit assertions covering ordinary users, owners, correct scope, wrong scope, platform administrators, and every switch combination.
 
 Pure frontend layout work normally needs only `verify:local`. The action coverage guard rejects registered actions that are not referenced by a domain integration test. Do not bypass it with a call that has no assertion.
+
+Do not duplicate authorization rules only inside components. Role, permission, and category-scope decisions use `src/lib/session-access.ts`; proposal/facility feature routing uses `src/lib/feature-access.ts`. Component behavior and backend integration tests must jointly protect presentation and real authorization so hiding a button never substitutes for denying the API, and a denied operation is not still offered by the UI.
+
+Large suites use thin entry files that import domain-focused cases; shared accounts, fixtures, page objects, and emulator helpers belong in a sibling `support` or `helpers` module. Reassess responsibility as a test file approaches 400 lines. Do not keep adding unrelated permission domains, workers, RLS boundaries, and UI flows to a multi-thousand-line script.
 
 ## Reusable UI system
 

@@ -63,6 +63,15 @@ npm run verify:integration
 npm run verify:all
 ```
 
+權限、分類、提案、設備、公告或功能開關的使用者流程，可單獨執行真實 Chromium E2E：
+
+```bash
+npm run test:e2e:install
+npm run test:e2e
+```
+
+第一次只需安裝一次瀏覽器。E2E 會自動重建隔離環境，透過真實 UI 完成 Setup、建立多個測試帳號與兩組分類，並在桌面及手機 viewport 驗證按鈕顯示／隱藏、實際點擊結果、跨分類隔離、權限撤銷／恢復、分類生命週期與提案／設備四種開關組合。測試登入橋接只允許開發模式、loopback Auth Emulator 與 `@integration.invalid` 帳號，production build 不會開放。
+
 多人、多分類、多權限與完整內容流程的壓力矩陣使用：
 
 ```bash
@@ -71,7 +80,7 @@ npm run verify:stress
 
 預設會從實際 runtime catalog 展開多名使用者與重疊權限，涵蓋每個提案／設備分類、圖片、巢狀留言、附議／我也遇到、通知、狀態、多人管理與分類新增／刪除，不以固定分類數或單一帳號代替壓測。
 
-PR CI 會自動執行兩套驗證。Windows 直接在 PowerShell 執行 npm 指令即可；整合驗證會自動轉入 WSL。Windows 需要 WSL 2、Docker，以及 WSL `PATH` 內的 Supabase CLI 與 Deno；Linux 與 CI 不需要 WSL。
+PR CI 會自動執行本機靜態／單元、後端整合與真實瀏覽器 E2E 三層驗證。Windows 直接在 PowerShell 執行 npm 指令即可；整合與 E2E 環境會自動轉入 WSL。Windows 需要 WSL 2、Docker，以及 WSL `PATH` 內的 Supabase CLI 與 Deno；Linux 與 CI 不需要 WSL。
 
 整合驗證會重建隔離的本地 Supabase、套用全部 migration、執行 database lint，再檢查 action、權限、RLS、冪等與 worker lifecycle。外部服務測試器可注入 FCM 暫時失敗，必須實際斷言 delivery 留在持久化佇列、退避後重試成功且 payload 清除。`.env.local` 可省略；即使存在，Supabase 網址與金鑰也會強制換成本地值，不會寫入遠端資料。
 
@@ -81,14 +90,20 @@ PR CI 會自動執行兩套驗證。Windows 直接在 PowerShell 執行 npm 指�
 |---|---|
 | 新 backend action | 成功行為與相關拒絕行為；漏掉 action 時 coverage guard 會失敗 |
 | 新角色／權限 | allowed、denied；有 scope 時再測 scope 內與 scope 外 |
+| 權限授予／撤銷 | grant 後允許、revoke 後立即拒絕讀寫、其他 scope 不受影響、負責人列表同步移除 |
 | RPC／schema／migration | 對真實本地資料庫的結果 assertion |
 | RLS | 依適用範圍測 anon、authenticated、service role |
 | 冪等寫入 | 缺少 request ID、首次執行、相同 ID replay |
 | worker／outbox／刪除工作 | claim、完成或失敗、retry／deduplication |
 | composable／瀏覽器儲存／元件互動 | 在 `tests/unit/` 補 Vitest 成功與失敗情境 |
+| 權限型 UI／功能開關 | 以表格化矩陣測 visible、hidden、disabled 與 click／emit；至少涵蓋一般人、owner、正確 scope、錯誤 scope、平台管理員及所有開關組合 |
 | 純前端版面 | 通常不需補整合測試，跑 `verify:local` |
 
 不得只加入沒有 assertion 的 action 呼叫來通過 coverage guard。新增案例放進 `tests/integration/` 最接近的領域檔案；若建立新領域檔，也要加入 `action-coverage.test.ts` 的掃描清單。
+
+權限判斷不得只在元件內複製。角色／permission／分類 scope 使用 `src/lib/session-access.ts`，提案／設備開關與路由使用 `src/lib/feature-access.ts`；元件行為測試與後端整合測試必須同時保護 UI 呈現與真正授權，避免只藏按鈕卻仍可呼叫 API，或後端已拒絕但畫面仍提供操作。
+
+大型測試檔使用薄入口依領域匯入案例，共用帳號、fixture、page object 與 emulator helper 集中在同層 `support`／`helpers`。單一檔案接近 400 行時檢查責任，不能讓不同權限領域、worker、RLS 與 UI 流程繼續堆進同一支數千行腳本。
 
 ## 5. 共用 UI 規範
 
