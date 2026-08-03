@@ -79,7 +79,7 @@ Notion publishes no monthly API request quota, so throughput—not user count—
 - Visit writes now occur at most daily instead of every six hours.
 - The Firebase Redis record keeps an absolute creation time while warm Edge isolates reuse it for up to five minutes, preserving the 15-minute revocation window.
 - Production Cloudflare observability samples 10% of traces.
-- After Firebase authentication, issue, facility, and announcement lists use a 30-second Cloudflare POP cache isolated by UID, Origin, and the complete request digest. Hits skip Supabase Edge while browser responses remain `no-store`.
+- Mutable issue, facility, and announcement lists use `no-store` after Cloudflare validation instead of a POP cache, so status and comment settings cannot remain stale; the trade-off is additional Supabase Edge forwarding and invocations for list reads.
 - Lists, details, comments, and notifications use account-scoped persistent caching, request coalescing, and Realtime invalidation. Edge signs media URLs in batches, while the Worker shares cached image bytes.
 - Public author profiles are fetched in batches of 50 and kept in IndexedDB for 24 hours. Re-tapping active navigation is coalesced for 20 seconds, while desktop detail prefetch requires a 180 ms dwell and is disabled for data saver, 2G, background tabs, and mobile pointers.
 - Outbox rows retain identifiers required for delivery and synchronization instead of duplicating full content. Comment text is fetched by ID only when a worker processes that event.

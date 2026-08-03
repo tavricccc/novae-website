@@ -16,11 +16,11 @@ Open a pending proposal, verify category, privacy, personal data, content, and i
 
 Move Awaiting response to Processing with a useful update. Close as Completed with a verifiable result, or Infeasible with constraints and alternatives. A category response deadline starts at creation without support, or when support succeeds when enabled.
 
-When a discussion needs to pause, close new comments from that proposal's management actions. Existing comments remain readable, and a manager for the category can reopen composition later.
+Comments have category and record-level controls. Turning comments off for a category is a live constraint for every existing and new proposal in that category: existing comments remain readable, but new comments and replies are blocked. When the category is enabled again, only proposals that follow the category and are not completed reopen automatically. A proposal closed manually, or closed because it became completed, stays closed; completed proposals can never be reopened. An explicit record-level enable still cannot bypass the category switch.
 
 ## Announcements and deletion
 
-Publish announcements from the global create menu. Published announcements are immutable; delete and republish only after checking impact. Proposal and announcement deletion uses a warning confirmation and the controlled deletion worker—never manually remove only the Cloudinary resource or only the database record.
+Publish announcements from the global create menu. Published announcements are immutable; delete and republish only after checking impact. **System settings → Categories and workflows → Announcements** includes the comment switch shared by every announcement. Turning it off blocks new comments and replies on every existing and new announcement, and a record-level switch cannot bypass it. When the global switch is restored, announcements that follow it reopen while manually closed announcements stay closed. Announcement details retain the record-level switch, and existing comments remain readable in every closed state. Proposal and announcement deletion uses a warning confirmation and the controlled deletion worker—never manually remove only the Cloudinary resource or only the database record.
 
 ## Category managers
 

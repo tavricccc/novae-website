@@ -20,8 +20,9 @@ Disabled features do not require categories. They can be reopened later under **
 | --- | --- |
 | Proposals | Hidden from desktop and mobile navigation; existing proposals, categories, and assignments remain |
 | Facility reports | Hidden from desktop and mobile navigation; existing reports, categories, and assignments remain |
+| Announcement comments | New comments and replies stop on every existing and new announcement; announcements and existing comments remain readable |
 
-Announcements are unaffected. Feature switches and category drafts are saved together in System settings so a partial write cannot leave only one side applied.
+The announcement entry point is unaffected by the proposal and facility switches; comments have their own global switch. All three switches and category drafts are saved together in System settings so a partial write cannot leave only one side applied.
 
 ## What can change later
 
@@ -30,12 +31,15 @@ Announcements are unaffected. Feature switches and category drafts are saved tog
 | Category ID | Locked | Protects URLs, relationships, and notifications |
 | Read access | Permanently locked | Prevents an edit from exposing existing content |
 | Author visibility | Permanently locked | Preserves the original anonymity promise |
-| Comments | Editable | Future proposals only; existing comments remain |
+| Proposal comments | Editable | The category switch constrains existing proposals immediately; record overrides preserve manual and completed closures |
+| Announcement comment switch | Editable | Constrains every announcement immediately; record overrides preserve manual closures |
 | Support and deadlines | Editable | Future proposals only |
 | Name | Editable | Updates category display immediately |
 | Platform feature switches | Editable | Navigation and new entry points only; existing data remains |
 
-Each proposal snapshots privacy, comments, support, and deadline rules when it is created. Turning comments off for a category never deletes old comments or retroactively disables comments on existing proposals. A category manager can still close or reopen new comments on an individual proposal; previously posted comments remain readable while composition is closed.
+Each proposal snapshots privacy, support, and deadline rules when it is created. Comment availability combines the live category switch with a record-level `comments_override`. Disabling a category immediately blocks new comments and replies on all its proposals. Re-enabling restores only non-completed proposals that still follow the category; manually or completed closures remain closed, and completed proposals cannot be reopened. Existing comments remain readable.
+
+Announcements have no category. Their global comment switch combines with the same record-level override model: disabling it blocks new comments and replies on every existing and new announcement, and no record can bypass it. Re-enabling restores announcements that follow the global setting while manually closed announcements stay closed.
 
 ## Read access
 
@@ -67,8 +71,9 @@ Categories have no archive or stop-accepting state. Use the platform feature swi
 
 1. Create test proposals in public, reviewed, and private categories.
 2. Verify what a general user, author, and category manager can see.
-3. Confirm comments and support use the proposal-time snapshot, and that closing new comments on one proposal preserves its existing thread.
-4. Create a proposal and facility report in every category. Verify that only explicitly assigned managers whose notification setting applies receive creation notices, and that an unassigned platform administrator does not.
-5. Verify the facility board switches categories, creation preserves the active category, and the correct manager can comment, update status, and delete.
-6. Create a dedicated test category and record, delete the category, and confirm the record plus comments, support/affected-user relations, notifications, and images are gone. Confirm that a default category cannot be deleted directly.
-7. Turn a feature off and on again; navigation should hide and restore while existing records and categories remain manageable.
+3. Confirm category comment switches immediately constrain existing proposals, re-enabling restores only non-completed proposals that still follow the category, and manual or completed closures cannot be reopened. Existing comments remain readable.
+4. Disable the global announcement comment switch and verify that existing and new announcements cannot receive comments or be reopened individually. Restore it and verify that followers reopen while manually closed announcements stay closed.
+5. Create a proposal and facility report in every category. Verify that only explicitly assigned managers whose notification setting applies receive creation notices, and that an unassigned platform administrator does not.
+6. Verify the facility board switches categories, creation preserves the active category, and the correct manager can comment, update status, and delete.
+7. Create a dedicated test category and record, delete the category, and confirm the record plus comments, support/affected-user relations, notifications, and images are gone. Confirm that a default category cannot be deleted directly.
+8. Turn a feature off and on again; navigation should hide and restore while existing records and categories remain manageable.

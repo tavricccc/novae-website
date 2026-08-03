@@ -90,7 +90,7 @@ Notion 沒有公開的月 API request 配額；限制是吞吐量而不是人數
 - Visit 最多每日寫入一次，不再每 6 小時更新 `last_seen_at`。
 - Firebase 使用者 Redis cache 在 warm Edge isolate 內最多重用 5 分鐘，並保存絕對建立時間，避免延長 15 分鐘的撤銷檢查窗口。
 - Cloudflare 正式環境只抽樣 10% observability traces；錯誤仍由應用程式明確記錄。
-- 提案、設備與公告列表在 Firebase 驗證後，以 UID、Origin 與完整 request digest 隔離 30 秒 Cloudflare POP cache；命中時不呼叫 Supabase Edge，瀏覽器端仍是 `no-store`，不會跨帳號共用個人狀態。
+- 提案、設備與公告等可變內容列表在 Cloudflare 驗證後使用 `no-store`，不再保留 POP cache，避免狀態與留言設定在短時間內殘留；代價是列表請求會增加部分 Supabase Edge forwarding 與 invocation。
 - 列表、詳情、留言與通知有 account-scoped persistent cache、coalesced request 與 Realtime invalidation；圖片網址由 Edge 批次簽發，實際圖片內容由 Worker edge cache 共用。
 - 作者公開資料以 50 筆批次讀取並保存 24 小時 IndexedDB cache；重按目前導覽 20 秒內合併，桌面詳情預抓需停留 180ms，省流／2G／背景頁與手機不做 hover 預抓。
 - Outbox 只保存通知與同步需要的識別欄位，不複製完整正文；留言正文只在 Worker 實際處理該事件時依 ID 精準補讀。
