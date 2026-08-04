@@ -1,6 +1,40 @@
 # 更新紀錄
 
-累計更新：825 次
+累計更新：828 次
+
+## v2.0.291｜AppShell 頂欄與詳情頁 Header 上下垂直居中優化
+
+2026-08-05
+
+- AppShell 頂欄與詳情頁 Header 垂直置中：修正 `AppMobileHeader` 返回箭頭與「提案內容」標題的垂直軸線對齊，並校正 `DetailPageShell` 分類標籤列與切換分頁控制項的上下置中，確保標題、按鈕與標籤完美平順置中。
+- 詳情頁全端套用 Threads-style 佈局：將 `ContentDetailBody` 的頭像放至左側（44px），作者姓名置於頂行，正文標題置於作者行下方，實現列表卡片與詳情頁佈局完全一致且等比放大的和諧視覺。
+- 作者姓名尺寸精細化：桌面版與手機版統一將作者姓名設為精細小巧的 `text-xs font-normal`（12px），與圓形頭像呈現合適和諧的比例。
+- 統一全端標題字重：列表卡片標題統一採用 `text-base font-semibold`；詳情頁正文標題採用 `text-2xl font-semibold`。
+- 補全 Cloudinary Content Security Policy (CSP)：在 `vite.config.ts` 的 `connect-src` 與 `img-src` 加入 `https://api.cloudinary.com` 與 `https://res.cloudinary.com`，解決圖片直傳被瀏覽器 CSP 阻擋的問題。
+- 雙語精簡相對時間：列表卡片時間格式改為自動雙語轉換（中文 `剛剛` / `47分鐘前` / `2小時前` / `3天前` / `1週前`；英文 `Just now` / `47m ago` / `2h ago` / `3d ago` / `1w ago`）；詳情頁面維持完整日期時間。
+
+## v2.0.290｜手機版頂欄間距縮減與列表 3D 質感扁平化
+
+2026-08-05
+
+- 手機版 AppShell Header 留白優化：移除 `.app-main-content` 額外 Top Padding 留白與微調列表頂部間距，讓頁面內容緊貼 Top Bar 正下方。
+- 附議進度與告示面板 3D 質感扁平化：移除列表卡片（`IssueTableRow`）與告示組件（`ContentNoticePanel`）的重陰影與 3D 內凹/邊框樣式，改為極簡平整的微柔背景（`bg-ink-100/60`）與圓角進度條。
+- 手機版返回按鈕改為直線左箭頭（arrow-left），移除圓形背景框，視覺尺寸調小（18px）同時維持 44px 點擊觸控範圍。
+- 詳情頁移除細灰分割線（border-t / border-b / border-l），並在手機版讓 Action Bar 隨內容自然捲動。
+
+## v2.0.289｜二級介面 Bottom Nav 隱藏與狀態顏色規格化
+
+2026-08-04
+
+- 手機版所有二級介面（提案詳情/新增、我的提案、設備詳情/新增、公告詳情/新增、數據統計、系統設定中心）隱藏底部 Tabbar 導覽列，並將留白高度變數歸零，使內容顯示範圍延伸至螢幕底部。
+- 提案與設備狀態顏色規範化：
+  - 待審核（under-review）：琥珀黃（#FFB020），與未回覆明確區隔。
+  - 未回覆 / 設備待受理（pending）：中性灰（#8E8E93）。
+  - 附議未通過（auto-rejected）：淺紅/磚紅（#E5484D）。
+  - 審核未通過（review-rejected）：鮮紅（#D0342C）。
+  - 無法實行 / 設備無法處理（infeasible / unable-to-handle）：深灰紅/酒紅（#8B3A3A）。
+  - 處理中（processing）：藍色（#2E7DD1）。
+  - 處理完成（completed）：綠色（#2FA84F）。
 
 ## v2.0.288｜卡片懸停位移與標題按鈕游標判定
 
