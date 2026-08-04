@@ -2,14 +2,12 @@
 
 累計更新：828 次
 
-## v2.0.291｜AppShell 頂欄與詳情頁 Header 上下垂直居中優化
+## v2.0.291｜詳情頁頂欄比例精細化與 Cloudinary CSP 補全
 
 2026-08-05
 
-- AppShell 頂欄與詳情頁 Header 垂直置中：修正 `AppMobileHeader` 返回箭頭與「提案內容」標題的垂直軸線對齊，並校正 `DetailPageShell` 分類標籤列與切換分頁控制項的上下置中，確保標題、按鈕與標籤完美平順置中。
-- 詳情頁全端套用 Threads-style 佈局：將 `ContentDetailBody` 的頭像放至左側（44px），作者姓名置於頂行，正文標題置於作者行下方，實現列表卡片與詳情頁佈局完全一致且等比放大的和諧視覺。
-- 作者姓名尺寸精細化：桌面版與手機版統一將作者姓名設為精細小巧的 `text-xs font-normal`（12px），與圓形頭像呈現合適和諧的比例。
-- 統一全端標題字重：列表卡片標題統一採用 `text-base font-semibold`；詳情頁正文標題採用 `text-2xl font-semibold`。
+- 詳情頁頂欄比例精細化：校正 `ContentDetailBody` 的頭像大小（`36px` / `size="md"`）、作者姓名（`12px` / `text-xs font-normal`）與正文標題（`18-20px` / `text-lg sm:text-xl font-semibold`），消除過大臃腫感，使詳情頁與列表卡片呈現完全和諧一致的 Threads 精緻比例。
+- AppShell 頂欄與詳情頁 Header 垂直置中：修正 `AppMobileHeader` 返回箭頭與「提案內容」標題的垂直軸線對齊，並校正 `DetailPageShell` 分類標籤列與切換分頁控制項的上下置中。
 - 補全 Cloudinary Content Security Policy (CSP)：在 `vite.config.ts` 的 `connect-src` 與 `img-src` 加入 `https://api.cloudinary.com` 與 `https://res.cloudinary.com`，解決圖片直傳被瀏覽器 CSP 阻擋的問題。
 - 雙語精簡相對時間：列表卡片時間格式改為自動雙語轉換（中文 `剛剛` / `47分鐘前` / `2小時前` / `3天前` / `1週前`；英文 `Just now` / `47m ago` / `2h ago` / `3d ago` / `1w ago`）；詳情頁面維持完整日期時間。
 
