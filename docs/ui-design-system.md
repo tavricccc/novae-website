@@ -37,7 +37,7 @@ atoms → molecules → organisms → domain components / views
 4. 最後才以 atom 補上按鈕、icon、標籤、訊息與 skeleton。
 5. route 組裝與頁面級狀態留在 `views/`，流程進 composable，資料邊界只經 service。
 
-Route view 不得自行增加另一套頁面級 `px-*`、`left-*`、`right-*`、safe-area 計算或 max-width。這些由 `AppShell`、`ViewportFrame` 與 `RoutePageFrame` 統一負責。卡片陰影需要空間時，應在捲動內容內側增加共用 padding；不得先把內容推出容器再用 `overflow-x-hidden` 裁掉。
+Route view 不得自行增加另一套頁面級 `px-*`、`left-*`、`right-*`、safe-area 計算或 max-width。這些由 `AppShell`、`ViewportFrame` 與 `RoutePageFrame` 統一負責。卡片陰影需要空間時，應在捲動內容內側增加共用 padding；不得先把內容推出容器再用 `overflow-x-hidden` 裁掉。原生捲動條由全域基礎樣式統一隱藏，頁面仍須保留滑鼠滾輪、觸控、鍵盤與程式捲動，不得以 `overflow: hidden` 取代可捲動行為。
 
 ## 常見需求對照
 

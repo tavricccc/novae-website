@@ -37,7 +37,7 @@ Lower layers must not import higher layers, and molecules must not depend on org
 4. Add atoms for buttons, icons, badges, messages, and skeletons last.
 5. Keep route composition and page state in `views/`, workflows in composables, and data boundaries in services.
 
-Route views must not add another page-level `px-*`, `left-*`, `right-*`, safe-area calculation, or max-width. `AppShell`, `ViewportFrame`, and `RoutePageFrame` own those contracts. When card shadows need drawing room, reserve shared padding inside the scrolling content; never push content beyond its container and hide it with `overflow-x-hidden`.
+Route views must not add another page-level `px-*`, `left-*`, `right-*`, safe-area calculation, or max-width. `AppShell`, `ViewportFrame`, and `RoutePageFrame` own those contracts. When card shadows need drawing room, reserve shared padding inside the scrolling content; never push content beyond its container and hide it with `overflow-x-hidden`. Native scrollbars are hidden globally while wheel, touch, keyboard, and programmatic scrolling remain available; do not replace scrollable behavior with `overflow: hidden`.
 
 ## Common needs
 
