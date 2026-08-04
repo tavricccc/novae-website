@@ -31,6 +31,10 @@ For signed-in users, mobile bottom navigation remains visible on root and ordina
 
 All `localStorage` and `sessionStorage` access goes through safe helpers. Storage blocking, private browsing, quota failures, and SSR may degrade caching but cannot block sign-in, application updates, or Push-device workflows. Production HTML generates an exact CSP from the active API and Supabase origins; it intersects with the Vercel header to constrain script, frame, connect, image, and worker sources. HarmonyOS Sans TC ships only the used 400/500/600/700 weights without changing the family or rendered weight mapping.
 
+All three detail surfaces share one complete height chain. Desktop panels use the parent’s available height with `min-h-0`; detail and comment scroll regions reserve bottom shadow room so the final item is never clipped. Mobile detail routes use a flat solid AppShell header and `RoutePageFrame bottom-safe` for the Bottom Tab gap; route changes recompute header scroll state so a scrolled list cannot carry shadow into a detail page.
+
+All infinite-scroll feeds share `useInfiniteScroll` and `useContentListRuntime`: three domain-shaped placeholders are inserted near the end, downward wheel/touch/programmatic scrolling is gated at that boundary while upward scrolling remains available, successful responses replace them in place, and failures release the boundary with retry.
+
 ## Localization and error contract
 
 Frontend catalogs live in `src/i18n/messages/<locale>/<domain>.ts`. Each file owns one functional domain, keys use short stable semantic names, and Traditional Chinese and English must expose the same keys. Callers translate by key only; localized source text is never used as a reverse lookup.

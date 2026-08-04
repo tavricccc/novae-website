@@ -60,6 +60,8 @@ Structures that differ only by strings, icons, states, slots, or callbacks must 
 
 Route-level session skeletons and live list content must be exclusive (`v-if` / `v-else-if` on one chain). Never mount both the skeleton and boards such as `IssueBoard` at once. Empty lists that use `EmptyStatePanel` keep the icon tile at `elevation="none"` so a vacant board does not look like a leftover card. Initial list loads and infinite-scroll load-more states both use skeletons; `.skeleton-card` / `.skeleton-enter` animations may use opacity only—no transform—so unmount does not leave composite shadows. System settings category and membership flows also use skeletons while loading, never a bare "Loading…" label.
 
+Initial list loads and infinite-scroll load-more states use skeletons; load-more always inserts three domain-shaped placeholders, blocks only downward movement past that boundary, and keeps upward scrolling, retry, and `prefers-reduced-motion` usable. Desktop detail and list scroll regions reserve bottom shadow room; mobile detail headers stay flat and preserve the Bottom Tab safe gap.
+
 ## Surfaces and shadows
 
 Elevation has exactly three levels:

@@ -60,6 +60,8 @@ Route view 不得自行增加另一套頁面級 `px-*`、`left-*`、`right-*`、
 
 路由頁的 session 骨架與實際列表必須互斥（`v-if` / `v-else-if` 同一鏈），不得在 skeleton 仍掛載時同時渲染 `IssueBoard` 等內容。空列表使用 `EmptyStatePanel` 時 icon tile 預設 `elevation="none"`，避免空白頁看起來像殘留卡片。列表初次載入與向下載入更多都使用 skeleton；`.skeleton-card`／`.skeleton-enter` 進場只允許 opacity，不對 skeleton 使用 transform，以免卸載後留下合成陰影。系統設定的分類流程與人員權限載入中也改為 skeleton，不使用純文字「載入中」。
 
+列表初次載入與向下載入更多都使用 skeleton；向下載入更多固定插入三筆對應形狀的 placeholder，資料完成後在同一位置替換。載入期間只阻止向下越過 placeholder 邊界，向上捲動、錯誤重試與 `prefers-reduced-motion` 都必須保持可用。桌面詳情與列表捲動區必須預留底部陰影空間；手機詳情 Header 使用實色平面並保留 Bottom Tab safe gap。
+
 ## Surface 與陰影
 
 陰影只有三階：
