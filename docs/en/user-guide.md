@@ -7,7 +7,7 @@ Desktop uses the sidebar; mobile uses the floating bottom navigation, where the 
 1. Sign in with a Google account in the allowed school domain. The control shows a busy spinner and stays disabled while sign-in is in progress.
 2. Google always shows the account picker. Closing it, a blocked popup, or an in-app browser shows an error only; production does not fall back to a full-page Firebase redirect.
 3. After role and category bootstrap, the app leaves the sign-in page for the default proposal category; mobile bottom navigation and the desktop sidebar appear only then.
-4. Browse a proposal category or My proposals, then search, filter, and sort cards before opening a detail page.
+4. Browse a proposal category or My proposals, then search, filter, and sort cards before opening a detail page. Desktop details use a flat content/comments split without an outer card; mobile switches between content and discussion.
 5. Pending-review and private proposals remain visible only to their author and administrators.
 
 On an unconfigured installation, the first platform administrator confirms language, chooses whether proposals and facility reports are enabled, and then creates categories only for the enabled features. The browser or operating system's first preferred language is the default. If completion is interrupted, refresh or retry; the app recognizes setup that already committed.
@@ -25,7 +25,11 @@ Category policy determines whether the proposal is immediately school-readable, 
 
 Support-enabled categories show the configured goal and remaining days. Meeting `support.goal` succeeds early; missing it after `support.deadlineDays` produces the did-not-pass status. Comment visibility follows category access, and reviewed categories do not open school-wide comments before approval.
 
+Proposal and facility details place progress, actions, and dates in one quiet summary area. Dates form a horizontal milestone timeline on desktop and a vertical timeline on mobile; announcement details do not show this timeline.
+
 Comments support replies and plain-text input only. Markdown is not rendered and there is no preview mode. Each comment accepts at most 70 visible characters and may still include one image under the current `rate-limits.config.json` setting. On mobile, the comment count appears directly in the content/comments segmented control instead of being repeated inside the comment panel.
+
+When comments are unavailable, the normal composer remains visible with an unavailable placeholder, while typing, image selection, and submission are disabled. Existing comments remain readable.
 
 ## Status meanings
 

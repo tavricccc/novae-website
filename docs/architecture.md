@@ -49,7 +49,7 @@ flowchart LR
 
 前端對 `localStorage` 與 `sessionStorage` 的存取統一經過安全 helper；瀏覽器封鎖 storage、無痕模式、quota 或 SSR 都只能讓快取退化，不能阻止登入、更新或 Push 裝置流程。Production HTML 依目前 API 與 Supabase origins 產生精確 CSP，與 Vercel header 共同限制 script、frame、connect、image 與 worker 來源。HarmonyOS Sans TC 只打包實際使用的 400／500／600／700，字族與視覺權重不變。
 
-三種詳情頁共用完整高度鏈；桌面 panel 使用父層可用高度與 `min-h-0`，內容與留言捲動區保留底部陰影空間，避免最後一項被裁切。手機詳情頁使用實色平面 AppShell Header，並由 `RoutePageFrame bottom-safe` 提供 Bottom Tab 安全距離；跨路由時會重算 Header 捲動狀態，避免從已捲動列表帶入陰影。
+三種詳情頁共用完整高度鏈；桌面 `DetailPageShell` 不再建立最外層卡片，直接以父層可用高度與 `min-h-0` 組成平面內容／留言雙欄，欄間只保留分隔線，讓正文與討論使用完整畫布。提案與設備透過共用 `DetailActionGroup` inset summary 整合進度、操作與 `OperationTimeList` 響應式時間軸；公告沿用精簡操作列。手機詳情頁使用實色平面 AppShell Header，並由 `RoutePageFrame bottom-safe` 提供 Bottom Tab 安全距離；跨路由時會重算 Header 捲動狀態，避免從已捲動列表帶入陰影。留言不開放時仍渲染同一 `CommentComposer`，但停用輸入、圖片與送出控制，既有留言保持可讀。
 
 所有 infinite-scroll feed 共用 `useInfiniteScroll` 與 `useContentListRuntime`：接近底部時先插入三筆領域骨架；載入期間只封住向下越過骨架所在位置的 wheel、touch 與 scroll，向上返回仍可用；成功後原地替換，失敗則解除邊界並保留重試。
 

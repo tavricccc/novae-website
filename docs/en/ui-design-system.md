@@ -47,7 +47,8 @@ Route views must not add another page-level `px-*`, `left-*`, `right-*`, safe-ar
 | Standard, icon, toolbar, primary, and secondary buttons | `AppButton` |
 | List support, affected, and like counters | `AppButton` with `button-card-count` (32px surface, 44px touch target) |
 | Cards, controls, floating panels, insets, and list shells | `SurfacePanel` |
-| Detail-page share, support/affected, management, and delete actions | `DetailActionGroup`, `DetailActionButton` |
+| Detail progress, actions, and timeline | `DetailActionGroup` summary, `DetailActionButton`, `OperationTimeList` |
+| Comment entry and unavailable state | Normal and disabled modes of `CommentComposer` |
 | List supplements, detail locations, and result notices | `ContentNoticePanel` (compact/detail; neutral/success/error) |
 | Grouped lists and settings rows | `ListSurfaceRow`, `IconListRow`, `LabeledListSection` |
 | Dropdowns and items | `DropdownMenu`, `DropdownPanel`, `dropdown-item` |
@@ -60,7 +61,7 @@ Structures that differ only by strings, icons, states, slots, or callbacks must 
 
 Route-level session skeletons and live list content must be exclusive (`v-if` / `v-else-if` on one chain). Never mount both the skeleton and boards such as `IssueBoard` at once. Empty lists that use `EmptyStatePanel` keep the icon tile at `elevation="none"` so a vacant board does not look like a leftover card. Initial list loads and infinite-scroll load-more states both use skeletons; `.skeleton-card` / `.skeleton-enter` animations may use opacity only—no transform—so unmount does not leave composite shadows. System settings category and membership flows also use skeletons while loading, never a bare "Loading…" label.
 
-Initial list loads and infinite-scroll load-more states use skeletons; load-more always inserts three domain-shaped placeholders, blocks only downward movement past that boundary, and keeps upward scrolling, retry, and `prefers-reduced-motion` usable. Desktop detail and list scroll regions reserve bottom shadow room; mobile detail headers stay flat and preserve the Bottom Tab safe gap.
+Initial list loads and infinite-scroll load-more states use skeletons; load-more always inserts three domain-shaped placeholders, blocks only downward movement past that boundary, and keeps upward scrolling, retry, and `prefers-reduced-motion` usable. Desktop `DetailPageShell` uses a flat two-column layout without an outer card; route views must not wrap it in another detail card. Proposal and facility summaries use `surface-inset`, while `OperationTimeList` renders horizontally on desktop and vertically on mobile. Mobile detail headers stay flat and preserve the Bottom Tab safe gap.
 
 ## Surfaces and shadows
 
