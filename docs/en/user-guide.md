@@ -7,7 +7,7 @@ Desktop uses the sidebar; mobile uses the floating bottom navigation, where the 
 1. Sign in with a Google account in the allowed school domain. The control shows a busy spinner and stays disabled while sign-in is in progress.
 2. Google always shows the account picker. Closing it, a blocked popup, or an in-app browser shows an error only; production does not fall back to a full-page Firebase redirect.
 3. After role and category bootstrap, the app leaves the sign-in page for the default proposal category; mobile bottom navigation and the desktop sidebar appear only then.
-4. Browse a proposal category or My proposals, then search, filter, and sort cards before opening a detail page. Desktop details use a flat content/comments split without an outer card; mobile switches between content and discussion.
+4. Browse a proposal category or My proposals, then search, filter, and sort cards before opening a detail page. Desktop details use a flat content/comments split without an outer card; mobile presents body, action summary, discussion, and comments in one continuous feed.
 5. Pending-review and private proposals remain visible only to their author and administrators.
 
 On an unconfigured installation, the first platform administrator confirms language, chooses whether proposals and facility reports are enabled, and then creates categories only for the enabled features. The browser or operating system's first preferred language is the default. If completion is interrupted, refresh or retry; the app recognizes setup that already committed.
@@ -27,7 +27,7 @@ Support-enabled categories show the configured goal and remaining days. Meeting 
 
 Proposal and facility details place progress, actions, and dates in one quiet summary area. Dates form a horizontal milestone timeline on desktop and a vertical timeline on mobile; announcement details do not show this timeline.
 
-Comments support replies and plain-text input only. Markdown is not rendered and there is no preview mode. Each comment accepts at most 70 visible characters and may still include one image under the current `rate-limits.config.json` setting. On mobile, the comment count appears directly in the content/comments segmented control instead of being repeated inside the comment panel.
+Comments support replies and plain-text input only. Markdown is not rendered and there is no preview mode. Each comment accepts at most 70 visible characters and may still include one image under the current `rate-limits.config.json` setting. On mobile, comments share the page scroll with the content and a divider replaces repeated discussion headings, count badges, and the large empty state. The composer stays docked above bottom navigation without covering the last comment. Comment notifications open the discussion and center the referenced comment.
 
 When comments are unavailable, the normal composer remains visible with an unavailable placeholder, while typing, image selection, and submission are disabled. Existing comments remain readable.
 
@@ -45,7 +45,7 @@ When comments are unavailable, the normal composer remains visible with an unava
 
 ## Facility reports
 
-The facility board, like proposals, starts with a category. The selection remains in the URL and carries into creation. Reports can include content and images; their detail page supports comments, “I have this issue too,” and status tracking. Only a manager assigned to that facility category or a platform administrator may manage the report, and each assignment controls whether it receives new-report notices.
+The facility board, like proposals, starts with a category. The selection remains in the URL and carries into creation. Reports can include content and images; their detail page supports “I have this issue too” and status tracking. Mobile shows the same discussion shape with a “comments are currently unavailable” disabled composer, but facilities do not currently have comment functionality; desktop shows no comment column. Only a manager assigned to that facility category or a platform administrator may manage the report, and each assignment controls whether it receives new-report notices.
 
 ## Announcements, notifications, and settings
 

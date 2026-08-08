@@ -49,7 +49,7 @@ flowchart LR
 
 前端對 `localStorage` 與 `sessionStorage` 的存取統一經過安全 helper；瀏覽器封鎖 storage、無痕模式、quota 或 SSR 都只能讓快取退化，不能阻止登入、更新或 Push 裝置流程。Production HTML 依目前 API 與 Supabase origins 產生精確 CSP，與 Vercel header 共同限制 script、frame、connect、image 與 worker 來源。HarmonyOS Sans TC 只打包實際使用的 400／500／600／700，字族與視覺權重不變。
 
-三種詳情頁共用完整高度鏈；桌面 `DetailPageShell` 不再建立最外層卡片，直接以父層可用高度與 `min-h-0` 組成平面內容／留言雙欄，欄間只保留分隔線，讓正文與討論使用完整畫布。提案與設備透過共用 `DetailActionGroup` inset summary 整合進度、操作與 `OperationTimeList` 響應式時間軸；公告沿用精簡操作列。手機詳情頁使用實色平面 AppShell Header，並由 `RoutePageFrame bottom-safe` 提供 Bottom Tab 安全距離；跨路由時會重算 Header 捲動狀態，避免從已捲動列表帶入陰影。留言不開放時仍渲染同一 `CommentComposer`，但停用輸入、圖片與送出控制，既有留言保持可讀。
+三種詳情頁共用完整高度鏈；桌面 `DetailPageShell` 不再建立最外層卡片，直接以父層可用高度與 `min-h-0` 組成平面內容／留言雙欄，欄間只保留分隔線，讓正文與討論使用完整畫布。提案與設備透過共用 `DetailActionGroup` inset summary 整合進度、操作與 `OperationTimeList` 響應式時間軸；公告沿用精簡操作列。手機移除內容／留言 segmented tabs，以同一個 scroll root 依序呈現正文、操作摘要、討論區與留言串；使用分隔線，不再重複顯示討論標題、留言數或無留言空狀態。`tab=comments` 先定位討論 anchor，`comment=<id>` 再由 embedded `CommentThreadPanel` 載入並置中指定留言。提案與公告的 `CommentComposer` 在桌機與手機共用低高度全圓角 pill；手機由獨立 prop 固定在 Bottom Tab 上方，使用 viewport gutter、safe area、Visual Viewport 與尾端 scroll padding。Composer 與回覆提示後方使用不透明 surface 作為內容邊界，回覆狀態顯示作者與原留言前 24 個字，避免留言捲動內容穿透。留言不開放時仍渲染同一 Composer，但停用輸入、圖片、送出與自動 focus，既有留言保持可讀；設備手機版只掛載無資料、無 service 的 disabled discussion shell，桌面與後端仍沒有設備留言流程。
 
 所有 infinite-scroll feed 共用 `useInfiniteScroll` 與 `useContentListRuntime`：接近底部時先插入三筆領域骨架；載入期間只封住向下越過骨架所在位置的 wheel、touch 與 scroll，向上返回仍可用；成功後原地替換，失敗則解除邊界並保留重試。
 
@@ -85,9 +85,9 @@ flowchart LR
   API --> P[新案件規則與留言即時限制]
 ```
 
-分類、設備分類、平台功能開關與管理員指派以 Postgres 為單一來源。首次設定與系統設定共用相同的分類選擇與編輯結構；首次完成時先略過尚未註冊人員的負責人指派。提案與設備看板都從同一 runtime catalog 選擇分類，建立與列表查詢都保存分類範圍；關閉的功能不會出現在導覽，但既有資料仍可管理。分類沒有封存狀態，資料庫強制既有分類保持可用；刪除分類會在同一受控流程永久刪除其中案件、關聯、通知與圖片引用並排入外部圖片刪除工作。建立提案時會把隱私、附議與期限規則快照到案件；留言可用性是執行期的分類限制，`comments_override` 則保留單筆跟隨、手動關閉或明確開啟的設定。分類關閉會立即限制該分類所有提案，重新開啟只恢復仍跟隨分類且未結案的提案；手動關閉與結案關閉不會自動重開，結案提案也不得再次開啟。閱讀範圍與作者顯示由資料庫 trigger 鎖定，前端條件不承擔安全責任。
+分類、設備分類、平台功能開關與管理員指派以 Postgres 為單一來源。首次設定與系統設定共用相同的分類選擇與編輯結構；首次完成時先略過尚未註冊人員的負責人指派。提案與設備看板都從同一 runtime catalog 選擇分類，建立與列表查詢都保存分類範圍；關閉的功能不會出現在導覽，但既有資料仍可管理。分類沒有封存狀態，資料庫強制既有分類保持可用；刪除分類會在同一受控流程永久刪除其中案件、關聯、通知與圖片引用並排入外部圖片刪除工作。建立提案時會把隱私、附議與期限規則快照到案件；留言可用性只由執行期分類限制與結案狀態決定。分類關閉會立即限制該分類所有提案，重新開啟恢復仍未結案的提案；結案提案保持關閉。閱讀範圍與作者顯示由資料庫 trigger 鎖定，前端條件不承擔安全責任。
 
-系統設定先在前端暫存變更，最後將提案／設備功能開關、公告留言總開關及兩邊分類的新增／修改／刪除草稿一次寫入受控 backend action 與單一 Postgres 交易；驗證或任一步驟失敗時全部回滾，不會留下部分分類或功能狀態。公告沒有分類，其留言總開關是所有公告的即時限制；單筆 `comments_override` 保留手動關閉，且不能在總開關關閉時繞過。平台總管理員只由 `ADMIN_EMAILS` 產生；分類指派則是獨立的 scope 資料。新提案與新設備回報寫入個人通知給該分類明確負責人，不使用管理員廣播，因此平台總管理員不會因角色自動成為收件人。
+系統設定先在前端暫存變更，最後將提案／設備功能開關、公告留言總開關及兩邊分類的新增／修改／刪除草稿一次寫入受控 backend action 與單一 Postgres 交易；驗證或任一步驟失敗時全部回滾，不會留下部分分類或功能狀態。公告沒有分類，其留言總開關是所有公告的即時限制，不提供單筆覆寫。平台總管理員只由 `ADMIN_EMAILS` 產生；分類指派則是獨立的 scope 資料。新提案與新設備回報寫入個人通知給該分類明確負責人，不使用管理員廣播，因此平台總管理員不會因角色自動成為收件人。
 
 內容與留言的作者顯示改以 UID 讀取使用者資料，避免前端另外保存可漂移的作者副本。
 
@@ -103,11 +103,11 @@ Notion 建立頁面前先在 Postgres 取得 `pending:<uuid>` reservation，頁�
 
 ## 即時更新與驗證快取
 
-內容、通知、留言設定與通知已讀狀態透過 Supabase Realtime 的私有 Broadcast topics 傳送。topic 依校內、管理員或個別使用者分流，連線時由 `realtime.messages` RLS 驗證 Firebase 身分與角色；登入者不需要、也沒有權限直接查詢通知、通知狀態或即時事件私有資料表。Broadcast 只用來提示前端更新；狀態／留言設定寫入後會清除相關列表與詳情快取，Postgres 仍是 source of truth。
+內容、通知、留言設定與通知已讀狀態透過 Supabase Realtime 的私有 Broadcast topics 傳送。topic 依校內、管理員或個別使用者分流，連線時由 `realtime.messages` RLS 驗證 Firebase 身分與角色；登入者不需要、也沒有權限直接查詢通知、通知狀態或即時事件私有資料表。提案、公告與設備各自使用 Postgres 單調版本戳記，內容事件攜帶同一交易的版本；連續事件優先原地 patch，版本跳號才靜默刷新。App 恢復前景、瀏覽器恢復網路或 Realtime 重連時只以一次 `getContentVersions` 批次驗證三個領域，Cloudflare Worker 不產生或保存版本。Postgres 仍是 source of truth。
 
 Edge 驗證 Firebase token 後，會將必要的使用者資料短暫保存在 Function instance 記憶體與 Upstash Redis。快取失效時才重新呼叫 Firebase，並保留過期與數量上限，減少重複外部請求而不改變每個 action 的授權檢查。
 
-前端內容讀取會依帳號保存在記憶體與 IndexedDB，維持積極的長效快取以減少伺服器與外部服務用量。記憶體層使用有數量上限的 LRU，讀取命中會更新最近使用順序；持久層仍保留較長存活時間。每次請求攜帶 scope 與失效版本；若寫入、Realtime 或切換帳號已讓資料過期，較早完成的請求不能把舊內容重新寫回，持久層也只刪除同一寫入版本，避免誤刪後續新資料。提案列表在 pointer／focus intent 時只預抓該筆完整 Detail，並以 coalesced request 與詳情路由共用請求；點擊後先用一次性列表摘要畫出穩定骨架，不把整頁阻塞在首次 Detail read。
+前端內容讀取會依帳號保存在記憶體與 IndexedDB，維持積極的長效快取以減少伺服器與外部服務用量。記憶體層使用有數量上限的 LRU，讀取命中會更新最近使用順序；持久層仍保留較長存活時間。列表 response 直接帶回查詢前取得的領域版本，不另呼叫版本 action；若寫入、Realtime 或切換帳號已讓資料過期，較早完成的請求不能把舊內容重新寫回。背景 first-page refresh 保留現有畫面，並以第一個可見 content id 恢復相對捲動位置。提案列表在 pointer／focus intent 時只預抓該筆完整 Detail，並以 coalesced request 與詳情路由共用請求；點擊後先用一次性列表摘要畫出穩定骨架，不把整頁阻塞在首次 Detail read。
 
 PWA 發現新版本後會要求 waiting Service Worker 立即接管，等待 `controllerchange` 後以版本化 URL 重新載入；watchdog 與每版本重載次數上限會終止失敗循環。更新流程不保留舊版相容分支，也不需要清除資料庫或關閉積極內容快取。
 

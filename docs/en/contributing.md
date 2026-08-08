@@ -91,14 +91,16 @@ The main application treats `src/styles/primitives.css` and `src/components/ui/`
 | Need | Canonical entry point |
 |---|---|
 | Page gutters, safe areas, and content width | `AppShell` / `ViewportFrame` / `RoutePageFrame` |
-| Three-domain desktop detail split and mobile tabs | `DetailPageShell`; do not add an outer desktop card |
+| Three-domain desktop detail split and unified mobile feed | `DetailPageShell`; do not add an outer desktop card or restore mobile segmented tabs |
 | Standard, icon, toolbar, primary, and secondary actions | `AppButton` or an existing `button-*` variant |
 | Cards, controls, floating panels, and inset areas | `SurfacePanel` or `surface-control` / `surface-card` / `surface-floating` / `surface-inset` |
 | Grouped lists and interactive rows | `list-surface`, `list-surface-row` |
 | Page tabs, exclusive choices, and equal-width segments | Semantic `AppButton` tabs, `SelectionOptionButton`, and `PillSegmentedControl` with `adaptive` / `equal` layout |
 | Dropdowns and menu items | `DropdownMenu` / `DropdownPanel`, `dropdown-item` |
 | Composite fields and footers | `field`, `control-frame`, `control-footer` |
-| Detail progress/actions/timeline and unavailable comments | `DetailActionGroup` summary, `OperationTimeList`, `CommentComposer disabled` |
+| Detail progress/actions/timeline, embedded comments, and unavailable state | `DetailActionGroup` summary, `OperationTimeList`, `CommentThreadPanel embedded`, `CommentComposer disabled/mobileDocked` |
+
+Mobile detail body, actions, and discussion share the outer `DetailPageShell` scroll root; embedded infinite scroll must resolve that root rather than adding an inner comment overflow container. Desktop and mobile composers share one pill control. Docking must reuse Bottom Tab, safe-area, and viewport-gutter tokens; an opaque surface must block scrolling content behind the composer and reply context, and the reply excerpt stays single-line truncated. Facilities may use only the presentation-only `UnavailableCommentDiscussion`; do not add facility comment actions, services, Realtime, notifications, or tables as part of that shell.
 
 Elevation has exactly three levels: `--shadow-control`, `--shadow-card`, and `--shadow-floating`. Do not add arbitrary shadows, page-level horizontal padding in route views, fixed left/right offsets that imitate safe areas, or manually assembled near-duplicate cards.
 

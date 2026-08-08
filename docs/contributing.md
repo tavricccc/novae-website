@@ -114,14 +114,16 @@ PR CI 會自動執行本機靜態／單元、後端整合與真實瀏覽器 E2E 
 | 需求 | 規範入口 |
 |---|---|
 | 頁面左右留白、safe area、內容最大寬度 | `AppShell`／`ViewportFrame`／`RoutePageFrame` |
-| 三領域詳情桌面雙欄與手機分頁 | `DetailPageShell`；桌面不得再包外層卡片 |
+| 三領域詳情桌面雙欄與手機單一內容流 | `DetailPageShell`；桌面不得再包外層卡片，手機不得恢復 segmented tabs |
 | 一般按鈕、icon、toolbar、主要與次要動作 | `AppButton` 或既有 `button-*` variant |
 | 卡片、控制表面、浮動層、內嵌區塊 | `SurfacePanel` 或 `surface-control`／`surface-card`／`surface-floating`／`surface-inset` |
 | 群組列表與可互動列 | `list-surface`、`list-surface-row` |
 | 頁面 Tabs、互斥選項與等寬分段控制 | `AppButton` 語意化 Tabs、`SelectionOptionButton`、`PillSegmentedControl` 的 `adaptive`／`equal` layout |
 | dropdown 與項目 | `DropdownMenu`／`DropdownPanel`、`dropdown-item` |
 | 複合輸入與 footer | `field`、`control-frame`、`control-footer` |
-| 詳情進度／操作／時間與留言關閉態 | `DetailActionGroup` summary、`OperationTimeList`、`CommentComposer disabled` |
+| 詳情進度／操作／時間、embedded 留言與關閉態 | `DetailActionGroup` summary、`OperationTimeList`、`CommentThreadPanel embedded`、`CommentComposer disabled/mobileDocked` |
+
+手機詳情的正文、actions 與討論串共用 `DetailPageShell` 外層 scroll root；infinite scroll 在 embedded 模式解析該外層，不得新增留言內層 overflow。桌機與手機 Composer 共用同一個 pill control；dock 必須沿用 Bottom Tab、safe-area 與 viewport gutter tokens，composer／回覆提示後方必須以不透明 surface 阻擋捲動內容，回覆摘要維持單行截斷。設備只允許純展示的 `UnavailableCommentDiscussion`，不得因此加入設備留言 action、service、Realtime、通知或資料表。
 
 陰影只有 control、card、floating 三階，分別使用 `--shadow-control`、`--shadow-card`、`--shadow-floating`。不得加入 arbitrary shadow、在 route view 自行加頁面級左右 padding、用固定 `left-*`／`right-*` 模擬 safe area，或手組另一個近似卡片。
 
