@@ -11,7 +11,6 @@ import circleCheck from '@tabler/icons/outline/circle-check.svg?raw';
 import clockHour4 from '@tabler/icons/outline/clock-hour-4.svg?raw';
 import deviceMobileDown from '@tabler/icons/outline/device-mobile-down.svg?raw';
 import devices from '@tabler/icons/outline/devices.svg?raw';
-import dots from '@tabler/icons/outline/dots.svg?raw';
 import externalLink from '@tabler/icons/outline/external-link.svg?raw';
 import eye from '@tabler/icons/outline/eye.svg?raw';
 import gitBranch from '@tabler/icons/outline/git-branch.svg?raw';
@@ -34,6 +33,7 @@ import switchHorizontal from '@tabler/icons/outline/switch-horizontal.svg?raw';
 import thumbUp from '@tabler/icons/outline/thumb-up.svg?raw';
 import trash from '@tabler/icons/outline/trash.svg?raw';
 import trendingUp from '@tabler/icons/outline/trending-up.svg?raw';
+import tool from '@tabler/icons/outline/tool.svg?raw';
 import user from '@tabler/icons/outline/user.svg?raw';
 import userShield from '@tabler/icons/outline/user-shield.svg?raw';
 
@@ -51,7 +51,6 @@ const ICONS = {
   'clock-hour-4': clockHour4,
   'device-mobile-down': deviceMobileDown,
   devices,
-  dots,
   'external-link': externalLink,
   eye,
   'git-branch': gitBranch,
@@ -74,6 +73,7 @@ const ICONS = {
   'thumb-up': thumbUp,
   trash,
   'trending-up': trendingUp,
+  tool,
   user,
   'user-shield': userShield
 };

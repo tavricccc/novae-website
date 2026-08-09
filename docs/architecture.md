@@ -72,7 +72,9 @@ flowchart LR
 | `n<namespace>-delete` | 清除 Cloudinary 資源並同步刪除狀態 |
 | `n<namespace>-maintenance` | 執行保留期、維護 RPC，並觸發 deletion/outbox workers |
 
-公開 API 路徑仍由 Cloudflare Worker 先驗證來源與粗限流，再轉送 Edge。每一次成功轉送都會計入 Supabase Edge Function invocation；因此冷啟動改以 `getSessionBootstrap` 一次讀取角色、分類目錄、內容版本與未讀提示，並可選擇合併平台造訪寫入。細項 action 仍保留給局部刷新與管理寫入。Media Gateway 只負責驗證簽名、固定圖片變體與 edge cache，不承擔提案或設備的 domain 授權判斷；可讀性仍由 Edge 在簽發網址前決定。
+公開 API 路徑仍由 Cloudflare Worker 先驗證來源與粗限流，再轉送 Edge。每一次成功轉送都會計入 Supabase Edge Function invocation；因此冷啟動改以 `getSessionBootstrap` 一次讀取角色、分類目錄、內容版本與未讀提示，並可選擇合併平台造訪寫入。這個 bootstrap 在 Edge 內只使用 access context 與一個 Postgres snapshot request；提案、個人提案、設備與公告列表也各自以單一 snapshot RPC 同時取得政策、頁面資料與內容版本，不再為分類驗證、政策陣列或版本拆出額外資料庫請求。細項 action 仍保留給局部刷新與管理寫入。Media Gateway 只負責驗證簽名、固定圖片變體與 edge cache，不承擔提案或設備的 domain 授權判斷；可讀性仍由 Edge 在簽發網址前決定。
+
+建立內容、流程轉換與外部副作用仍使用可重播的資料庫冪等紀錄。公告按讚與取消附議則是設定明確最終狀態的自然冪等操作，保留 request ID 與業務限流，但不再為每次成功操作額外寫入 claim／complete 紀錄。
 
 ## 分類設定如何生效
 
@@ -97,7 +99,7 @@ Postgres 是 source of truth。需要通知、Push、Notion 或其他外部服�
 
 Notion 建立頁面前先在 Postgres 取得 `pending:<uuid>` reservation，頁面帶有穩定的 `Novae ID`。若遠端建立成功後本機 mapping 寫入中斷，重試會先依 ID 找回同一頁再完成 mapping；過期 reservation 可被安全接手，避免重複頁面。
 
-保留期清理提案或設備時，若存在 Notion 對應頁面，會在刪除主資料的同一交易排入刪除同步事件；這類排程清理不會另發使用者通知，但仍會由正常 outbox 重試與追蹤。
+保留期清理提案或設備時，若存在 Notion 對應頁面，會在刪除主資料的同一交易排入刪除同步事件；這類排程清理不會另發使用者通知，但仍會由正常 outbox 重試與追蹤。Maintenance snapshot 會在同一個資料庫 request 回傳實際到期的 outbox／deletion worker，交易提交後只喚醒有 backlog 的項目；事件 trigger 負責即時處理，每 5 分鐘的 cron 只作失敗重試保險，不再每分鐘固定輪詢。
 
 圖片採統一 Media Gateway：瀏覽器仍以受控簽名直接上傳 Cloudinary，callback 驗證後只保存私有原圖識別資料；讀取時由 Edge 先依內容權限簽發 Worker 網址。公開圖片與頭像使用穩定網址，私人提案／留言使用約 15 分鐘的短效網址。Worker 驗證通過後先讀自己的共享 edge cache，未命中才向 Cloudinary 取原圖；圖片列固定使用 320×240 縮圖，正文與燈箱才載完整圖。私人圖片不允許瀏覽器長期快取，但不同已授權使用者仍可共用 Worker 端的圖片內容快取。前端、Notion 匯入與頭像都不接觸 Cloudinary delivery URL。可變內容列表改用 `no-store`，不再保留短時間 POP cache，因此狀態寫入後讀取一致，但列表請求會增加部分 Cloudflare 到 Supabase 的轉送與 Edge invocation。
 

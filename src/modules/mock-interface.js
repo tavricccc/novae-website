@@ -7,7 +7,7 @@ const words = {
     comments: '討論留言', details: '提案內容', share: '分享', review: '審核提案', delete: '刪除',
     support: '附議', submitted: '提案時間', result: '提案結果', announcement: '公告', notifications: '通知',
     operations: '維運狀態', categories: '分類使用概況', outcomes: '平台成果',
-    dashboard: '統計', settings: '我的', create: '新增', processing: '處理中', waiting: '待審核', unanswered: '未回覆',
+    facilities: '設備', dashboard: '統計', settings: '我的', create: '新增', processing: '處理中', waiting: '待審核', unanswered: '未回覆',
     completed: '已完成', infeasible: '無法實行', reply: '回覆', search: '搜尋',
   },
   en: {
@@ -15,7 +15,7 @@ const words = {
     comments: 'Discussion', details: 'Proposal', share: 'Share', review: 'Review', delete: 'Delete',
     support: 'support', submitted: 'Submitted', result: 'Result', announcement: 'Announcements', notifications: 'Notifications',
     operations: 'Operations', categories: 'Category usage', outcomes: 'Platform outcomes',
-    dashboard: 'Dashboard', settings: 'Me', create: 'Create', processing: 'Processing', waiting: 'Under review', unanswered: 'Awaiting reply',
+    facilities: 'Facilities', dashboard: 'Dashboard', settings: 'Me', create: 'Create', processing: 'Processing', waiting: 'Under review', unanswered: 'Awaiting reply',
     completed: 'Completed', infeasible: 'Infeasible', reply: 'Reply', search: 'Search',
   },
 };
@@ -61,8 +61,7 @@ function supportButton(issue) {
 
 function issueCard(issue) {
   return `<article class="app-issue-card">
-    <header>${statusTag(issue)}<time>${issue.time}</time><button class="app-icon-button" type="button" aria-label="more">${icon('dots')}</button></header>
-    <div class="app-issue-title">${avatar(issue)}<div><h4>${issue.title}</h4><p>${issue.author}</p></div></div>
+    <header class="app-card-identity">${avatar(issue)}<div><p><strong>${issue.author}</strong><time>${issue.time}</time>${statusTag(issue)}</p><h4>${issue.title}</h4></div></header>
     ${progress(issue)}
     <footer><button class="app-icon-button" type="button" aria-label="comments">${icon('message')}</button>${supportButton(issue)}</footer>
   </article>`;
@@ -71,15 +70,14 @@ function issueCard(issue) {
 function appSidebar(active = 'proposals') {
   return `<aside class="app-sidebar"><img src="./logo.svg" alt=""/><nav>
     <button class="${active === 'proposals' ? 'is-active' : ''}" aria-label="${w('proposals')}">${icon('message')}</button>
+    <button class="${active === 'facilities' ? 'is-active' : ''}" aria-label="${w('facilities')}">${icon('tool')}</button>
     <button class="${active === 'announcement' ? 'is-active' : ''}" aria-label="${w('announcement')}">${icon('speakerphone')}</button>
-    <button aria-label="${w('create')}">${icon('plus')}</button>
-    <button class="${active === 'notifications' ? 'is-active' : ''}" aria-label="${w('notifications')}">${icon('bell')}</button>
-  </nav>${profileAvatar(2)}</aside>`;
+  </nav><div class="app-sidebar-utilities"><button class="${active === 'notifications' ? 'is-active' : ''}" aria-label="${w('notifications')}">${icon('bell')}</button>${profileAvatar(2)}</div></aside>`;
 }
 
 function boardToolbar() {
-  return `<div class="app-board-toolbar"><div><h3>${w('proposals')}</h3><button class="app-text-button">${w('public')}${icon('chevron-down')}</button></div>
-    <div class="app-board-controls"><div class="app-segmented"><button class="is-active" type="button">${icon('list-details')}<span>${w('active')}</span></button><button type="button">${icon('archive')}<span>${w('closed')}</span></button></div><button class="app-icon-button">${icon('sort-descending')}</button><button class="app-icon-button">${icon('search')}</button></div></div>`;
+  return `<div class="app-board-toolbar"><button class="app-text-button app-category-heading">${w('public')}${icon('chevron-down')}</button>
+    <div class="app-board-controls"><div class="app-segmented"><button class="is-active" type="button">${icon('list-details')}<span>${w('active')}</span></button><button type="button">${icon('archive')}<span>${w('closed')}</span></button></div><button class="app-icon-button" aria-label="${w('latest')}">${icon('sort-descending')}</button><button class="app-icon-button" aria-label="${w('search')}">${icon('search')}</button><button class="app-icon-button app-create-button" aria-label="${w('create')}">${icon('plus')}</button></div></div>`;
 }
 
 function boardDemo() {
@@ -115,7 +113,7 @@ function announcementCards() {
     { title: '期末考週圖書館延長開放', author: '學務處', time: '7月12日', likes: 28 },
     { title: '提案狀態與通知體驗更新', author: '系統管理員', time: '7月10日', likes: 14 },
   ];
-  return `<div class="app-announcement-grid">${cards.map((item, index) => `<article class="app-issue-card app-announcement-card"><header><span class="app-category">${w('announcement')}</span><time>${item.time}</time><button class="app-icon-button" type="button" aria-label="more">${icon('dots')}</button></header><div class="app-issue-title">${profileAvatar(index + 1)}<div><h4>${item.title}</h4><p>${item.author}</p></div></div><footer><button class="app-icon-button" type="button" aria-label="comments">${icon('message')}</button><button class="app-pill-button" type="button">${icon('thumb-up')}<span>${item.likes}</span></button></footer></article>`).join('')}</div>`;
+  return `<div class="app-announcement-grid">${cards.map((item, index) => `<article class="app-issue-card app-announcement-card"><header class="app-card-identity">${profileAvatar(index + 1)}<div><p><strong>${item.author}</strong><time>${item.time}</time><span class="app-category">${w('announcement')}</span></p><h4>${item.title}</h4></div></header><footer><button class="app-icon-button" type="button" aria-label="comments">${icon('message')}</button><button class="app-pill-button" type="button">${icon('thumb-up')}<span>${item.likes}</span></button></footer></article>`).join('')}</div>`;
 }
 
 function announcementsDemo() {
@@ -135,7 +133,7 @@ function moderationDemo() {
 }
 
 function mobileDemo() {
-  return `<section class="app-mobile"><header><strong>${w('proposals')}</strong></header><main>${boardToolbar()}<div class="app-issue-list">${issues().slice(0,2).map((issue) => issueCard(issue)).join('')}</div></main><nav><button class="is-active">${icon('message')}<small>${w('proposals')}</small></button><button>${icon('speakerphone')}<small>${w('announcement')}</small></button><button class="app-mobile-create" type="button" title="${w('create')}" aria-label="${w('create')}">${icon('plus')}</button><button>${icon('bell')}<small>${w('notifications')}</small></button><button>${icon('user')}<small>${w('settings')}</small></button></nav></section>`;
+  return `<section class="app-mobile"><header><strong>${w('public')}</strong>${icon('chevron-down')}</header><main>${boardToolbar()}<div class="app-issue-list">${issues().slice(0,2).map((issue) => issueCard(issue)).join('')}</div></main><nav><button class="is-active">${icon('message')}<small>${w('proposals')}</small></button><button>${icon('tool')}<small>${w('facilities')}</small></button><button>${icon('speakerphone')}<small>${w('announcement')}</small></button><button>${icon('bell')}<small>${w('notifications')}</small></button><button>${profileAvatar(2)}<small>${w('settings')}</small></button></nav></section>`;
 }
 
 function templateFor(variant) {
@@ -149,13 +147,13 @@ function templateFor(variant) {
 }
 
 const demoDimensions = {
-  announcements: [1120, 480],
-  board: [1120, 620],
-  detail: [1120, 625],
+  announcements: [1280, 720],
+  board: [1280, 720],
+  detail: [1280, 720],
   hero: [720, 520],
-  mobile: [390, 760],
-  moderation: [1120, 620],
-  notifications: [1120, 480],
+  mobile: [390, 844],
+  moderation: [1280, 720],
+  notifications: [1280, 720],
 };
 
 function fitDemo(root) {
@@ -165,18 +163,20 @@ function fitDemo(root) {
   if (!available) return;
   const [designWidth, designHeight] = demoDimensions[root.dataset.novaeDemo] ?? demoDimensions.board;
   surface.style.width = `${designWidth}px`;
-  surface.style.height = 'auto';
-  surface.style.minHeight = `${designHeight}px`;
+  surface.style.height = `${designHeight}px`;
+  surface.style.minHeight = '0';
   surface.style.transform = 'scale(1)';
   surface.style.transformOrigin = 'top left';
-  const naturalHeight = Math.max(designHeight, surface.scrollHeight);
   const scale = available / designWidth;
   surface.style.transform = `scale(${scale})`;
-  root.style.aspectRatio = `${designWidth} / ${naturalHeight}`;
+  root.style.aspectRatio = `${designWidth} / ${designHeight}`;
   root.style.height = 'auto';
+  root.style.setProperty('--demo-scale', String(scale));
+  root.dataset.demoFitted = 'true';
 }
 
 function paint(root) {
+  delete root.dataset.demoFitted;
   root.innerHTML = templateFor(root.dataset.novaeDemo);
   requestAnimationFrame(() => fitDemo(root));
 }
@@ -204,7 +204,15 @@ export function initializeInterfaceDemos() {
   roots.forEach((root) => { paint(root); initializeDemoInteractions(root); });
   document.addEventListener('novae:language', () => roots.forEach(paint));
   if (typeof ResizeObserver !== 'undefined') {
-    const observer = new ResizeObserver(() => roots.forEach((root) => requestAnimationFrame(() => fitDemo(root))));
+    const scheduled = new WeakSet();
+    const observer = new ResizeObserver((entries) => entries.forEach(({ target }) => {
+      if (scheduled.has(target)) return;
+      scheduled.add(target);
+      requestAnimationFrame(() => {
+        scheduled.delete(target);
+        fitDemo(target);
+      });
+    }));
     roots.forEach((root) => observer.observe(root));
   }
 }

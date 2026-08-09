@@ -7,10 +7,12 @@ import {
   LineSegments,
   Mesh,
   MeshBasicMaterial,
+  OctahedronGeometry,
   PerspectiveCamera,
   Points,
   PointsMaterial,
   Scene,
+  TorusGeometry,
   WebGLRenderer
 } from 'three';
 
@@ -18,6 +20,11 @@ const NODE_COUNT = 52;
 const MOBILE_NODE_COUNT = 34;
 const CONNECTION_STEP = 7;
 const GOLDEN_ANGLE = Math.PI * (3 - Math.sqrt(5));
+
+function seededNoise(index, salt) {
+  const value = Math.sin(index * 91.345 + salt * 17.271) * 47453.5453;
+  return value - Math.floor(value);
+}
 
 function createConstellation(count) {
   const positions = new Float32Array(count * 3);
@@ -46,6 +53,16 @@ function createConnections(points) {
   return new Float32Array(positions);
 }
 
+function createDepthField(count) {
+  const positions = new Float32Array(count * 3);
+  for (let index = 0; index < count; index += 1) {
+    positions[index * 3] = (seededNoise(index, 1) - 0.5) * 10;
+    positions[index * 3 + 1] = (seededNoise(index, 2) - 0.5) * 7;
+    positions[index * 3 + 2] = -1.5 - seededNoise(index, 3) * 5;
+  }
+  return positions;
+}
+
 function disposeScene(renderer, geometries, materials, resizeObserver) {
   renderer.setAnimationLoop(null);
   resizeObserver.disconnect();
@@ -61,12 +78,14 @@ export function mountHeroSpace(host) {
   const compact = window.matchMedia('(max-width: 760px)').matches;
   const canvas = document.createElement('canvas');
   const pixelRatio = Math.min(window.devicePixelRatio || 1, compact ? 1.2 : 1.5);
-  const context = canvas.getContext('webgl2', {
+  const contextOptions = {
     alpha: true,
     antialias: pixelRatio <= 1.25,
     failIfMajorPerformanceCaveat: true,
     powerPreference: 'low-power'
-  });
+  };
+  const context = canvas.getContext('webgl2', contextOptions)
+    || canvas.getContext('webgl', contextOptions);
   if (!context) {
     host.dataset.heroSpaceUnavailable = 'true';
     return;
@@ -133,6 +152,45 @@ export function mountHeroSpace(host) {
   });
   group.add(new Mesh(shellGeometry, shellMaterial));
 
+  const depthGeometry = new BufferGeometry();
+  depthGeometry.setAttribute(
+    'position',
+    new BufferAttribute(createDepthField(compact ? 38 : 72), 3)
+  );
+  const depthMaterial = new PointsMaterial({
+    color: 0x748b78,
+    opacity: 0.24,
+    size: compact ? 0.035 : 0.045,
+    sizeAttenuation: true,
+    transparent: true
+  });
+  const depthField = new Points(depthGeometry, depthMaterial);
+  scene.add(depthField);
+
+  const novaGroup = new Group();
+  novaGroup.position.set(1.55, -1.05, 0.35);
+  novaGroup.rotation.set(0.72, -0.35, 0.2);
+  group.add(novaGroup);
+
+  const novaGeometry = new OctahedronGeometry(compact ? 0.25 : 0.31, 0);
+  const novaMaterial = new MeshBasicMaterial({
+    color: 0x8b7c9f,
+    opacity: 0.18,
+    transparent: true,
+    wireframe: true
+  });
+  const nova = new Mesh(novaGeometry, novaMaterial);
+  novaGroup.add(nova);
+
+  const orbitGeometry = new TorusGeometry(compact ? 0.48 : 0.58, 0.008, 4, 72);
+  const orbitMaterial = new MeshBasicMaterial({
+    color: 0x7b8fa2,
+    opacity: 0.18,
+    transparent: true
+  });
+  const orbit = new Mesh(orbitGeometry, orbitMaterial);
+  novaGroup.add(orbit);
+
   const target = { x: 0, y: 0 };
   let active = true;
   let elapsed = 0;
@@ -155,6 +213,12 @@ export function mountHeroSpace(host) {
     elapsed += delta;
     group.rotation.y += (target.x * 0.18 + elapsed * 0.018 - group.rotation.y) * 0.025;
     group.rotation.x += (-0.12 + target.y * 0.12 - group.rotation.x) * 0.035;
+    depthField.rotation.z = elapsed * -0.004;
+    depthField.position.x += (target.x * -0.22 - depthField.position.x) * 0.018;
+    nova.rotation.x = elapsed * 0.34;
+    nova.rotation.y = elapsed * 0.46;
+    orbit.rotation.x = Math.sin(elapsed * 0.32) * 0.2;
+    orbit.rotation.z = elapsed * -0.11;
     renderer.render(scene, camera);
   };
 
@@ -175,17 +239,19 @@ export function mountHeroSpace(host) {
   document.addEventListener('visibilitychange', updateLoop);
 
   const interactionSurface = host.parentElement;
+  const handlePointerMove = (event) => {
+    if (event.pointerType === 'touch') return;
+    const rect = host.getBoundingClientRect();
+    target.x = (event.clientX - rect.left) / rect.width - 0.5;
+    target.y = (event.clientY - rect.top) / rect.height - 0.5;
+  };
+  const handlePointerLeave = () => {
+    target.x = 0;
+    target.y = 0;
+  };
   if (!compact && interactionSurface) {
-    interactionSurface.addEventListener('pointermove', (event) => {
-      if (event.pointerType === 'touch') return;
-      const rect = host.getBoundingClientRect();
-      target.x = (event.clientX - rect.left) / rect.width - 0.5;
-      target.y = (event.clientY - rect.top) / rect.height - 0.5;
-    });
-    interactionSurface.addEventListener('pointerleave', () => {
-      target.x = 0;
-      target.y = 0;
-    });
+    interactionSurface.addEventListener('pointermove', handlePointerMove, { passive: true });
+    interactionSurface.addEventListener('pointerleave', handlePointerLeave);
   }
 
   updateLoop();
@@ -194,10 +260,12 @@ export function mountHeroSpace(host) {
     if (event.persisted) return;
     observer.disconnect();
     document.removeEventListener('visibilitychange', updateLoop);
+    interactionSurface?.removeEventListener('pointermove', handlePointerMove);
+    interactionSurface?.removeEventListener('pointerleave', handlePointerLeave);
     disposeScene(
       renderer,
-      [pointGeometry, lineGeometry, shellGeometry],
-      [pointMaterial, lineMaterial, shellMaterial],
+      [pointGeometry, lineGeometry, shellGeometry, depthGeometry, novaGeometry, orbitGeometry],
+      [pointMaterial, lineMaterial, shellMaterial, depthMaterial, novaMaterial, orbitMaterial],
       resizeObserver
     );
   }, { once: true });

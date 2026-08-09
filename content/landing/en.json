@@ -1,7 +1,7 @@
 {
   "meta": {
     "title": "Novae · Let every new star be seen",
-    "description": "Novae helps every student proposal be seen—and turn into real campus change."
+    "description": "Novae helps every student proposal be seen, then become real campus change."
   },
   "skip": "Skip to content",
   "nav": {
@@ -21,11 +21,11 @@
     "roles": "Management"
   },
   "landing": {
-    "brandNote": "Novae is the plural of nova—ideas gathering into change.",
+    "brandNote": "Novae is the plural of nova: ideas gathering into change.",
     "proposalsNumber": "01 / PROPOSALS & SUPPORT",
     "proposalsLede": "Public initiatives and private cases each have the right place, while proposals, support and status stay in one real interface.",
     "updatesNumber": "03 / ANNOUNCEMENTS & NOTIFICATIONS",
-    "updatesTitle": "Announcements, discussion and updates—<br><em>without losing the thread.</em>",
+    "updatesTitle": "Announcements, discussion and updates.<br><em>Keep the thread.</em>",
     "updatesLede": "Announcements can broadcast and invite discussion; new proposals and facility reports reach their category owners, while status and comment updates return to the people involved.",
     "managementNumber": "04 / MANAGEMENT & RESPONSE",
     "managementTitle": "Students speak up.<br><em>Schools can respond clearly.</em>",
@@ -37,7 +37,7 @@
   "hero": {
     "eyebrow": "Every voice can become the start of change",
     "title": "Let every new star on campus <em>be seen.</em>",
-    "lede": "Forms vanish. Posts scroll away. Novae keeps proposals, support, review, and responses on one traceable path—so students know where things stand and schools know what is next.",
+    "lede": "Forms vanish. Posts scroll away. Novae keeps proposals, support, review, and responses on one traceable path. Everyone can see what is next.",
     "ctaPrimary": "Explore the project",
     "ctaDocs": "Read the documentation",
     "facts": [
@@ -86,7 +86,7 @@
       {
         "icon": "git-branch",
         "title": "A clear status lifecycle",
-        "body": "Under review, rejected, processing, completed, or infeasible—with response targets and written outcomes on one timeline."
+        "body": "Under review, rejected, processing, completed, or infeasible, with response targets and written outcomes on one timeline."
       },
       {
         "icon": "lock-heart",
@@ -101,7 +101,7 @@
       {
         "icon": "speakerphone",
         "title": "Announcements that broadcast",
-        "body": "Admins publish and edit; school users can read, like, and comment—with optional push delivery."
+        "body": "Admins publish and edit; school users can read, like, and comment, with optional push delivery."
       },
       {
         "icon": "chart-dots",
@@ -168,7 +168,7 @@
     "studio": {
       "number": "03 / ADJUSTABLE RULES",
       "title": "Do not pick a preset.<br><em>Compose the right rules.</em>",
-      "lede": "Configure during first sign-in and in System settings—no code changes required",
+      "lede": "Configure during first sign-in and in System settings. No code changes required.",
       "docsCta": "Read the system settings guide",
       "stepLabel": "Rule module",
       "dimensions": [
@@ -223,7 +223,7 @@
             },
             {
               "title": "Support on",
-              "body": "Set a goal and deadline—for example, the current public category uses 50 people in 14 days."
+              "body": "Set a goal and deadline. For example, the current public category uses 50 people in 14 days."
             }
           ]
         },
@@ -339,7 +339,7 @@
       },
       {
         "title": "Discussion in context",
-        "body": "Questions and replies stay beside the proposal—not scattered across chats."
+        "body": "Questions and replies stay beside the proposal, not scattered across chats."
       },
       {
         "title": "Photos of the site",

@@ -75,8 +75,10 @@ Notion publishes no monthly API request quota, so throughput—not user count—
 
 ## Cost controls already implemented
 
-- Session bootstrap combines access, categories, revisions, unread status, and a once-daily visit write; the obsolete `recordPlatformVisit` action is removed.
-- Visit writes now occur at most daily instead of every six hours.
+- Session bootstrap combines access, categories, versions, unread status, and the visit record; inside Edge it now needs only the access-context lookup plus one Postgres snapshot request, and the obsolete `recordPlatformVisit` action remains removed.
+- An unchanged visit updates `last_seen_at` at most once every 24 hours, while name, email, or avatar changes are persisted immediately.
+- Proposal, personal-proposal, facility, and announcement lists each use one snapshot RPC for policy, page data, and the content version instead of separate category, policy, and version requests.
+- Announcement likes and support removal use natural idempotent final states. They retain request IDs and business limits but avoid successful claim/complete requests and idempotency-table writes; creates, deletes, and workflow transitions retain full replay protection.
 - The Firebase Redis record keeps an absolute creation time while warm Edge isolates reuse it for up to five minutes, preserving the 15-minute revocation window.
 - Production Cloudflare observability samples 10% of traces.
 - Mutable issue, facility, and announcement lists use `no-store` after Cloudflare validation instead of a POP cache, so status and comment settings cannot remain stale; the trade-off is additional Supabase Edge forwarding and invocations for list reads.
@@ -85,6 +87,7 @@ Notion publishes no monthly API request quota, so throughput—not user count—
 - Outbox rows retain identifiers required for delivery and synchronization instead of duplicating full content. Comment text is fetched by ID only when a worker processes that event.
 - Browser WebP compression caps images at 800 KB and 2,000 px. The Cloudinary preset retains format and file-size validation without a duplicate incoming resize transformation.
 - Unchanged Notion content hashes are skipped, while outbox, notification, and deletion retries remain bounded.
+- Maintenance invokes only workers whose snapshot reports due backlog. The retry cron is a five-minute safety net behind immediate event triggers, reducing fixed polling by 80% from the previous once-per-minute schedule.
 - Closed issues and facility reports retain their full data for 180 days from closure, then their comments, per-user relations, database rows, and Cloudinary images are permanently deleted. Notion pages remain as a manual long-term record. Announcements are retained indefinitely.
 
 This design does not automatically disable features at 70%, 80%, 90%, or any other quota threshold. Provider alerts notify administrators without silently changing product behavior.

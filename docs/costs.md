@@ -86,8 +86,10 @@ Notion 沒有公開的月 API request 配額；限制是吞吐量而不是人數
 
 ## 已落實的成本控制
 
-- 登入 bootstrap 合併角色、分類、版本、未讀提示與每日一次的 visit 紀錄；已刪除重複的 `recordPlatformVisit` action。
-- Visit 最多每日寫入一次，不再每 6 小時更新 `last_seen_at`。
+- 登入 bootstrap 合併角色、分類、版本、未讀提示與 visit 紀錄；Edge 內只剩 access context 加一個 Postgres snapshot request，已刪除重複的 `recordPlatformVisit` action。
+- 純 visit 最多每 24 小時更新一次 `last_seen_at`；姓名、Email 或頭像變更仍會立即寫入。
+- 提案、個人提案、設備與公告列表各以一個 snapshot RPC 同時取得政策、頁面資料與內容版本，不再拆出分類／政策／版本 requests。
+- 公告按讚與取消附議使用自然冪等最終狀態，保留 request ID 與業務限流，但省去成功操作的 claim／complete requests 與冪等表寫入；建立、刪除及流程轉換仍保留完整重播保護。
 - Firebase 使用者 Redis cache 在 warm Edge isolate 內最多重用 5 分鐘，並保存絕對建立時間，避免延長 15 分鐘的撤銷檢查窗口。
 - Cloudflare 正式環境只抽樣 10% observability traces；錯誤仍由應用程式明確記錄。
 - 提案、設備與公告等可變內容列表在 Cloudflare 驗證後使用 `no-store`，不再保留 POP cache，避免狀態與留言設定在短時間內殘留；代價是列表請求會增加部分 Supabase Edge forwarding 與 invocation。
@@ -96,6 +98,7 @@ Notion 沒有公開的月 API request 配額；限制是吞吐量而不是人數
 - Outbox 只保存通知與同步需要的識別欄位，不複製完整正文；留言正文只在 Worker 實際處理該事件時依 ID 精準補讀。
 - 圖片在瀏覽器先轉 WebP，限制 800 KB、2,000 px 與每種內容張數；Cloudinary preset 只保留格式與檔案大小限制，不再套用重複的 incoming resize transformation。
 - Notion 內容 hash 不變時不重送，outbox、通知與刪除工作皆有 bounded retry。
+- Maintenance 只在 snapshot 判定有到期 backlog 時喚醒對應 worker；即時 trigger 之外的 retry cron 由每分鐘降為每 5 分鐘，固定輪詢次數減少 80%。
 - 已結案提案與設備保留完整資料 180 天，之後連同留言、個人關聯與 Cloudinary 圖片永久刪除；Notion 頁面保留作人工長期紀錄。公告永久保留，不納入這項清理。
 
 這套策略不會依 70%／80%／90% 等額度門檻自動停用功能。供應商警示只用於通知管理員，避免流量波動自行改變前台行為。

@@ -14,7 +14,7 @@
 - `index.html`：產品首頁結構；文案優先改語系 JSON。
 - `src/main.js` / `src/main-docs.js`：首頁與文件頁入口。
 - `src/config/site.js`：GitHub、授權與文件網址的單一設定來源。
-- `src/modules/`：首頁語系、內容渲染、示意介面、規則互動、章節導覽與共用 pointer 按壓狀態（放開後固定保留 160ms、移動 12px 取消）；`icons.js` 集中輸出可縮放的 Tabler SVG，`reveal.js` 以 Motion Mini 統一首屏與章節進場，`hero-space.js` 則以延遲載入的 Three.js 繪製首屏星圖並在離開畫面時暫停；mock interface 以固定設計寬度與實際完整內容高度作為圖片式畫布，再依容器等比例縮放，不以固定高度裁切內容。
+- `src/modules/`：首頁語系、內容渲染、示意介面、規則互動、章節導覽與共用 pointer 按壓狀態（放開後固定保留 160ms、移動 12px 取消）；`icons.js` 集中輸出可縮放的 Tabler SVG，`reveal.js` 以 Motion Mini 統一首屏與章節進場，`hero-space.js` 以延遲載入的 Three.js 繪製有景深、軌道與 pointer 回饋的首屏星圖，離屏、低效能、省流量與 reduced motion 皆降級或暫停；`mock-interface.js` 以目前主程式的側邊導覽、卡片階層、看板操作與手機底部導覽為結構來源，每種示意畫面使用固定設計尺寸與畫面比例，容器只對整張畫布等比縮放。
 - `src/styles/`：`index.js` 統一載入全站字體與共用樣式，另含首頁區塊、章節導覽、示意介面與文件樣式；文件 layout 與 header 直接使用完整螢幕寬度、只保留固定 gutter；手機版以頁面既有 padding 容納 mockup 與橫向資訊列，不使用負 margin 或頁面級 overflow 裁切。
 - `public/assets/`：Landing 專用透明陶瓷／壓克力裝置與低飽和圖片頭像。
 
