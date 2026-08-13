@@ -1,124 +1,83 @@
-# UI 設計系統與可復用元件
+# UI 設計系統與共用元件
 
-本頁是 Novae 前端新增頁面、元件與視覺樣式的實作規範。目標是讓新頁面以組裝為主，並讓桌面與手機共用資料流、互動狀態與視覺語言。
+本頁記錄 Novae Next.js／React 前端的實作契約。完整視覺方向位於主程式 `DESIGN.md`；新頁面必須組合既有 token 與 primitive，不得建立領域專用的平行設計系統。
 
 ## 單一來源
 
 | 能力 | 主程式位置 |
 | --- | --- |
-| 色彩、圓角、動效與陰影 token | `src/styles/base.css` |
-| surface、viewport、list、dropdown、Dialog、editor、skeleton | `src/styles/primitives.css` |
-| 按鈕、欄位與控制項 | `src/styles/controls.css` |
-| 無業務 UI 元件 | `src/components/ui/` |
+| 色彩、字體、圓角、safe area、viewport、surface 與三階陰影 | `src/app/globals.css` |
+| timing、easing、route、overlay、數字、反應、載入與 reduced-motion | `src/styles/motion.css` |
+| 無業務資料的 shadcn／Radix 元件 | `src/components/ui/` |
+| 可復用的數字、文字、清單與反應動效 | `src/components/motion/` |
 | 元件位置與責任 | `structure.md` |
-| 防回歸規則 | `scripts/check-ui-primitives.mjs`、`tests/architecture.test.mjs` |
+| 回歸防線 | `scripts/check-ui-primitives.mjs`、`tests/architecture/` |
 
-領域元件不得另建近似的卡片、按鈕、陰影、dropdown、Dialog 或 viewport 樣式。既有 primitive 缺少合理能力時，先擴充原元件的 props、slots 或 callbacks。
+頁面與領域元件不得自行建立另一套 button、card、field、dropdown、dialog、navigation、shadow 或 motion。primitive 缺少合理能力時，先擴充既有 props、children 或 callback。
 
-## Atomic Design 分層
+## 架構邊界
 
-依賴方向固定為：
+- `src/app/` 只組裝 App Router 頁面與 layout，不直接存取 service。
+- `src/components/` 顯示領域資料並轉發事件；流程與非同步狀態進 `src/hooks/`。
+- `src/components/ui/` 不 import service、session 或領域 hook。
+- `src/lib/` 保持無 React 相依，`src/services/` 是 API、Supabase 與 Edge 邊界。
+- 手機與桌面共用同一份資料流與互動狀態，只切換 layout。
 
-```text
-atoms → molecules → organisms → domain components / views
-```
+## 視覺契約
 
-- `atoms/`：最小視覺或互動單位，例如 `AppButton`、`AppIcon`、`TagBadge`、`SwitchIndicator`、`SkeletonBlock`、`InlineAlert`、`SelectionMark`。
-- `molecules/`：可獨立復用的局部組合，例如 `SurfacePanel`、`ListSurfaceRow`、`LabeledListSection`、`SectionHeader`、`DropdownMenu`、`DialogHeading`、`DialogActionRow`。
-- `organisms/`：可直接供 route view 或領域元件填資料與 slots 的完整區塊，例如 `RoutePageFrame`、`DialogShell`、`ContentListState`、`DetailPageShell`、`ContentCardSkeleton`、`EntryComposerShell`。
+- 英數使用 Inter，繁中使用 HarmonyOS Sans TC，識別碼與營運資料才使用 Roboto Mono。
+- 淺色使用近白 stage 與白色 surface；深色使用分層 charcoal。Logo 在淺色為白底黑字，深色相反。
+- 陰影只有 `--shadow-control`、`--shadow-card`、`--shadow-floating` 三階。禁止 arbitrary shadow 或在領域元件手組近似卡片。
+- 圓角依控制、卡片與浮動層分級；pill 只用於分段控制、導覽與確實需要的緊湊控制。
+- viewport 左右留白與 safe area 由 `AppShell` 和全域 token 統一提供；route page 不再增加另一套頁面 gutter。
+- 全域隱藏捲動條只改視覺，不能移除 wheel、touch、keyboard 或程式捲動能力。
 
-低層不得 import 高層；molecule 不得依賴 organism。所有 UI 層都不得讀取 service、session 或業務資料。
-
-## 新頁面組裝順序
-
-1. 使用 `RoutePageFrame` 決定 flow/fill、垂直 padding 與 bottom safe area；水平邊界只由 `ViewportFrame` 的 safe-area-aware padding 提供，不使用 bleed、負 margin 或頁面級橫向裁切。
-2. 先找涵蓋列表、詳情、Dialog、Composer 或 loading state 的 organism。
-3. 用 `SurfacePanel`、`SectionHeader`、`LabeledListSection` 等 molecule 組成區塊。
-4. 最後才以 atom 補上按鈕、icon、標籤、訊息與 skeleton。
-5. route 組裝與頁面級狀態留在 `views/`，流程進 composable，資料邊界只經 service。
-
-Route view 不得自行增加另一套頁面級 `px-*`、`left-*`、`right-*`、safe-area 計算或 max-width。這些由 `AppShell`、`ViewportFrame` 與 `RoutePageFrame` 統一負責。卡片陰影需要空間時，應在捲動內容內側增加共用 padding；不得先把內容推出容器再用 `overflow-x-hidden` 裁掉。原生捲動條由全域基礎樣式統一隱藏，頁面仍須保留滑鼠滾輪、觸控、鍵盤與程式捲動，不得以 `overflow: hidden` 取代可捲動行為。
-
-## 常見需求對照
+## 共用元件
 
 | 需求 | 優先使用 |
 | --- | --- |
-| 頁面骨架、左右留白與安全區 | `RoutePageFrame`、`ViewportFrame` |
-| 一般、icon、toolbar、主要與次要按鈕 | `AppButton` |
-| 列表內的附議、遇到與按讚計數 | `AppButton` 搭配 `button-card-count`（32px 表面、44px 觸控區） |
-| 卡片、控制框、浮動層、內嵌區、列表外殼 | `SurfacePanel` |
-| 詳情頁進度、操作與時間軸 | `DetailActionGroup` summary、`DetailActionButton`、`OperationTimeList` |
-| 留言輸入與不開放狀態 | `CommentComposer` 的一般／disabled 模式 |
-| 手機詳情單一內容流與設備不可用討論殼 | `DetailPageShell` embedded comments slot、`CommentThreadPanel`、`UnavailableCommentDiscussion` |
-| 列表補充資訊、詳情地點與處理結果 | `ContentNoticePanel`（compact／detail，neutral／success／error） |
-| grouped list 與設定列 | `ListSurfaceRow`、`IconListRow`、`LabeledListSection` |
-| dropdown 與項目 | `DropdownMenu`、`DropdownPanel`、`dropdown-item` |
-| Dialog | `DialogShell`、`DialogHeading`、`DialogActionRow` |
-| 列表載入、空白、錯誤與更多內容 | `ContentListState`、`EmptyStatePanel`、`PageLoadFailure` |
-| 卡片與詳情骨架 | `ContentCardSkeleton`、`SkeletonDetail`、`SkeletonBlock` |
-| 字數限制輸入 | `CountedTextField`、`CountedTextareaField` |
+| 一般、icon、主要與次要按鈕 | `Button` 的既有 variant／size |
+| 卡片、欄位與文字輸入 | `Card`、`Input`、`Textarea`、`Label` |
+| 下拉、選擇與分段控制 | `DropdownMenu`、`Select`、`Tabs`、`LiquidTabs` |
+| 對話框與手機浮層 | `Dialog`、`AlertDialog`、`Sheet` |
+| 狀態、載入、空白與錯誤 | `StatusBadge`、`Skeleton`、`PageState`、Sonner toast |
+| Markdown、圖片與留言 | 共用 composer fields、content renderer、discussion surface |
+| 數字、文字、反應與清單變化 | `components/motion/` 既有 wrapper |
 
-相同結構若只差字串、icon、狀態、slot 或 callback，必須共用；不要複製近似元件。
+結構只差字串、icon、狀態或 callback 時必須共用同一元件。列表卡片只有在整張可點擊時才有克制的 hover；不可點擊卡片不位移、不上浮。
 
-路由頁的 session 骨架與實際列表必須互斥（`v-if` / `v-else-if` 同一鏈），不得在 skeleton 仍掛載時同時渲染 `IssueBoard` 等內容。空列表使用 `EmptyStatePanel` 時 icon tile 預設 `elevation="none"`，避免空白頁看起來像殘留卡片。列表初次載入與向下載入更多都使用 skeleton；`.skeleton-card`／`.skeleton-enter` 進場只允許 opacity，不對 skeleton 使用 transform，以免卸載後留下合成陰影。系統設定的分類流程與人員權限載入中也改為 skeleton，不使用純文字「載入中」。
+## 響應式與觸控
 
-列表初次載入與向下載入更多都使用 skeleton；向下載入更多固定插入三筆對應形狀的 placeholder，資料完成後在同一位置替換。載入期間只阻止向下越過 placeholder 邊界，向上捲動、錯誤重試與 `prefers-reduced-motion` 都必須保持可用。桌面 `DetailPageShell` 使用無外層卡片的平面雙欄，不得在 route view 另包 detail card；提案與設備的 summary 使用 `surface-inset`，時間軸由 `OperationTimeList` 在桌面水平、手機垂直呈現。手機詳情 Header 使用實色平面，正文、actions 與 embedded comments 必須共用同一 scroll root，不得恢復 segmented tabs 或在留言串建立第二層 overflow scroll。fixed Composer 使用 `viewport-floating-inline`、Bottom Tab tokens 與 feed scroll padding，不自行硬編碼左右 safe area；設備 unavailable shell 不得掛載留言 service。
+- Desktop 顯示完整側欄，寬度足夠的列表可使用兩欄；mobile 使用單欄與底部導覽。
+- 手機以目前頁面標題作為 header 脈絡，不建立重複的第二列標題或通知入口。
+- 主要手機控制至少 44×44px，包含返回、分享、更多操作、反應與底部導覽。
+- Hover 必須位於 `(hover: hover) and (pointer: fine)`；觸控使用 active feedback，不能依賴 hover 才能發現功能。
+- 使用 `100dvh`、`viewport-fit=cover` 與 safe-area token；固定或 sticky 控制不得遮住最後一筆內容。
+- 字串在 320px、英文長文與放大文字時仍須完整容納，不以 viewport 寬度縮放字級。
 
-## Surface 與陰影
+## 內容與互動
 
-陰影只有三階：
+- 功能名稱與狀態文字由 i18n key 統一；繁中與英文 key 結構一致，不在不同頁面使用不同稱呼。
+- 提案附議與設備「我也遇到」使用手勢反應；公告按讚使用愛心。啟用時播放各自粒子與數字動畫，不插入通用 spinner/check 取代 icon。
+- 留言是一個連續討論區，不將每則留言做成獨立卡片；composer 放在實際回覆位置並顯示 reply context。
+- 作者只在目前使用者有權限讀取時顯示；可見時頭像與姓名放在時間前方。
+- 一般 mutation 原地更新 React state，不用整頁 reload 表達成功。
 
-| Token / class | 用途 |
-| --- | --- |
-| `--shadow-control` / `shadow-control` | 按鈕、欄位、icon tile、小型互動控制 |
-| `--shadow-card` / `shadow-card` | 內容卡片與大型穩定表面 |
-| `--shadow-floating` / `shadow-floating` | Dropdown、toast、浮動導覽與最上層浮動表面 |
+## 動效
 
-禁止 arbitrary shadow、第四套 elevation 名稱，以及在領域元件重複拼出 `rounded + border + background + shadow` 的卡片。`SurfacePanel` 的 `control`、`card`、`floating`、`inset`、`list` variant 應表達表面的語意。空白狀態與說明性 icon 不應使用 card elevation。
-
-## 動態與頁面連續性
-
-- 全域可點擊元素使用無位移的放大與 spring-like 回彈；小型控制使用更明顯的 7% 膨起與提亮，大型卡片／列表降低幅度。共用 pointer 狀態在放開後固定保留 160ms，移動超過 12px 視為捲動並取消；中性控制統一顯示灰色表面與卡片陰影，填色控制維持原色並提亮。不使用縮小、下沉、變暗或 inset shadow，也不模擬 Liquid Glass。
-- Route 換頁使用固定 Grid 儲存格疊放新舊頁，並以較完整的 opacity crossfade 表達連續性；不得動畫會逐幀觸發 layout 的 inset／margin，也不在離場時切換 absolute 定位、不使用會產生空白幀的 `out-in`、不對包含陰影的整頁套用 transform／backface，避免 iOS viewport 裁切與殘影。
-- Persistent Header 的控制項不得用立即移除造成文字跳位；返回鍵保留單一 DOM 並以寬度與 opacity 收合，標題維持單一內容實例，不做 keyed 雙層排版。
-- 頁內互斥分頁使用 opacity crossfade；Dialog、popover、通知回饋與導覽浮層可在自身局部合成層使用 `translate3d`／scale。所有動態一律尊重 `prefers-reduced-motion`，且不得以 `transition-all` 代替明確屬性。
-- 遠端圖片與本機預覽統一使用 block-level `DecodedImage`：原生圖片在 `load` 與 `decode()` 完成前維持透明並顯示 spinner，禁止直接露出瀏覽器的漸進式掃描繪製，也不得因 inline baseline 留下底部白邊；錯誤時必須結束 loading 並提供 fallback。
-- 觸控介面以 `touch-action: manipulation` 搭配 capture touchend 座標判斷阻止雙擊縮放，且保留雙指 pinch zoom；不得依賴兩次點擊命中完全相同的子節點。
-
-## Dialog、表單與回饋
-
-- Dialog 統一由 `DialogShell` 管理 overlay、獨立全畫面 backdrop、focus trap、body scroll lock、ARIA、dismiss 與 persistent 行為。Transition 根節點必須提供可量測的生命週期，避免 Vue 提前移除子層 class；surface 與 backdrop 分開進場，按壓回彈先開始，再以延遲漸進壓暗背景。Backdrop 的 blur 固定，只動畫 opacity；不得逐幀動畫 `backdrop-filter` 或直接在整個 overlay 套 opacity。
-- Bottom Sheet 的 pointer move 必須以 `requestAnimationFrame` 合併，拖曳只更新局部 transform 與 backdrop opacity；進度條等長度變化優先使用固定寬度加 `scaleX`，避免動畫 width。
-- 桌面 Popup 不顯示拖曳把手，也不套用 Bottom Sheet 的頂部補償；外層 padding 應保持緊湊，卡片陰影空間由內層 scroll container 預留，避免以大量外距掩蓋裁切問題。
-- 沉浸式新增頁沿用 AppShell 的手機側距；底部動作列須扣除 safe area 的重複空白但仍避開 Home Indicator，桌面則在捲動內容內側預留控制項陰影空間。
-- 手機 `RoutePageFrame` 的 bottom-safe 內容與 Bottom Tab 使用同一個動態螢幕底距；Detail 頁底部操作列到 Tab、Tab 到螢幕底部應形成相同間距。
-- Bottom Tab 已存在時，App 主內容與 Detail/Skeleton 內層不得再疊加底部 padding；Header 返回鍵的動畫槽位必須與實際 44px tap target 同寬，避免視覺控制溢出覆蓋標題。
-- Bottom Tab 的選中底色屬於各按鈕自身狀態；不得用 DOM 量測與 transform 搬動跨項目的共用 indicator。
-- 有最大字數的輸入使用 counted field；非同步按鈕內容使用 `BusyButtonContent`。
-- 有框線背景的訊息使用 `InlineAlert`；欄位附近的精簡狀態使用 `InlineMessage`。
-- 可見文字一律使用 i18n key，繁中與英文 key 結構必須一致。
-- dropdown trigger 保留 `aria-haspopup`、`aria-expanded`；選項使用合適的 menu/listbox role 與選取狀態。
-
-## 何時新增 primitive
-
-只有在現有元件無法清楚表達，且至少有兩個合理使用點時才新增。完成時必須：
-
-1. 放入正確的 atomic tier，並維持單向依賴。
-2. 通用樣式進既有 shared stylesheet，不放在領域 scoped CSS。
-3. 遷移至少兩個使用點並刪除舊 API、CSS 與相容殘留。
-4. 更新主程式 `structure.md`、本文件與雙語文件。
-5. 補 `check:ui`／架構測試規則，阻止手刻版本回歸。
-6. 執行 `npm run verify:local`；若涉及後端邊界再執行整合驗證。
+- 動效只傳達狀態、層級或內容變化，使用命名 recipe，不使用 `transition-all`。
+- 非互動 surface 保持靜止；方向箭頭可輕微位移，hover 底色只改一個克制層級。
+- Route 只動畫內容區，App shell 保持固定；選取、數字、載入、成功、dialog、dropdown 與 toast 使用各自 recipe。
+- `prefers-reduced-motion` 必須保留狀態清晰度，同時移除非必要 transform、blur 與粒子位移。
 
 ## 新 UI 交付檢查表
 
-- [ ] 已先搜尋 `src/components/ui/`，沒有重複既有元件。
-- [ ] Atomic tier 與依賴方向正確。
-- [ ] 頁面使用 `RoutePageFrame`，沒有自行建立 viewport gutter。
-- [ ] Surface、按鈕、列表、dropdown、Dialog、表單與 skeleton 使用既有元件。
+- [ ] 已先搜尋 `src/components/ui/` 與 `src/components/motion/`，沒有重複現有能力。
+- [ ] 頁面沒有直接 import service，流程位於 hook。
+- [ ] viewport、surface、按鈕、列表、dropdown、dialog 與表單沿用共用 primitive。
 - [ ] 陰影只使用 control、card、floating。
-- [ ] 手機與桌面共用資料流與互動狀態。
+- [ ] 手機 44px 觸控、safe area、無橫向溢位與 touch hover 已驗證。
 - [ ] i18n、ARIA、label、alt、focus 與 keyboard 行為完整。
-- [ ] 新 primitive 有至少兩個使用點，文件與架構規則已同步。
+- [ ] 新 primitive 有至少兩個使用點，文件、`structure.md` 與架構規則同步。
 - [ ] 已清除舊 API、CSS 與未使用宣告。
-- [ ] `npm run verify:local` 通過。
+- [ ] `npm run verify:local` 通過；大型交付再跑 `npm run verify:all`。

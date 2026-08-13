@@ -1,6 +1,6 @@
 # User workflows
 
-Desktop uses the sidebar; mobile uses the floating bottom navigation, where the central create action is an icon-only plus. Announcements, notifications, and settings are separate pages.
+Desktop uses the sidebar and multi-column lists; mobile uses floating bottom navigation, with each content list providing its own create action. Announcements, notifications, and settings are separate pages.
 
 ## Sign in and browse
 
@@ -14,8 +14,8 @@ On an unconfigured installation, the first platform administrator confirms langu
 
 ## Create a proposal
 
-1. Open the global create action.
-2. Choose Proposal and a category.
+1. Open Proposals and choose a category from the page title.
+2. Select New proposal on that category page.
 3. Add a title of at most 30 characters, up to 1,000 visible content characters, and optional images.
 4. Publish and wait for the inline busy state plus bottom feedback result.
 

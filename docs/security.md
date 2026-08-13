@@ -4,7 +4,7 @@ Novae 的安全模型是假設瀏覽器、使用者輸入與公開網路都不�
 
 ## 上線前逐步確認
 
-1. 只允許學校控制的 Google 網域，且 `VITE_ALLOWED_DOMAIN` 與 `ALLOWED_DOMAIN` 相同。
+1. 只允許學校控制的 Google 網域，且 `NEXT_PUBLIC_ALLOWED_DOMAIN` 與 `ALLOWED_DOMAIN` 相同。
 2. `ADMIN_EMAILS` 只列出確實需要管理權限的人。
 3. 所有敏感值只在 GitHub `production` Environment secrets 與供應商 secret store。
 4. service role、service account、API secret、DB password、token 沒有進瀏覽器或 Git。

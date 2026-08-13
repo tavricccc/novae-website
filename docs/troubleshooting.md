@@ -40,7 +40,7 @@ Cloudflare secret 更新可能有短暫傳播時間；最新版 workflow 對暫�
 
 1. 確認 frontend workflow 成功並取得 deployment URL。
 2. 檢查 Vercel project、org ID、project ID 是否相符。
-3. 檢查 build log 是否缺少必要 `VITE_*`。
+3. 檢查 build log 是否缺少必要 `NEXT_PUBLIC_*`。
 4. 若自訂路徑重新整理 404，確認 repository 的 `vercel.json` rewrites 沒被移除。
 5. 若只有舊畫面，先保持頁面開啟等待 Service Worker 接管；更新流程會自動以版本化 URL 重載且限制重試。只有 watchdog 明確失敗時才手動重新整理一次，不要先清除網站資料、內容快取或任何資料庫。
 
@@ -50,12 +50,12 @@ Cloudflare secret 更新可能有短暫傳播時間；最新版 workflow 對暫�
 
 1. Firebase Google provider 是否啟用。
 2. 正式網域是否加入 Firebase authorized domains。
-3. `VITE_GOOGLE_CLIENT_ID` 是否為同一 Firebase／GCP 專案的 **Web** OAuth Client ID，且 OAuth client 的 **Authorized JavaScript origins** 含正式站（與本機開發 origin）。
-4. `VITE_ALLOWED_DOMAIN` 與 `ALLOWED_DOMAIN` 是否完全相同。
+3. `NEXT_PUBLIC_GOOGLE_CLIENT_ID` 是否為同一 Firebase／GCP 專案的 **Web** OAuth Client ID，且 OAuth client 的 **Authorized JavaScript origins** 含正式站（與本機開發 origin）。
+4. `NEXT_PUBLIC_ALLOWED_DOMAIN` 與 `ALLOWED_DOMAIN` 是否完全相同。
 5. Web App config、`FIREBASE_PROJECT_ID`、`FIREBASE_WEB_API_KEY`、service account 是否來自同一 project。
 6. 若剛啟用 App Check，暫時確認 site key 與網域是否正確；不要用關閉所有後端驗證當永久修法。
 7. 彈出視窗被擋、使用者關閉帳號選擇器，或在應用程式內建瀏覽器中：只會顯示錯誤（例如允許彈出視窗／改用系統瀏覽器），**不會**再改走 Firebase 整頁 redirect。
-8. 顯示「無法啟動登入」：先確認 GitHub Environment 已設 `VITE_GOOGLE_CLIENT_ID` 並重新部署前端；再檢查 OAuth JS origin 與 CSP 是否允許 `https://accounts.google.com`。
+8. 顯示「無法啟動登入」：先確認 GitHub Environment 已設 `NEXT_PUBLIC_GOOGLE_CLIENT_ID` 並重新部署前端；再檢查 OAuth JS origin 與 CSP 是否允許 `https://accounts.google.com`。
 9. 登入後仍停在登入卡、或點「提案」卻進「我的提案」：確認角色 bootstrap 與分類目錄是否成功；正常情況會等 bootstrap 完成後自動導向預設分類。
 
 ## 4. 登入成功但資料操作失敗

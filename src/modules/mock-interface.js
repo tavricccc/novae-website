@@ -3,20 +3,26 @@ import { icon } from './icons.js';
 
 const words = {
   zh: {
-    proposals: '提案', public: '公共議題', active: '進行中', closed: '已結案', latest: '最新',
-    comments: '討論留言', details: '提案內容', share: '分享', review: '審核提案', delete: '刪除',
-    support: '附議', submitted: '提案時間', result: '提案結果', announcement: '公告', notifications: '通知',
-    operations: '維運狀態', categories: '分類使用概況', outcomes: '平台成果',
-    facilities: '設備', dashboard: '統計', settings: '我的', create: '新增', processing: '處理中', waiting: '待審核', unanswered: '未回覆',
-    completed: '已完成', infeasible: '無法實行', reply: '回覆', search: '搜尋',
+    active: '進行中', announcement: '公告', announcements: '公告', back: '返回提案',
+    categories: '分類使用概況', closed: '已結案', comments: '討論', completed: '已完成',
+    create: '新增提案', dashboard: '統計', delete: '刪除提案', details: '提案內容',
+    facilities: '設備', infeasible: '無法實行', latest: '最新', more: '更多操作',
+    notifications: '通知', operations: '維運狀態', outcomes: '平台成果', processing: '處理中',
+    proposals: '提案', public: '公共議題', reply: '回覆', review: '管理狀態',
+    search: '搜尋提案', searchPlaceholder: '搜尋提案…', settings: '設定', share: '分享提案',
+    submitted: '提案時間', support: '附議', supportProgress: '附議進度', timeline: '時間軸',
+    waiting: '待審核', writeComment: '輸入留言…', unanswered: '未回覆',
   },
   en: {
-    proposals: 'Proposals', public: 'Public issues', active: 'Active', closed: 'Closed', latest: 'Latest',
-    comments: 'Discussion', details: 'Proposal', share: 'Share', review: 'Review', delete: 'Delete',
-    support: 'support', submitted: 'Submitted', result: 'Result', announcement: 'Announcements', notifications: 'Notifications',
-    operations: 'Operations', categories: 'Category usage', outcomes: 'Platform outcomes',
-    facilities: 'Facilities', dashboard: 'Dashboard', settings: 'Me', create: 'Create', processing: 'Processing', waiting: 'Under review', unanswered: 'Awaiting reply',
-    completed: 'Completed', infeasible: 'Infeasible', reply: 'Reply', search: 'Search',
+    active: 'Active', announcement: 'Announcement', announcements: 'Announcements', back: 'Back to proposals',
+    categories: 'Category usage', closed: 'Closed', comments: 'Discussion', completed: 'Completed',
+    create: 'New proposal', dashboard: 'Dashboard', delete: 'Delete proposal', details: 'Proposal',
+    facilities: 'Facilities', infeasible: 'Infeasible', latest: 'Latest', more: 'More actions',
+    notifications: 'Notifications', operations: 'Operations', outcomes: 'Platform outcomes', processing: 'In progress',
+    proposals: 'Proposals', public: 'Public issues', reply: 'Reply', review: 'Manage status',
+    search: 'Search proposals', searchPlaceholder: 'Search proposals…', settings: 'Settings', share: 'Share proposal',
+    submitted: 'Submitted', support: 'Support', supportProgress: 'Support progress', timeline: 'Timeline',
+    waiting: 'Under review', writeComment: 'Enter a comment…', unanswered: 'Awaiting reply',
   },
 };
 
@@ -49,39 +55,53 @@ function profileAvatar(source = 1, size = '') {
   return `<img class="app-avatar ${size}" src="./assets/avatar-student-${source}.png" alt="" />`;
 }
 
-function progress(issue) {
-  const percent = Math.min(100, Math.round((issue.count / issue.goal) * 100));
-  const remaining = issue.days > 0 ? `${getLanguage() === 'en' ? '' : '剩 '}${issue.days}${getLanguage() === 'en' ? ' days' : ' 天'}` : (getLanguage() === 'en' ? 'Goal reached' : '已達標');
-  return `<div class="app-progress"><div><strong>${issue.count} / ${issue.goal} ${w('support')}</strong><span>${remaining}</span></div><i><b style="width:${percent}%"></b></i></div>`;
+function brandLockup() {
+  return `<div class="app-brand"><span><img src="./logo.svg" alt="" /></span><strong>Novae</strong></div>`;
 }
 
-function supportButton(issue) {
-  return `<button class="app-pill-button${issue.supported ? ' is-active' : ''}" type="button" data-demo-support aria-pressed="${issue.supported}">${icon('thumb-up')}<span>${issue.count}</span></button>`;
+function progress(issue, card = false) {
+  const percent = Math.min(100, Math.round((issue.count / issue.goal) * 100));
+  const remaining = issue.days > 0
+    ? `${getLanguage() === 'en' ? '' : '剩 '}${issue.days}${getLanguage() === 'en' ? ' days' : ' 天'}`
+    : (getLanguage() === 'en' ? 'Goal reached' : '已達標');
+  return `<div class="app-progress${card ? ' app-progress--card' : ''}"><div><span>${w('supportProgress')}</span><strong>${issue.count} / ${issue.goal}</strong></div><i><b style="transform:scaleX(${percent / 100})"></b></i>${card ? `<small>${icon('calendar-time')}${remaining}</small>` : ''}</div>`;
+}
+
+function reactionButton({ active = false, count, kind = 'hand', label = '' }) {
+  const iconName = kind === 'heart' ? 'heart' : 'hand-stop';
+  return `<button class="app-reaction${active ? ' is-active' : ''}" type="button" data-demo-reaction aria-label="${label}" aria-pressed="${active}" data-reaction="${kind}">${icon(iconName)}<span>${count}</span></button>`;
 }
 
 function issueCard(issue) {
   return `<article class="app-issue-card">
-    <header class="app-card-identity">${avatar(issue)}<div><p><strong>${issue.author}</strong><time>${issue.time}</time>${statusTag(issue)}</p><h4>${issue.title}</h4></div></header>
-    ${progress(issue)}
-    <footer><button class="app-icon-button" type="button" aria-label="comments">${icon('message')}</button>${supportButton(issue)}</footer>
+    <div class="app-card-top"><div class="app-card-copy"><p class="app-card-meta">${avatar(issue, 'xs')}<strong>${issue.author}</strong><span>·</span><time>${issue.time}</time></p><h4>${issue.title}</h4></div>${icon('arrow-up-right')}</div>
+    <p class="app-card-excerpt">${getLanguage() === 'en' ? 'A clear proposal with visible progress, discussion, and responsible follow-up.' : '讓提案內容、附議進度與後續回應都能清楚追蹤。'}</p>
+    ${progress(issue, true)}
+    <footer>${statusTag(issue)}${reactionButton({ active: issue.supported, count: issue.count, label: w('support') })}<span class="app-comment-count">${icon('message')}</span></footer>
   </article>`;
 }
 
-function appSidebar(active = 'proposals') {
-  return `<aside class="app-sidebar"><img src="./logo.svg" alt=""/><nav>
-    <button class="${active === 'proposals' ? 'is-active' : ''}" aria-label="${w('proposals')}">${icon('message')}</button>
-    <button class="${active === 'facilities' ? 'is-active' : ''}" aria-label="${w('facilities')}">${icon('tool')}</button>
-    <button class="${active === 'announcement' ? 'is-active' : ''}" aria-label="${w('announcement')}">${icon('speakerphone')}</button>
-  </nav><div class="app-sidebar-utilities"><button class="${active === 'notifications' ? 'is-active' : ''}" aria-label="${w('notifications')}">${icon('bell')}</button>${profileAvatar(2)}</div></aside>`;
+function sidebarItem(key, iconName, active) {
+  return `<button class="app-nav-item${active ? ' is-active' : ''}" type="button">${icon(iconName)}<span>${w(key)}</span></button>`;
 }
 
-function boardToolbar() {
-  return `<div class="app-board-toolbar"><button class="app-text-button app-category-heading">${w('public')}${icon('chevron-down')}</button>
-    <div class="app-board-controls"><div class="app-segmented"><button class="is-active" type="button">${icon('list-details')}<span>${w('active')}</span></button><button type="button">${icon('archive')}<span>${w('closed')}</span></button></div><button class="app-icon-button" aria-label="${w('latest')}">${icon('sort-descending')}</button><button class="app-icon-button" aria-label="${w('search')}">${icon('search')}</button><button class="app-icon-button app-create-button" aria-label="${w('create')}">${icon('plus')}</button></div></div>`;
+function appSidebar(active = 'proposals') {
+  return `<aside class="app-sidebar">${brandLockup()}<nav>
+    ${sidebarItem('proposals', 'blocks', active === 'proposals')}
+    ${sidebarItem('facilities', 'tool', active === 'facilities')}
+    ${sidebarItem('announcements', 'speakerphone', active === 'announcement')}
+    ${sidebarItem('notifications', 'bell', active === 'notifications')}
+    ${sidebarItem('settings', 'settings', active === 'settings')}
+  </nav><div class="app-account">${profileAvatar(2)}<span><strong>${getLanguage() === 'en' ? 'Yu-Ching Lin' : '林予晴'}</strong><small>student@school.edu</small></span>${icon('chevron-down')}</div></aside>`;
+}
+
+function boardToolbar({ mobile = false } = {}) {
+  return `<div class="app-board-toolbar"><button class="app-category-heading" type="button">${w('public')}${icon('chevron-down')}</button><button class="app-new-button" type="button">${icon('plus')}<span>${w('create')}</span></button></div>
+    <div class="app-filter-bar"><div class="app-segmented"><button class="is-active" type="button"><span>${w('active')}</span></button><button type="button"><span>${w('closed')}</span></button></div><div class="app-search-field">${icon('search')}<span>${w('searchPlaceholder')}</span></div><button class="app-control-button" aria-label="${w('latest')}">${icon('adjustments-horizontal')}${mobile ? '' : `<span>${w('latest')}</span>`}${icon('chevron-down')}</button></div>`;
 }
 
 function boardDemo() {
-  return `<section class="app-frame app-frame--board">${appSidebar()}<main>${boardToolbar()}<div class="app-issue-list">${issues().slice(0, 4).map((issue) => issueCard(issue)).join('')}</div></main></section>`;
+  return `<section class="app-frame app-frame--board">${appSidebar()}<main>${boardToolbar()}<div class="app-issue-list">${issues().slice(0, 4).map(issueCard).join('')}</div></main></section>`;
 }
 
 function heroDemo() {
@@ -89,51 +109,61 @@ function heroDemo() {
   return `<div class="app-hero-stack"><div class="app-stack-card app-stack-card--back">${issueCard(data[1])}</div><div class="app-stack-card app-stack-card--front">${issueCard(data[0])}</div></div>`;
 }
 
-function comment(name, body, time) {
-  const source = name.includes('林') ? 2 : 1;
-  return `<div class="app-comment">${profileAvatar(source)}<div><p><strong>${name}</strong><time>${time}</time></p><span>${body}</span><button type="button">${w('reply')}</button></div></div>`;
+function comment(name, body, time, source = 1) {
+  return `<article class="app-comment">${profileAvatar(source)}<div><p><strong>${name}</strong><time>${time}</time></p><span>${body}</span><button type="button" aria-label="${w('reply')}">${icon('message')}</button></div></article>`;
+}
+
+function timeline(issue) {
+  const items = getLanguage() === 'en'
+    ? [['Proposal', issue.time], ['Support deadline', 'Jul 16, 11:59 PM'], ['Reply deadline', 'Jul 23, 11:59 PM']]
+    : [['提案', issue.time], ['附議截止', '7月16日 下午11:59'], ['回覆期限', '7月23日 下午11:59']];
+  return `<section class="app-timeline"><h4>${icon('calendar-time')}${w('timeline')}</h4>${items.map(([label, value]) => `<div><i></i><span><strong>${label}</strong><small>${value}</small></span></div>`).join('')}</section>`;
 }
 
 function detailDemo() {
   const issue = issues()[0] ?? {};
+  const description = getLanguage() === 'en'
+    ? ['Quiet study space is difficult to find during finals. Extend library access to 11 PM and keep several floors available for students.', 'A two-week pilot would let the school review real attendance before making the change permanent.']
+    : ['期末考週晚上經常找不到安靜的自習空間，希望圖書館能延長開放到晚上十一點，並保留部分樓層供學生使用。', '若能先試行兩週，也能依實際使用人數再評估是否常態化。'];
   return `<section class="app-detail" data-detail-demo>
-    <header class="app-detail-head"><button class="app-icon-button app-detail-back" type="button" aria-label="${getLanguage() === 'en' ? 'Back' : '返回'}">${icon('chevron-left')}</button><span class="app-category">${w('public')}</span>${statusTag(issue)}<div class="app-segmented app-detail-tabs"><button class="is-active" data-detail-tab="details">${icon('list')}<span>${w('details')}</span></button><button data-detail-tab="comments">${icon('message')}<span>${w('comments')}</span></button></div></header>
-    <div class="app-detail-grid">
-      <div class="app-detail-main" data-detail-panel="details">
-        <div class="app-detail-scroll"><h3>${issue.title}</h3><div class="app-detail-author">${avatar(issue)}<div><strong>${issue.author}</strong><span>${w('submitted')} ${issue.time}</span></div></div><p>期末考週晚上經常找不到安靜的自習空間，希望圖書館能延長開放到晚上十一點，並保留部分樓層供學生使用。</p><p>若能先試行兩週，也能依實際使用人數再評估是否常態化。</p></div>
-        <footer class="app-detail-actions">${progress(issue)}<div class="app-detail-button-row">${supportButton(issue)}<button class="app-pill-button">${icon('share-2')}<span>${w('share')}</span></button><button class="app-pill-button">${icon('pencil')}<span>${w('review')}</span></button><button class="app-danger-button">${icon('trash')}<span>${w('delete')}</span></button></div><div class="app-operation-times"><span><b>提案發出時間：</b>${issue.time}</span><span><b>審核通過時間：</b>7月9日 上午09:10</span><span><b>附議截止時間：</b>7月16日 下午11:59</span></div></footer>
-      </div>
-      <aside class="app-comments" data-detail-panel="comments"><header>${icon('message')}<strong>${w('comments')}</strong></header><div class="app-comment-list">${comment('林同學','如果延長到 23:00，期中考週也能比照辦理嗎？','7月13日 10:15')}${comment('總務處服務組','已收到建議，會先確認人力與門禁安排。','7月14日 09:30')}</div><div class="app-comment-compose"><span>${getLanguage() === 'en' ? 'Write a comment…' : '分享你的想法…'}</span><button>${icon('send')}</button></div></aside>
-    </div>
+    <div class="app-detail-toolbar"><button class="app-icon-button" type="button" aria-label="${w('back')}">${icon('chevron-left')}</button><span></span><button class="app-icon-button" type="button" aria-label="${w('share')}">${icon('share-2')}</button><button class="app-icon-button" type="button" aria-label="${w('more')}">${icon('dots')}</button></div>
+    <div class="app-detail-grid"><article class="app-detail-main"><section class="app-detail-content"><div class="app-detail-labels"><span class="app-category">${w('public')}</span>${statusTag(issue)}</div><h3>${issue.title}</h3><div class="app-detail-author">${avatar(issue)}<strong>${issue.author}</strong><span>·</span><time>${issue.time}</time></div>${description.map(item => `<p>${item}</p>`).join('')}</section>
+      <section class="app-discussion"><header>${icon('message')}<strong>${w('comments')}</strong><span>2</span></header><div class="app-comment-list">${comment(getLanguage() === 'en' ? 'Yu-Ching Lin' : '林同學', getLanguage() === 'en' ? 'Could the same schedule apply during midterms?' : '如果延長到 23:00，期中考週也能比照辦理嗎？', getLanguage() === 'en' ? 'Jul 13, 10:15 AM' : '7月13日 10:15', 2)}${comment(getLanguage() === 'en' ? 'Student Affairs' : '總務處服務組', getLanguage() === 'en' ? 'We will confirm staffing and access-control arrangements first.' : '已收到建議，會先確認人力與門禁安排。', getLanguage() === 'en' ? 'Jul 14, 9:30 AM' : '7月14日 09:30')}</div><div class="app-comment-compose"><span>${w('writeComment')}</span><button aria-label="${w('reply')}">${icon('send')}</button></div></section></article>
+      <aside class="app-detail-side"><section class="app-support-panel">${progress(issue)}${reactionButton({ active: issue.supported, count: issue.count, label: w('support') })}</section>${timeline(issue)}</aside></div>
   </section>`;
 }
 
-function announcementCards() {
-  const cards = [
-    { title: '期末考週圖書館延長開放', author: '學務處', time: '7月12日', likes: 28 },
-    { title: '提案狀態與通知體驗更新', author: '系統管理員', time: '7月10日', likes: 14 },
-  ];
-  return `<div class="app-announcement-grid">${cards.map((item, index) => `<article class="app-issue-card app-announcement-card"><header class="app-card-identity">${profileAvatar(index + 1)}<div><p><strong>${item.author}</strong><time>${item.time}</time><span class="app-category">${w('announcement')}</span></p><h4>${item.title}</h4></div></header><footer><button class="app-icon-button" type="button" aria-label="comments">${icon('message')}</button><button class="app-pill-button" type="button">${icon('thumb-up')}<span>${item.likes}</span></button></footer></article>`).join('')}</div>`;
+function announcementCard(item, index) {
+  return `<article class="app-issue-card app-announcement-card"><div class="app-card-top"><div class="app-card-copy"><p class="app-card-meta">${profileAvatar(index + 1, 'xs')}<strong>${item.author}</strong><span>·</span><time>${item.time}</time></p><h4>${item.title}</h4></div>${icon('arrow-up-right')}</div><p class="app-card-excerpt">${item.excerpt}</p><footer>${reactionButton({ count: item.likes, kind: 'heart', label: w('announcement') })}<span class="app-comment-count">${icon('message')}<b>${item.comments}</b></span></footer></article>`;
 }
 
 function announcementsDemo() {
-  return `<section class="app-frame app-frame--announcements">${appSidebar('announcement')}<main><header class="app-page-head"><h3>${w('announcement')}</h3></header>${announcementCards()}</main></section>`;
+  const cards = getLanguage() === 'en'
+    ? [
+        { title: 'Library hours extended during finals', author: 'Student Affairs', time: 'Jul 12', likes: 28, comments: 6, excerpt: 'Opening hours and access details for the final examination period.' },
+        { title: 'Proposal status and notification update', author: 'System Admin', time: 'Jul 10', likes: 14, comments: 3, excerpt: 'Status changes now appear more clearly throughout the application.' },
+      ]
+    : [
+        { title: '期末考週圖書館延長開放', author: '學務處', time: '7月12日', likes: 28, comments: 6, excerpt: '公告期末考期間延長開放時段與夜間出入方式。' },
+        { title: '提案狀態與通知體驗更新', author: '系統管理員', time: '7月10日', likes: 14, comments: 3, excerpt: '提案狀態變更現在會在各頁面以一致方式呈現。' },
+      ];
+  return `<section class="app-frame app-frame--announcements">${appSidebar('announcement')}<main><header class="app-page-head"><h3>${w('announcements')}</h3></header><div class="app-announcement-grid">${cards.map(announcementCard).join('')}</div></main></section>`;
 }
 
 function notificationsDemo() {
-  return `<section class="app-frame app-frame--notifications">${appSidebar('notifications')}<main><div class="app-notification-column"><header><div><h3>${w('notifications')}</h3><p>${getLanguage() === 'en' ? 'Recent proposal activity' : '最近的提案進度與互動'}</p></div></header><div class="app-notification-group">
-    <button>${profileAvatar(1)}<span><strong>管理單位回覆了你的提案</strong><small>圖書館延長開放時間</small></span>${icon('chevron-right')}</button>
-    <button><span class="app-notice-icon app-notice-icon--sage">${icon('circle-check')}</span><span><strong>提案已達附議門檻</strong><small>增加宿舍公共區域充電插座</small></span>${icon('chevron-right')}</button>
-    <button><span class="app-notice-icon">${icon('switch-horizontal')}</span><span><strong>提案狀態已更新為處理中</strong><small>改善教學大樓飲水機標示</small></span>${icon('chevron-right')}</button>
+  return `<section class="app-frame app-frame--notifications">${appSidebar('notifications')}<main><div class="app-notification-column"><header><h3>${w('notifications')}</h3></header><div class="app-notification-group">
+    <button>${profileAvatar(1)}<span><strong>${getLanguage() === 'en' ? 'A manager replied to your proposal' : '管理單位回覆了你的提案'}</strong><small>${getLanguage() === 'en' ? 'Extend library hours during finals' : '延長期末考週圖書館開放時間'}</small></span>${icon('chevron-right')}</button>
+    <button><span class="app-notice-icon app-notice-icon--success">${icon('circle-check')}</span><span><strong>${getLanguage() === 'en' ? 'Proposal reached its support goal' : '提案已達附議門檻'}</strong><small>${getLanguage() === 'en' ? 'Add charging outlets to common areas' : '增加宿舍公共區域充電插座'}</small></span>${icon('chevron-right')}</button>
+    <button><span class="app-notice-icon">${icon('switch-horizontal')}</span><span><strong>${getLanguage() === 'en' ? 'Proposal status changed to In progress' : '提案狀態已更新為處理中'}</strong><small>${getLanguage() === 'en' ? 'Improve water dispenser signage' : '改善教學大樓飲水機標示'}</small></span>${icon('chevron-right')}</button>
   </div></div></main></section>`;
 }
 
 function moderationDemo() {
-  return `<section class="app-frame app-frame--moderation">${appSidebar()}<main>${boardToolbar()}<div class="app-issue-list">${issues().slice(0, 3).map((issue) => issueCard(issue)).join('')}</div></main><div class="app-dialog-backdrop"><section class="app-review-dialog" role="dialog" aria-label="審核此提案"><h3>審核此提案</h3><p>請審查提案內容，決定是否通過審核。審核通過後，提案將對外公開並開放附議。</p><strong>審核結果</strong><button class="is-selected"><span><b>審核通過</b><small>提案將會公開，並開始接受使用者附議。</small></span>${icon('check')}</button><button><span><b>審核不通過</b><small>提案將不會公開，需提供不通過原因通知提案者。</small></span></button><footer><button class="app-pill-button">取消</button><button class="app-pill-button is-active">確認</button></footer></section></div></section>`;
+  return `<section class="app-frame app-frame--moderation">${appSidebar()}<main>${boardToolbar()}<div class="app-issue-list">${issues().slice(0, 3).map(issueCard).join('')}</div></main><div class="app-dialog-backdrop"><section class="app-review-dialog" role="dialog" aria-label="${w('review')}"><h3>${w('review')}</h3><p>${getLanguage() === 'en' ? 'Choose the next proposal status. This update is visible to everyone who can read the proposal.' : '選擇提案接下來的狀態；有權閱讀提案的人都會看見這次更新。'}</p><label>${getLanguage() === 'en' ? 'Status' : '狀態'}</label><button class="app-select-button"><span>${w('processing')}</span>${icon('chevron-down')}</button><footer><button class="app-secondary-button">${getLanguage() === 'en' ? 'Cancel' : '取消'}</button><button class="app-primary-button">${getLanguage() === 'en' ? 'Save changes' : '儲存變更'}</button></footer></section></div></section>`;
 }
 
 function mobileDemo() {
-  return `<section class="app-mobile"><header><strong>${w('public')}</strong>${icon('chevron-down')}</header><main>${boardToolbar()}<div class="app-issue-list">${issues().slice(0,2).map((issue) => issueCard(issue)).join('')}</div></main><nav><button class="is-active">${icon('message')}<small>${w('proposals')}</small></button><button>${icon('tool')}<small>${w('facilities')}</small></button><button>${icon('speakerphone')}<small>${w('announcement')}</small></button><button>${icon('bell')}<small>${w('notifications')}</small></button><button>${profileAvatar(2)}<small>${w('settings')}</small></button></nav></section>`;
+  return `<section class="app-mobile"><main>${boardToolbar({ mobile: true })}<div class="app-issue-list">${issues().slice(0, 2).map(issueCard).join('')}</div></main><nav>${sidebarItem('proposals', 'blocks', true)}${sidebarItem('facilities', 'tool', false)}${sidebarItem('announcements', 'speakerphone', false)}${sidebarItem('notifications', 'bell', false)}${sidebarItem('settings', 'settings', false)}</nav></section>`;
 }
 
 function templateFor(variant) {
@@ -147,13 +177,8 @@ function templateFor(variant) {
 }
 
 const demoDimensions = {
-  announcements: [1280, 720],
-  board: [1280, 720],
-  detail: [1280, 720],
-  hero: [720, 520],
-  mobile: [390, 844],
-  moderation: [1280, 720],
-  notifications: [1280, 720],
+  announcements: [1280, 720], board: [1280, 720], detail: [1280, 720], hero: [720, 520],
+  mobile: [390, 844], moderation: [1280, 720], notifications: [1280, 720],
 };
 
 function fitDemo(root) {
@@ -165,7 +190,6 @@ function fitDemo(root) {
   surface.style.width = `${designWidth}px`;
   surface.style.height = `${designHeight}px`;
   surface.style.minHeight = '0';
-  surface.style.transform = 'scale(1)';
   surface.style.transformOrigin = 'top left';
   const scale = available / designWidth;
   surface.style.transform = `scale(${scale})`;
@@ -183,18 +207,12 @@ function paint(root) {
 
 function initializeDemoInteractions(root) {
   root.addEventListener('click', (event) => {
-    const support = event.target.closest('[data-demo-support]');
-    if (support) {
-      const active = support.classList.toggle('is-active');
-      support.setAttribute('aria-pressed', String(active));
-      const count = support.querySelector('span');
-      if (count) count.textContent = String(Number(count.textContent || 0) + (active ? 1 : -1));
-    }
-    const tab = event.target.closest('[data-detail-tab]');
-    if (tab) {
-      root.querySelectorAll('[data-detail-tab]').forEach((item) => item.classList.toggle('is-active', item === tab));
-      root.querySelectorAll('[data-detail-panel]').forEach((panel) => panel.classList.toggle('is-mobile-current', panel.dataset.detailPanel === tab.dataset.detailTab));
-    }
+    const reaction = event.target.closest('[data-demo-reaction]');
+    if (!reaction) return;
+    const active = reaction.classList.toggle('is-active');
+    reaction.setAttribute('aria-pressed', String(active));
+    const count = reaction.querySelector('span');
+    if (count) count.textContent = String(Number(count.textContent || 0) + (active ? 1 : -1));
   });
 }
 

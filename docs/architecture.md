@@ -32,26 +32,27 @@ flowchart LR
 
 | 目錄 | 責任 |
 | --- | --- |
-| `views/` | 路由頁組裝與頁面級狀態，不直接存取資料 |
+| `app/` | Next App Router 路由與 layout 組裝，不直接存取 service |
 | `components/` | 應用 UI 與事件轉發 |
 | `components/ui/` | 無業務資料、service、session 相依的共用 UI |
-| `composables/` | Vue 狀態、生命週期與跨元件流程 |
+| `components/motion/` | 可復用的數字、文字、反應與清單動效 |
+| `hooks/` | React 狀態、生命週期與跨元件流程 |
 | `services/` | `backendAction` 與 Supabase client 邊界 |
-| `lib/` | 無 Vue 相依的純工具 |
+| `lib/` | 無 React 相依的純工具 |
 | `types/` | 跨模組型別 |
 | `generated/` | 由 API error、限流等 JSON config 產生、前端使用的型別化規則；分類不在此處 |
 
 主要路由是提案列表／詳情、公告列表／詳情、通知、設定與管理 Dashboard。桌面與手機共用資料流，只切換 layout。
 
-共用視覺契約位於 `src/styles/primitives.css` 與 `components/ui/`，並依 `atoms → molecules → organisms` 單向組合。`AppShell`／`ViewportFrame`／`RoutePageFrame` 統一管理 viewport gutter、safe area、內容寬度與 route page 骨架；button、card、list、dropdown、Dialog、control 由共用元件組合，陰影只分 control、card、floating 三階。頁面層級 Tabs 使用語意化 `AppButton`，互斥選項與分段切換分別使用 `SelectionOptionButton`、`PillSegmentedControl`；分段控制可採內容自適應或標籤完整顯示的等寬 layout。列表 session 骨架與內容互斥；空列表用無 elevation 的 `EmptyStatePanel`，避免卸載後殘留卡片陰影。完整規範與新頁面清單見 [UI 設計系統](ui-design-system.md)。
+共用視覺契約位於 `src/app/globals.css`、`src/styles/motion.css`、`components/ui/` 與 `components/motion/`。`AppShell` 統一管理 viewport gutter、safe area、內容寬度與桌面／手機導覽；button、card、list、dropdown、Dialog、control 以 shadcn／Radix primitive 組合，陰影只分 control、card、floating 三階。分段控制與導覽使用同一個 liquid selection 契約；非互動表面保持靜止，hover 只在 `hover: hover` 且 `pointer: fine` 時啟用。主要手機控制至少 44px。完整規範與新頁面清單見 [UI 設計系統](ui-design-system.md)。
 
-手機底部導覽在已登入且角色 bootstrap 完成後的根頁與一般子頁持續顯示；提案、設備與公告的新增路由是專注輸入頁，會暫時隱藏底欄並以 Visual Viewport 避免鍵盤擠壓。登入過程中不提前露出底欄與側欄，避免半登入狀態。`AppShell` 讓一般頁面的捲動視窗延伸到導覽背後，`RoutePageFrame` 與 `route-scroll-through` 再把 safe area、浮動間距及導覽高度放進內容尾端；內容可穿透導覽所在區域，捲到底時最後一項仍能完整露出。路由來源只負責返回目的地，導覽 shell 與內容狀態保持分離。正式環境 Google 登入使用 Google Identity Services Token Client，再以 Firebase credential 建立 session；登入頁在使用者就緒後會等角色與分類目錄再導向預設提案分類，過程中登入按鈕維持 busy，避免重複送出。
+手機底部導覽在已登入且角色 bootstrap 完成後持續顯示；內容頁以目前頁面標題作為 header 脈絡，不再疊加重複的第二列標題。登入過程中不提前露出底欄與側欄，避免半登入狀態。`AppShell` 統一加入 safe area、底部導覽高度與內容尾端空間，捲到底時最後一項仍能完整露出。路由來源只負責返回目的地，導覽 shell 與內容狀態保持分離。正式環境 Google 登入使用 Google Identity Services Token Client，再以 Firebase credential 建立 session；登入頁在使用者就緒後會等角色與分類目錄再導向預設提案分類，過程中登入按鈕維持 busy，避免重複送出。
 
 前端對 `localStorage` 與 `sessionStorage` 的存取統一經過安全 helper；瀏覽器封鎖 storage、無痕模式、quota 或 SSR 都只能讓快取退化，不能阻止登入、更新或 Push 裝置流程。Production HTML 依目前 API 與 Supabase origins 產生精確 CSP，與 Vercel header 共同限制 script、frame、connect、image 與 worker 來源。HarmonyOS Sans TC 只打包實際使用的 400／500／600／700，字族與視覺權重不變。
 
-三種詳情頁共用完整高度鏈；桌面 `DetailPageShell` 不再建立最外層卡片，直接以父層可用高度與 `min-h-0` 組成平面內容／留言雙欄，欄間只保留分隔線，讓正文與討論使用完整畫布。提案與設備透過共用 `DetailActionGroup` inset summary 整合進度、操作與 `OperationTimeList` 響應式時間軸；公告沿用精簡操作列。手機移除內容／留言 segmented tabs，以同一個 scroll root 依序呈現正文、操作摘要、討論區與留言串；使用分隔線，不再重複顯示討論標題、留言數或無留言空狀態。`tab=comments` 先定位討論 anchor，`comment=<id>` 再由 embedded `CommentThreadPanel` 載入並置中指定留言。提案與公告的 `CommentComposer` 在桌機與手機共用低高度全圓角 pill；手機由獨立 prop 固定在 Bottom Tab 上方，使用 viewport gutter、safe area、Visual Viewport 與尾端 scroll padding。Composer 與回覆提示後方使用不透明 surface 作為內容邊界，回覆狀態顯示作者與原留言前 24 個字，避免留言捲動內容穿透。留言不開放時仍渲染同一 Composer，但停用輸入、圖片、送出與自動 focus，既有留言保持可讀；設備手機版只掛載無資料、無 service 的 disabled discussion shell，桌面與後端仍沒有設備留言流程。
+三種詳情頁共用緊湊的 toolbar、正文與 sidebar 組合，標題區不另建背景卡片。提案與設備 sidebar 呈現進度、手勢反應與響應式時間軸，公告沿用愛心反應；支援數與按讚數以固定寬度數字轉場更新。討論區是一個連續表面，不把每則留言包成獨立卡片，輸入框放在實際回覆位置並保留 reply context。手機依序呈現正文、操作與討論，不建立第二層 header 或重複底部入口。對話框在桌面置中，窄螢幕可改為 bottom sheet，兩者共用 Radix focus、dismiss 與 ARIA 行為。
 
-所有 infinite-scroll feed 共用 `useInfiniteScroll` 與 `useContentListRuntime`：接近底部時先插入三筆領域骨架；載入期間只封住向下越過骨架所在位置的 wheel、touch 與 scroll，向上返回仍可用；成功後原地替換，失敗則解除邊界並保留重試。
+列表讀取、搜尋、排序與載入更多由各領域 hook 共用既有 service 邊界；React state 原地更新成功結果，避免一般互動觸發整頁重新整理。換頁只重掛 route content，持續存在的 App shell 保持穩定；失敗保留重試，空白與 loading 使用共用 page state 與 skeleton。
 
 ## 本地化與錯誤契約
 

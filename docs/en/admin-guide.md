@@ -20,7 +20,7 @@ Comments have category and record-level controls. Turning comments off for a cat
 
 ## Announcements and deletion
 
-Publish announcements from the global create menu. Published announcements are immutable; delete and republish only after checking impact. **System settings → Categories and workflows → Announcements** includes the comment switch shared by every announcement. Turning it off blocks new comments and replies on every existing and new announcement, and a record-level switch cannot bypass it. When the global switch is restored, announcements that follow it reopen while manually closed announcements stay closed. Announcement details retain the record-level switch, and existing comments remain readable in every closed state. Proposal and announcement deletion uses a warning confirmation and the controlled deletion worker—never manually remove only the Cloudinary resource or only the database record.
+Publish announcements with New announcement on the announcement list. Published announcements are immutable; delete and republish only after checking impact. **System settings → Categories and workflows → Announcements** includes the comment switch shared by every announcement. Turning it off blocks new comments and replies on every existing and new announcement, and a record-level switch cannot bypass it. When the global switch is restored, announcements that follow it reopen while manually closed announcements stay closed. Announcement details retain the record-level switch, and existing comments remain readable in every closed state. Proposal and announcement deletion uses a warning confirmation and the controlled deletion worker—never manually remove only the Cloudinary resource or only the database record.
 
 ## Category managers
 

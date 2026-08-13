@@ -1,124 +1,83 @@
 # UI design system and reusable components
 
-This is the implementation contract for new Novae frontend pages, components, and visual styles. New pages should primarily compose existing capabilities, while desktop and mobile share data flow, interaction state, and visual language.
+This page records the implementation contract for the Novae Next.js/React frontend. The complete visual direction lives in the main application's `DESIGN.md`. New pages compose existing tokens and primitives instead of creating domain-specific parallel systems.
 
 ## Sources of truth
 
 | Capability | Main application location |
 | --- | --- |
-| Color, radius, motion, and shadow tokens | `src/styles/base.css` |
-| Surfaces, viewport, lists, dropdowns, dialogs, editors, and skeletons | `src/styles/primitives.css` |
-| Buttons, fields, and controls | `src/styles/controls.css` |
-| Business-free UI components | `src/components/ui/` |
+| Colors, type, radii, safe areas, viewport, surfaces, and three elevation levels | `src/app/globals.css` |
+| Timing, easing, routes, overlays, numbers, reactions, loading, and reduced motion | `src/styles/motion.css` |
+| Business-free shadcn/Radix components | `src/components/ui/` |
+| Reusable number, text, list, and reaction motion | `src/components/motion/` |
 | Component locations and responsibilities | `structure.md` |
-| Regression guards | `scripts/check-ui-primitives.mjs`, `tests/architecture.test.mjs` |
+| Regression guards | `scripts/check-ui-primitives.mjs`, `tests/architecture/` |
 
-Domain components must not create parallel cards, buttons, shadows, dropdowns, dialogs, or viewport styles. If a primitive lacks a valid capability, extend its props, slots, or callbacks first.
+Pages and domain components must not create parallel buttons, cards, fields, dropdowns, dialogs, navigation, shadows, or motion. When a primitive lacks a valid capability, extend existing props, children, or callbacks first.
 
-## Atomic Design layers
+## Architecture boundaries
 
-Dependencies flow in one direction:
+- `src/app/` only composes App Router pages and layouts; it does not access services directly.
+- `src/components/` renders domain data and forwards events; workflows and asynchronous state belong in `src/hooks/`.
+- `src/components/ui/` never imports services, sessions, or domain hooks.
+- `src/lib/` remains React-free, while `src/services/` owns API, Supabase, and Edge boundaries.
+- Mobile and desktop share one data flow and interaction state, changing only layout.
 
-```text
-atoms → molecules → organisms → domain components / views
-```
+## Visual contract
 
-- `atoms/`: minimal visual or interactive units such as `AppButton`, `AppIcon`, `TagBadge`, `SwitchIndicator`, `SkeletonBlock`, `InlineAlert`, and `SelectionMark`.
-- `molecules/`: reusable local compositions such as `SurfacePanel`, `ListSurfaceRow`, `LabeledListSection`, `SectionHeader`, `DropdownMenu`, `DialogHeading`, and `DialogActionRow`.
-- `organisms/`: complete blocks that accept route or domain data and slots, such as `RoutePageFrame`, `DialogShell`, `ContentListState`, `DetailPageShell`, `ContentCardSkeleton`, and `EntryComposerShell`.
+- Inter is used for Latin text, HarmonyOS Sans TC for Traditional Chinese, and Roboto Mono only for identifiers and operational data.
+- Light mode uses a near-white stage and white surfaces; dark mode uses layered charcoal. The logo is black on white in light mode and reversed in dark mode.
+- Elevation has exactly three levels: `--shadow-control`, `--shadow-card`, and `--shadow-floating`. Arbitrary shadows and domain-level hand-built cards are forbidden.
+- Radii scale across controls, cards, and floating layers. Pills are reserved for segmented controls, navigation, and genuinely compact controls.
+- `AppShell` and global tokens own viewport gutters and safe areas. Route pages do not add a second page-gutter system.
+- Scrollbars are hidden globally as a visual choice only; wheel, touch, keyboard, and programmatic scrolling remain available.
 
-Lower layers must not import higher layers, and molecules must not depend on organisms. UI layers never read services, sessions, or business data.
-
-## New-page composition order
-
-1. Use `RoutePageFrame` for flow/fill layout, vertical padding, and bottom safe area. Horizontal boundaries come only from `ViewportFrame` safe-area-aware padding; do not use bleed, negative margins, or page-level horizontal clipping.
-2. Look for an organism covering list, detail, dialog, composer, or loading behavior.
-3. Compose sections with molecules such as `SurfacePanel`, `SectionHeader`, and `LabeledListSection`.
-4. Add atoms for buttons, icons, badges, messages, and skeletons last.
-5. Keep route composition and page state in `views/`, workflows in composables, and data boundaries in services.
-
-Route views must not add another page-level `px-*`, `left-*`, `right-*`, safe-area calculation, or max-width. `AppShell`, `ViewportFrame`, and `RoutePageFrame` own those contracts. When card shadows need drawing room, reserve shared padding inside the scrolling content; never push content beyond its container and hide it with `overflow-x-hidden`. Native scrollbars are hidden globally while wheel, touch, keyboard, and programmatic scrolling remain available; do not replace scrollable behavior with `overflow: hidden`.
-
-## Common needs
+## Shared components
 
 | Need | Prefer |
 | --- | --- |
-| Page frame, gutters, and safe areas | `RoutePageFrame`, `ViewportFrame` |
-| Standard, icon, toolbar, primary, and secondary buttons | `AppButton` |
-| List support, affected, and like counters | `AppButton` with `button-card-count` (32px surface, 44px touch target) |
-| Cards, controls, floating panels, insets, and list shells | `SurfacePanel` |
-| Detail progress, actions, and timeline | `DetailActionGroup` summary, `DetailActionButton`, `OperationTimeList` |
-| Comment entry and unavailable state | Normal and disabled modes of `CommentComposer` |
-| Mobile unified detail feed and facility unavailable shell | `DetailPageShell` embedded comments slot, `CommentThreadPanel`, `UnavailableCommentDiscussion` |
-| List supplements, detail locations, and result notices | `ContentNoticePanel` (compact/detail; neutral/success/error) |
-| Grouped lists and settings rows | `ListSurfaceRow`, `IconListRow`, `LabeledListSection` |
-| Dropdowns and items | `DropdownMenu`, `DropdownPanel`, `dropdown-item` |
-| Dialogs | `DialogShell`, `DialogHeading`, `DialogActionRow` |
-| List loading, empty, error, and pagination states | `ContentListState`, `EmptyStatePanel`, `PageLoadFailure` |
-| Card and detail skeletons | `ContentCardSkeleton`, `SkeletonDetail`, `SkeletonBlock` |
-| Length-limited inputs | `CountedTextField`, `CountedTextareaField` |
+| Standard, icon, primary, and secondary actions | Existing `Button` variants and sizes |
+| Cards, fields, and text entry | `Card`, `Input`, `Textarea`, `Label` |
+| Menus, choices, and segments | `DropdownMenu`, `Select`, `Tabs`, `LiquidTabs` |
+| Dialogs and mobile layers | `Dialog`, `AlertDialog`, `Sheet` |
+| Status, loading, empty, and error states | `StatusBadge`, `Skeleton`, `PageState`, Sonner toast |
+| Markdown, media, and discussion | Shared composer fields, content renderer, and discussion surface |
+| Number, text, reaction, and list changes | Existing wrappers in `components/motion/` |
 
-Structures that differ only by strings, icons, states, slots, or callbacks must share one component.
+Structures that differ only by strings, icons, state, or callbacks share one component. A list card receives restrained hover feedback only when the entire card is interactive; non-interactive cards do not move or lift.
 
-Route-level session skeletons and live list content must be exclusive (`v-if` / `v-else-if` on one chain). Never mount both the skeleton and boards such as `IssueBoard` at once. Empty lists that use `EmptyStatePanel` keep the icon tile at `elevation="none"` so a vacant board does not look like a leftover card. Initial list loads and infinite-scroll load-more states both use skeletons; `.skeleton-card` / `.skeleton-enter` animations may use opacity only—no transform—so unmount does not leave composite shadows. System settings category and membership flows also use skeletons while loading, never a bare "Loading…" label.
+## Responsive and touch behavior
 
-Initial list loads and infinite-scroll load-more states use skeletons; load-more always inserts three domain-shaped placeholders, blocks only downward movement past that boundary, and keeps upward scrolling, retry, and `prefers-reduced-motion` usable. Desktop `DetailPageShell` uses a flat two-column layout without an outer card; route views must not wrap it in another detail card. Proposal and facility summaries use `surface-inset`, while `OperationTimeList` renders horizontally on desktop and vertically on mobile. Mobile detail headers stay flat, and body, actions, and embedded comments must share one scroll root; do not restore segmented tabs or create a second overflow scroller inside the comment thread. A fixed composer uses `viewport-floating-inline`, Bottom Tab tokens, and feed scroll padding instead of hard-coded horizontal safe areas. The facility unavailable shell must not mount a comment service.
+- Desktop shows the complete sidebar and may use two-column feeds when space allows; mobile uses one column and bottom navigation.
+- On mobile, the current page title provides header context. Do not add a duplicate title row or notification entry.
+- Primary mobile controls remain at least 44x44px, including back, share, more actions, reactions, and bottom navigation.
+- Hover belongs inside `(hover: hover) and (pointer: fine)`. Touch uses active feedback, and no capability may depend on hover discovery.
+- Use `100dvh`, `viewport-fit=cover`, and safe-area tokens. Fixed or sticky controls must not cover the final content item.
+- Copy must fit at 320px, with long English strings and enlarged text; do not scale type with viewport width.
 
-## Surfaces and shadows
+## Content and interaction
 
-Elevation has exactly three levels:
+- Functional names and status text come from shared i18n keys. Traditional Chinese and English expose identical key structures, and one function keeps one name across routes.
+- Proposal support and facility affected actions use the hand reaction; announcement likes use the heart. Activation plays the matching particles and number transition without replacing the icon with a generic spinner/check.
+- Comments form one continuous discussion region instead of one card per comment. The composer appears at the actual reply location with reply context.
+- Authors render only when the current user may read them. When visible, avatar and name precede the timestamp.
+- Normal mutations patch React state in place rather than using a full-document reload as success feedback.
 
-| Token / class | Use |
-| --- | --- |
-| `--shadow-control` / `shadow-control` | Buttons, fields, icon tiles, and small interactive controls |
-| `--shadow-card` / `shadow-card` | Content cards and large stable surfaces |
-| `--shadow-floating` / `shadow-floating` | Dropdowns, toasts, floating navigation, and top-layer surfaces |
+## Motion
 
-Arbitrary shadows, a fourth elevation name, and domain-level `rounded + border + background + shadow` card assembly are forbidden. Use the semantic `control`, `card`, `floating`, `inset`, and `list` variants of `SurfacePanel`. Empty-state and descriptive icons must not use card elevation.
-
-## Motion and page continuity
-
-- Every clickable element uses a translation-free scale-up with a spring-like release. Small controls use a clearly visible 7% expansion and highlight, while large cards and rows use a lower amplitude. Shared pointer state remains visible for a fixed 160ms after release and cancels after 12px of movement so scrolling remains natural. Neutral controls share a gray surface and card shadow; filled controls retain their color and brighten. Do not shrink, sink, dim, add an inset shadow, or imitate Liquid Glass.
-- Route changes overlap in one fixed Grid cell and use a deliberate opacity crossfade. Never animate inset or margin properties that trigger layout every frame, switch the leaving page to absolute positioning, use blank-frame-producing `out-in`, or apply transform/backface to an entire shadow-bearing route layer; those layers can reintroduce iOS viewport clipping and shadow artifacts.
-- Persistent Header controls must not disappear immediately and make text jump. Keep one back-button node, collapse it with width and opacity, and keep one title-content instance instead of keyed duplicate layout.
-- Mutually exclusive in-page tabs use an opacity crossfade. Dialogs, popovers, feedback banners, and navigation overlays may use `translate3d` or scale on their own local compositing layer. All motion respects `prefers-reduced-motion`, and `transition-all` is not a substitute for explicit animated properties.
-- Remote images and local previews use block-level `DecodedImage`. Keep the native image transparent behind a spinner until both `load` and `decode()` complete so progressive scan rendering is never exposed, and never leave an inline-baseline gap below the image; failures must end loading and provide a fallback.
-- Touch interfaces combine `touch-action: manipulation` with capture-phase coordinate-based touchend handling to block double-tap zoom while preserving two-finger pinch zoom. Never require both taps to hit the exact same child node.
-
-## Dialogs, forms, and feedback
-
-- `DialogShell` owns the overlay, independent full-screen backdrop, focus trapping, body scroll lock, ARIA, dismissal, and persistent behavior. The Transition root must expose a measurable lifecycle so Vue does not remove descendant classes early. Surface and backdrop enter separately: the press release starts first, then the background progressively dims after a delay. Keep blur fixed and animate backdrop opacity only; never animate `backdrop-filter` every frame or apply opacity to the entire overlay.
-- Coalesce Bottom Sheet pointer movement with `requestAnimationFrame`, updating only the local transform and backdrop opacity. Length indicators should prefer a fixed width plus `scaleX` instead of animating width.
-- Desktop popups do not show a drag handle or inherit Bottom Sheet top compensation. Keep outer padding compact and reserve card-shadow bleed inside the scrolling container instead of masking clipping with oversized outer spacing.
-- Immersive composer pages inherit the AppShell mobile inset. Their bottom action row removes duplicated safe-area whitespace while still clearing the Home Indicator, and desktop scrolling content reserves internal room for control shadows.
-- Mobile `RoutePageFrame` bottom-safe content shares the Bottom Tab's measured screen gap. Detail footers should have the same spacing above the Tab as the Tab has below the viewport edge.
-- When a Bottom Tab is present, App content and Detail/Skeleton internals must not stack additional bottom padding. A Header back-button animation slot must match its actual 44px tap target so the visual control cannot overflow over the title.
-- Bottom Tab selection backgrounds belong to each button's own state. Do not measure the DOM and translate a shared indicator between items.
-- Use counted fields for length limits and `BusyButtonContent` for asynchronous actions.
-- Use `InlineAlert` for framed messages and `InlineMessage` for compact field-adjacent status.
-- All visible copy uses i18n keys, with identical Traditional Chinese and English key structures.
-- Dropdown triggers retain `aria-haspopup` and `aria-expanded`; options use the appropriate menu/listbox role and selection state.
-
-## Adding a primitive
-
-Add one only when existing components cannot express the contract clearly and there are at least two valid consumers. Then:
-
-1. Place it in the correct atomic layer and preserve one-way dependencies.
-2. Put general styling in an existing shared stylesheet, not domain-scoped CSS.
-3. Migrate at least two consumers and remove old APIs, CSS, and compatibility residue.
-4. Update the main application's `structure.md`, this page, and both languages.
-5. Add `check:ui` or architecture guards that reject a hand-built regression.
-6. Run `npm run verify:local`, plus integration verification when backend boundaries change.
+- Motion communicates state, hierarchy, or content change through named recipes; do not use `transition-all`.
+- Non-interactive surfaces remain still. Directional arrows may shift slightly, while hover changes only one restrained surface level.
+- Route motion applies to the content region while the app shell remains stable. Selection, numbers, loading, success, dialogs, dropdowns, and toasts use their own recipes.
+- `prefers-reduced-motion` preserves clear state changes while removing nonessential transforms, blur, and particle travel.
 
 ## New UI delivery checklist
 
-- [ ] Existing `src/components/ui/` components were checked first.
-- [ ] The atomic layer and dependency direction are correct.
-- [ ] The page uses `RoutePageFrame` and does not create its own viewport gutter.
-- [ ] Surfaces, buttons, lists, dropdowns, dialogs, forms, and skeletons reuse primitives.
+- [ ] Existing `src/components/ui/` and `src/components/motion/` capabilities were checked first.
+- [ ] Pages do not import services directly; workflows live in hooks.
+- [ ] Viewport, surfaces, buttons, lists, dropdowns, dialogs, and forms reuse shared primitives.
 - [ ] Shadows use only control, card, or floating elevation.
-- [ ] Mobile and desktop share data flow and interaction state.
+- [ ] Mobile 44px targets, safe areas, horizontal overflow, and touch hover were verified.
 - [ ] i18n, ARIA, labels, alt text, focus, and keyboard behavior are complete.
-- [ ] A new primitive has at least two consumers, synchronized docs, and regression guards.
-- [ ] Old APIs, CSS, and unused declarations are removed.
-- [ ] `npm run verify:local` passes.
+- [ ] A new primitive has at least two consumers plus synchronized docs, `structure.md`, and architecture guards.
+- [ ] Old APIs, CSS, and unused declarations were removed.
+- [ ] `npm run verify:local` passes; large deliveries also run `npm run verify:all`.

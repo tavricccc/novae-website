@@ -12,7 +12,7 @@
 10. 每次變更在 `content/changelog.md` 最前方新增產品向紀錄，只讀與 patch 最前 20 行。
 11. 完成後執行 `npm run check`；不以人工預覽取代內容、連結與建置驗證。
 12. 主程式本地驗證與測試增補規則集中維護於 `docs/contributing.md` 與 `docs/en/contributing.md`；兩語結構同步，主程式 repo 只保留短版命令入口。
-13. 主程式 UI 規範以 `novae/src/styles/primitives.css` 與 `novae/src/components/ui/` 為單一來源；本網站只負責同步說明，不另行定義另一套主程式元件契約。
+13. 主程式 UI 規範以 `novae/src/app/globals.css`、`novae/src/styles/motion.css`、`novae/src/components/ui/` 與 `novae/src/components/motion/` 為單一來源；本網站只負責同步說明，不另行定義另一套主程式元件契約。
 14. 主程式新增或調整 viewport、button、card、list、dropdown、shadow、control primitive 時，同步更新雙語 contributing／architecture 文件與產品更新紀錄。
 15. 分類是 Postgres runtime 資料；提案與設備文件必須維持相同的動態分類、瀏覽、建立與分類管理語意，不得再描述硬編碼分類或分類 codegen。
 16. 平台總管理員只由 `ADMIN_EMAILS` 決定；文件不得描述任何 UI 指派方式。分類管理權限一律描述為先選分類，再查看、新增、修改或撤銷該分類負責人。

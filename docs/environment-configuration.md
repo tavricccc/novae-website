@@ -4,29 +4,29 @@
 
 ## 先理解可見性
 
-- `VITE_*` 會進入瀏覽器 bundle，不能當成密碼。
+- `NEXT_PUBLIC_*` 會進入瀏覽器 bundle，不能當成密碼。
 - token、service role、service account、API secret、DB password 只放 GitHub Environment secrets。
 - `SUPABASE_URL` 由 hosted Edge Functions 自動提供，不需要建立 GitHub secret。
-- `VITE_API_BASE_URL` 不需要另外建立 GitHub secret；frontend workflow 會直接使用 `CLOUDFLARE_WORKER_URL`。
+- `NEXT_PUBLIC_API_BASE_URL` 不需要另外建立 GitHub secret；frontend workflow 會直接使用 `CLOUDFLARE_WORKER_URL`。
 - 本機 `.env` 只供程式開發者使用，不是正式部署的一部分。
 
 ## 前端與 Vercel
 
 | Secret | 必要 | 來源／填法 |
 | --- | --- | --- |
-| `VITE_SCHOOL_NAME` | 建議 | 要顯示的學校名稱 |
-| `VITE_ALLOWED_DOMAIN` | 是 | 學校信箱網域，不含 `@` |
-| `VITE_FIREBASE_API_KEY` | 是 | Firebase Web App `apiKey` |
-| `VITE_FIREBASE_AUTH_DOMAIN` | 是 | Firebase Web App `authDomain` |
-| `VITE_FIREBASE_PROJECT_ID` | 是 | Firebase Web App `projectId` |
-| `VITE_FIREBASE_APP_ID` | 是 | Firebase Web App `appId` |
-| `VITE_FIREBASE_MESSAGING_SENDER_ID` | 是 | Firebase Web App `messagingSenderId` |
-| `VITE_FIREBASE_VAPID_KEY` | 是 | Firebase Cloud Messaging Web Push public key |
-| `VITE_GOOGLE_CLIENT_ID` | 是 | 同一 Firebase／GCP 專案的 **Web** OAuth 2.0 Client ID（`….apps.googleusercontent.com`）；瀏覽器可見，用於 Google Identity Services 登入 |
-| `VITE_FIREBASE_APP_CHECK_ENABLED` | 否 | 初次部署填 `false`；完成 App Check 後改 `true` |
-| `VITE_RECAPTCHA_ENTERPRISE_SITE_KEY` | 條件 | 啟用 App Check 時填入 |
-| `VITE_SUPABASE_URL` | 是 | Supabase Project URL |
-| `VITE_SUPABASE_PUBLISHABLE_KEY` | 是 | Supabase publishable key，不是 service role |
+| `NEXT_PUBLIC_SCHOOL_NAME` | 建議 | 要顯示的學校名稱 |
+| `NEXT_PUBLIC_ALLOWED_DOMAIN` | 是 | 學校信箱網域，不含 `@` |
+| `NEXT_PUBLIC_FIREBASE_API_KEY` | 是 | Firebase Web App `apiKey` |
+| `NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN` | 是 | Firebase Web App `authDomain` |
+| `NEXT_PUBLIC_FIREBASE_PROJECT_ID` | 是 | Firebase Web App `projectId` |
+| `NEXT_PUBLIC_FIREBASE_APP_ID` | 是 | Firebase Web App `appId` |
+| `NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID` | 是 | Firebase Web App `messagingSenderId` |
+| `NEXT_PUBLIC_FIREBASE_VAPID_KEY` | 是 | Firebase Cloud Messaging Web Push public key |
+| `NEXT_PUBLIC_GOOGLE_CLIENT_ID` | 是 | 同一 Firebase／GCP 專案的 **Web** OAuth 2.0 Client ID（`….apps.googleusercontent.com`）；瀏覽器可見，用於 Google Identity Services 登入 |
+| `NEXT_PUBLIC_FIREBASE_APP_CHECK_ENABLED` | 否 | 初次部署填 `false`；完成 App Check 後改 `true` |
+| `NEXT_PUBLIC_RECAPTCHA_ENTERPRISE_SITE_KEY` | 條件 | 啟用 App Check 時填入 |
+| `NEXT_PUBLIC_SUPABASE_URL` | 是 | Supabase Project URL |
+| `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY` | 是 | Supabase publishable key，不是 service role |
 | `CLOUDFLARE_WORKER_URL` | 是 | 固定 API 根網址，例如 `https://novae-api.school.workers.dev`；包含 `https://`，結尾不要 `/` |
 | `VERCEL_TOKEN` | 是 | Vercel account token |
 | `VERCEL_ORG_ID` | 是 | Vercel team／account ID |
@@ -40,10 +40,10 @@
 | `SUPABASE_PROJECT_REF` | 是 | Supabase project reference ID |
 | `SUPABASE_DB_PASSWORD` | 是 | 該 project 的 database password |
 | `SUPABASE_SERVICE_ROLE_KEY` | 是 | Supabase legacy `service_role` key |
-| `FIREBASE_PROJECT_ID` | 是 | 與 `VITE_FIREBASE_PROJECT_ID` 相同 |
-| `FIREBASE_WEB_API_KEY` | 是 | 與 `VITE_FIREBASE_API_KEY` 相同 |
+| `FIREBASE_PROJECT_ID` | 是 | 與 `NEXT_PUBLIC_FIREBASE_PROJECT_ID` 相同 |
+| `FIREBASE_WEB_API_KEY` | 是 | 與 `NEXT_PUBLIC_FIREBASE_API_KEY` 相同 |
 | `GOOGLE_SERVICE_ACCOUNT_JSON` | 是 | Firebase 下載檔的完整 JSON 內容，不是路徑 |
-| `ALLOWED_DOMAIN` | 是 | 與 `VITE_ALLOWED_DOMAIN` 完全相同 |
+| `ALLOWED_DOMAIN` | 是 | 與 `NEXT_PUBLIC_ALLOWED_DOMAIN` 完全相同 |
 | `ADMIN_EMAILS` | 是 | 完整 Email；多人以半形逗號分隔 |
 | `CLOUDINARY_CLOUD_NAME` | 是 | Cloudinary product environment cloud name |
 | `CLOUDINARY_API_KEY` | 是 | 同一 environment 的 API key |

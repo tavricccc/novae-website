@@ -12,10 +12,10 @@ Supabase 是 Novae 的資料與後端平台：Postgres、RLS、RPC、Realtime、
 
 | Supabase 值 | GitHub secret |
 | --- | --- |
-| Project URL | `VITE_SUPABASE_URL` |
-| Publishable key | `VITE_SUPABASE_PUBLISHABLE_KEY` |
+| Project URL | `NEXT_PUBLIC_SUPABASE_URL` |
+| Publishable key | `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY` |
 
-publishable key 會出現在瀏覽器；真正授權由 Firebase token、Edge 驗證與 RLS 負責。不要把 service role 填到 `VITE_*`。
+publishable key 會出現在瀏覽器；真正授權由 Firebase token、Edge 驗證與 RLS 負責。不要把 service role 填到 `NEXT_PUBLIC_*`。
 
 ## 3. 記錄部署用值
 
@@ -42,7 +42,7 @@ Hosted Edge Functions 會自動提供 `SUPABASE_URL`。不要為它建立 GitHub
 
 - [ ] URL、publishable key、project ref、DB password、service role 都來自同一 project。
 - [ ] access token 屬於有權部署此 project 的帳號。
-- [ ] 沒有把 service role 放進任何 `VITE_*`。
+- [ ] 沒有把 service role 放進任何 `NEXT_PUBLIC_*`。
 - [ ] 沒有手動改寫已存在的 migration。
 
 下一步：[建立 Cloudinary](cloudinary.md)。

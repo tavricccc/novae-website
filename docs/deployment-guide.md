@@ -30,10 +30,10 @@ flowchart LR
 
 幾組必須一致的值：
 
-- `VITE_ALLOWED_DOMAIN` = `ALLOWED_DOMAIN`
-- `VITE_FIREBASE_PROJECT_ID` = `FIREBASE_PROJECT_ID`
-- `VITE_FIREBASE_API_KEY` = `FIREBASE_WEB_API_KEY`
-- `VITE_GOOGLE_CLIENT_ID` 為同一 Firebase／GCP 專案的 Web OAuth Client ID，且 OAuth client 的 Authorized JavaScript origins 已含正式站（與本機）
+- `NEXT_PUBLIC_ALLOWED_DOMAIN` = `ALLOWED_DOMAIN`
+- `NEXT_PUBLIC_FIREBASE_PROJECT_ID` = `FIREBASE_PROJECT_ID`
+- `NEXT_PUBLIC_FIREBASE_API_KEY` = `FIREBASE_WEB_API_KEY`
+- `NEXT_PUBLIC_GOOGLE_CLIENT_ID` 為同一 Firebase／GCP 專案的 Web OAuth Client ID，且 OAuth client 的 Authorized JavaScript origins 已含正式站（與本機）
 - 標準 Cloudinary HMAC 流程：`CLOUDINARY_WEBHOOK_SECRET` = `CLOUDINARY_API_SECRET`
 - `CLOUDFLARE_WORKER_URL` 與 `ALLOWED_ORIGINS` 都包含 `https://`，結尾都沒有 `/`
 - `ALLOWED_ORIGINS` 是 Vercel 前端網域，不是 Worker 網址
@@ -63,7 +63,7 @@ Notion 未啟用時不需建立 Notion secrets；workflow 會以停用模式發�
 
 ## 4. 設定正式網域
 
-取得成功的 deployment URL 並確認能開啟後，在 Vercel 將正式網域連到 project，再把該網域加入 Firebase Authentication authorized domains，並把同一 origin 加入 GCP OAuth Web client 的 Authorized JavaScript origins（`VITE_GOOGLE_CLIENT_ID` 所屬 client）。若啟用 App Check，也要確認 reCAPTCHA Enterprise site key 允許正式網域。
+取得成功的 deployment URL 並確認能開啟後，在 Vercel 將正式網域連到 project，再把該網域加入 Firebase Authentication authorized domains，並把同一 origin 加入 GCP OAuth Web client 的 Authorized JavaScript origins（`NEXT_PUBLIC_GOOGLE_CLIENT_ID` 所屬 client）。若啟用 App Check，也要確認 reCAPTCHA Enterprise site key 允許正式網域。
 
 ## 5. 上線驗收
 

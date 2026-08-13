@@ -212,7 +212,7 @@
         },
         {
           "key": "support",
-          "icon": "thumb-up",
+          "icon": "hand-stop",
           "label": "Support",
           "title": "Choose whether support is gathered and when it qualifies",
           "body": "Support can be disabled. When enabled, both the goal and deadline must be positive integers; an unmet campaign ends according to the rule.",
@@ -289,7 +289,7 @@
       {
         "icon": "devices",
         "title": "Made for mobile and desktop",
-        "body": "Expandable desktop sidebar with adaptive lists; bottom navigation, reprioritized rows, and a center create action on mobile."
+        "body": "A complete desktop sidebar with multi-column lists; bottom navigation, reprioritized content, and page-local create actions on mobile."
       },
       {
         "icon": "refresh",
