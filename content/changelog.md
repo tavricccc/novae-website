@@ -1,6 +1,81 @@
 # 更新紀錄
 
-累計更新：845 次
+累計更新：914 次
+
+## v2.0.318｜管理主控台強化、互動限制與完整資料生命週期
+
+2026-08-22
+
+- 平台管理中心全面升級為整合式「管理主控台（Admin Console）」：新增即時指標總覽（平台提案、設備、公告與活躍趨勢）、使用者全文檢索管理與詳細審計日誌（Audit Log）追蹤。
+- 新增使用者層級互動限制（Interaction Restrictions）：管理員可針對特定成員設定提案發布限制、留言發表限制、附議／按讚限制或全面凍結操作，並即時寫入審計日誌，後端與資料庫函數全面強制邊界校驗。
+- 建立自動化資料保留與生命週期清理機制（Data Retention Lifecycle）：排程任務自動清理逾期已結案提案與設備案件（依設定天數）、過期審計日誌、未活躍帳號個資與頭像、無效推播裝置 token、過期限制紀錄及終止狀態的背景佇列工作。
+- 強化推播裝置 Token 心跳機制：在已登入 Shell 自動確認推播裝置註冊，支援 7 天客戶端頻率節流、跨裝置共用 Token 重新指派與設定頁明確的啟用／停用狀態回饋。
+- 本地開發與驗證支援 WSL2 整合：`scripts/wsl.mjs` 自動探索與按需調度 WSL2 Linux 容器環境，非侵入式管理 Docker 與 PostgreSQL 容器生命週期，並在驗證結束後自動釋放系統資源。
+
+## v2.0.317｜Cloudflare Turnstile 防護與登入安全邊界加固
+
+2026-08-20
+
+- 登入與註冊邊界整合 Cloudflare Turnstile 隱形人機驗證：在首次完成 Google 登入並建立設定檔時執行單次 Token 驗證，有效阻擋惡意自動化註冊與暴力爬蟲。
+- 強化客戶端登入驗證與安全邊界：優化 Firebase Auth、Google Identity Services (GIS) 與 Worker 之間的憑證交換，改善 iOS 獨立 PWA 模式與各瀏覽器中的認證交接、錯誤捕捉與重試機制。
+- 後端 Worker 建立專屬 Turnstile Siteverify 驗證邊界，強制執行單次 Token 消耗防線與專用限流。
+
+## v2.0.316｜自訂主題色彩與視覺介面刷新
+
+2026-08-18
+
+- 系統設定外觀新增「強調色（Accent Themes）」自訂功能：支援多款校園與品牌色彩搭配（包含 Slate、Indigo、Emerald、Rose 等），並與淺色／深色模式即時無縫切換。
+- 刷新全站控制項、狀態標籤、按鈕與分段控制器視覺層次，在各種自訂色彩主題下皆維持優異的高對比度、清晰焦點環與無障礙辨識度。
+
+## v2.0.315｜異步競態控制、請求可靠性與 PWA 安裝指引強化
+
+2026-08-17
+
+- 引入可中止異步競態工具（`abort-aware async race`）：前端網路請求全面支援 AbortSignal 與超時中斷，防止已取消操作或過期異步回應覆蓋最新畫面狀態。
+- 加固後端請求可靠性與速率限制處理：優化 Worker 請求自動重試、連線逾時防護，並精確回傳與處理 429 速率限制（`retryAfterSeconds`）提示。
+- 強化行動裝置 PWA 安裝提示與推播指引：針對 iOS Safari 及 Android Chrome 獨立顯示符合平台特性的安裝步驟引導，並在適當時機提示開啟站內與系統推播通知。
+- 完善 Google OAuth 登入相容性：解決 iOS Standalone PWA 模式與 Safari 環境下 Google 認證跳轉被阻擋的問題。
+
+## v2.0.314｜WASM 圖片編碼、載入幾何與 iOS 視窗穩定性
+
+2026-08-16
+
+- 圖片編碼引入 WebAssembly（`@jsquash/webp`）：在嚴格 CSP 規範下實現客戶端高效能圖片壓縮與 WebP 轉換，大幅降低上傳頻寬與伺服器處理負擔。
+- 修正 iOS Safari 視窗高度跳動與 Home Indicator 底部安全間距，優化行動端底部導覽列間距與觸控體驗。
+- 載入狀態指示器（Loading Spinner）幾何對齊與旋轉動畫平滑化；骨架屏延遲首繪以消除瞬態網路閃爍。
+
+## v2.0.313｜平台媒體限制、資料保留排程與備份災難復原
+
+2026-08-16
+
+- 系統設定新增「平台設定（Platform Settings）」分頁：可自訂提案、設備與公告的圖片上傳數量上限、單檔大小上限，以及結案資料保留期限（預設 180 天）。
+- 自動化資料庫邏輯備份工作流程（`backup-database.yml`）：每日定時透過 `pg_dump` 導出資料庫結構與數據，採用 `age` 進行高強度非對稱加密，校驗 Checksum 後上傳為 GitHub 加密產物並自動輪替歷史備份。
+- 建立受保護的手動災難重設與還原工作流程（`reset-database-and-cloudinary.yml`）：具備明確確認字串防誤觸機制，可一鍵重設資料表結構、重新套用遷移、修復 Worker 執行期角色並同步 Cloudinary 資源。
+
+## v2.0.312｜後端遷移至 Neon PostgreSQL 與 Cloudflare 架構
+
+2026-08-15
+
+- 資料庫全面遷移至 Neon Serverless PostgreSQL 17，移除對 Supabase CLI、Supabase Edge Functions 與 Upstash Redis 的相依。
+- 後端核心統一為 Cloudflare Workers API：透過 Cloudflare Hyperdrive 實現高效連線集區與查詢加速，並採用最低權限 `novae_runtime` 資料庫角色保障資料安全。
+- 引入 Cloudflare Queues 處理非同步 Outbox 佇列、通知推播、Cloudinary 刪除與排程維護；即時通訊全面改由 Cloudflare Durable Objects 提供 WebSocket Hibernation 中繼。
+- 建立跨平台規範化遷移校驗機制（Migration Checksum），確保本機開發與 CI/CD 遷移歷史的一致性與不可變性。
+
+## v2.0.311｜動態配方、流暢分頁與骨架屏優化
+
+2026-08-15
+
+- 整合 transitions.dev 動態配方：引入 `LiquidTabs` 滑動分頁標籤、`ResizableCard` 高度自適應過渡動效、平滑連續骨架屏微光（Calm Skeleton Shimmer）與字元限制計數器。
+- 繁體中文語系微調：設備「回報受影響人數」按鈕標籤統一調整為「我也遇到」，與提案「附議」操作語意保持一致。
+- 最佳化前端打包分塊（Chunking）與空閒時間路由預載（Route Preload），大幅縮短頁面切換首繪時間。
+
+## v2.0.310｜討論區幾何、導覽記憶與轉場細緻化
+
+2026-08-14
+
+- 討論區組件（CommentComposer & Thread）結構重整：固定於安全區域上方，垂直對齊 40px 頭像與操作按鈕，支援鍵盤自適應與回覆軌道折疊。
+- 建立導覽記憶機制（`navigation-memory`）：為 App 內路由賦予單調遞增歷史索引，確保瀏覽器上一頁／下一頁能精準對應正確的左右方向深度轉場。
+- 統一 12px 控制標籤文字排版與反應按鈕（Reaction Buttons）選中狀態層次。
 
 ## v2.0.309｜全面重寫前端介面與互動體驗
 

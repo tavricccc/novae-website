@@ -1,33 +1,64 @@
 # Administrator workflows
 
-Platform-administrator status comes only from backend `ADMIN_EMAILS`; the application cannot grant or revoke it. Users must sign in again after the environment value changes.
+Platform administrator permissions are derived solely from the backend `ADMIN_EMAILS` environment variable. The application has no grant or revoke controls for this role. Administrators must sign in again after changes to `ADMIN_EMAILS` to receive the updated role.
 
-## Daily order
+## 1. Daily Operational Routine
 
-1. Check notifications for categories explicitly assigned to you; platform administrators do not automatically receive every new record.
-2. Filter proposals to Pending review and Awaiting response.
-3. Review Dashboard errors, outbox backlog, and vendor failures.
+1. **Notifications**: Check assigned category notifications and comment updates.
+2. **Proposals Feed**: Filter for "Pending review" and "Awaiting response" records.
+3. **Admin Console**: Inspect overview metrics, audit logs, background queue health, and database connectivity.
 
-## Review proposals
+## 2. Moderation and Proposal Workflows
 
-Open a pending proposal, verify category, privacy, personal data, content, and images, then use Review proposal. Approval makes reviewed content school-readable and starts support when enabled. Rejection requires a clear reason and retains author/admin-only access.
+1. **Review Proposals**:
+   - Open pending proposals to verify visibility, personal data, content, and attached media.
+   - Click "Review Proposal": approving opens the proposal to the school and begins the support countdown (if enabled); rejecting requires a specific reason and moves the record to "Review rejected" (author and admin visible only).
+2. **Update Status & Respond**:
+   - Transition "Awaiting response" records to "Processing" with actionable progress notes.
+   - Close cases as "Completed" with concrete outcome statements, or "Infeasible" with clear justifications and alternative options.
 
-## Respond and close
+## 3. Admin Console Features
 
-Move Awaiting response to Processing with a useful update. Close as Completed with a verifiable result, or Infeasible with constraints and alternatives. A category response deadline starts at creation without support, or when support succeeds when enabled.
+Access the integrated **Admin Console** from the sidebar navigation:
 
-Comments have category and record-level controls. Turning comments off for a category is a live constraint for every existing and new proposal in that category: existing comments remain readable, but new comments and replies are blocked. When the category is enabled again, only proposals that follow the category and are not completed reopen automatically. A proposal closed manually, or closed because it became completed, stays closed; completed proposals can never be reopened. An explicit record-level enable still cannot bypass the category switch.
+### Overview & Activity Metrics
+- Real-time aggregation of total proposals, facility reports, announcements, comments, and daily active participants.
+- Visual breakdown of completed, processing, and pending ratios to monitor campus resolution velocity.
 
-## Announcements and deletion
+### User Management & Interaction Restrictions
+- **Member Search**: Search registered users by name, school email, or UID.
+- **Interaction Restrictions**: Apply granular restrictions on malicious or disruptive accounts:
+  - **Mute Proposal Creation**
+  - **Mute Commenting**
+  - **Mute Reactions & Votes**
+  - **Full Account Suspension**
+- All restriction actions require a stated reason, take effect immediately, and are logged to the Audit Log.
 
-Publish announcements with New announcement on the announcement list. Published announcements are immutable; delete and republish only after checking impact. **System settings → Categories and workflows → Announcements** includes the comment switch shared by every announcement. Turning it off blocks new comments and replies on every existing and new announcement, and a record-level switch cannot bypass it. When the global switch is restored, announcements that follow it reopen while manually closed announcements stay closed. Announcement details retain the record-level switch, and existing comments remain readable in every closed state. Proposal and announcement deletion uses a warning confirmation and the controlled deletion worker—never manually remove only the Cloudinary resource or only the database record.
+### Audit Log
+- Immutable records of all privileged administrative operations: proposal moderation, status changes, announcements, manager assignments, user restrictions, and platform settings updates.
+- Filter by actor, target entity, or action type for governance and transparency.
 
-## Category managers
+## 4. Category Management & Scoped RBAC
 
-In **System settings → People and management access**, choose a proposal, facility, or announcement responsibility first; for proposals or facilities, choose the category next. The page lists only current assignees for that scope, then looks up a signed-in member by full email or UID to grant or revoke access. It does not list every platform user at once. One category can have several managers, and category access never promotes someone to platform administrator.
+- **Dynamic Categories**: Maintain proposal and facility categories under **System settings → Categories and workflows**, configuring default categories, support goals, and response deadlines.
+- **Scoped Manager Assignment**: Assign managers per category under **System settings → People and management access**. Notifications are routed directly to assigned managers; platform administrators are not flooded with broadcast alerts.
 
-New proposals notify only explicit managers of their proposal category. New facility reports notify only managers of their facility category whose assignment enables them. Authors are excluded, and an unassigned platform administrator is not a recipient. See the complete event matrix in [user workflows](user-guide.md#notification-recipients).
+## 5. Platform Settings (Media & Retention)
 
-## Handoff
+Under **System settings → Platform settings**:
+- **Upload Limits**: Configure maximum photo attachments for proposals (default 2), facilities (default 2), announcements (default 10), and maximum file size (default 5 MB).
+- **Retention Lifecycle**: Configure automated retention cleanup for closed records (default 180 days) and audit logs (default 365 days).
 
-Keep at least two trusted administrators, rotate access when roles change, review category goals and days each term, and never share personal passwords. Continue with [post-launch operations](operations.md).
+## 6. Announcements and Lifecycle Deletions
+
+- Create campus announcements with optional images.
+- Toggle global announcement comments or individual record overrides.
+- Deletions trigger controlled cleanup of database records and Cloudinary media assets.
+
+## 7. System Health and Continuity
+
+- Regularly check Cloudflare Queue (`novae-jobs`) backlog.
+- Maintain at least two trusted administrators in `ADMIN_EMAILS` to avoid single-operator lockouts.
+- Rotate tokens and GitHub Environment secrets during role handoffs.
+
+For technical recovery procedures, continue to [post-launch operations](operations.md).

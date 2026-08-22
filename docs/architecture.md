@@ -1,125 +1,69 @@
 # 系統架構
 
-本頁先用一條請求解釋系統，再列模組邊界。部署者不需要理解每個檔案；只有開發、資安審查或事故定位時才需要深入。
+本頁說明 Novae 的整體系統架構、元件邊界、資料流與安全防線。
 
-## 一次操作經過哪裡
+## 系統資料與請求流
 
 ```mermaid
 flowchart LR
   U[瀏覽器 PWA] -->|Google 登入| F[Firebase Auth]
-  U -->|Firebase token + action| CFW[Cloudflare Worker]
-  CFW -->|來源、身分、原生 burst limit| RL[Cloudflare Rate Limiting]
-  CFW -->|origin secret 轉送| E[隨機名稱 Supabase Edge Functions]
-  E -->|精確業務配額／驗證快取| R[Upstash Redis]
-  E -->|RPC／交易| P[Postgres + RLS]
-  P -->|私有 Broadcast| U
-  U -->|簽名圖片上傳| CLD[Cloudinary 私有原圖]
-  CLD -->|簽章 callback| CFW
-  U -->|公開或短效私人圖片網址| CFW
-  CFW -->|先驗證、再讀共用圖片快取| MC[Cloudflare Media Cache]
-  MC -->|首次未命中才回源| CLD
-  P --> O[Outbox]
-  O --> W[outboxWorker]
-  W --> N[站內通知／FCM／Notion]
-  G[GitHub Actions] --> CFW
-  G --> E
-  G --> V[Vercel 前端]
+  U -->|Turnstile 驗證| T[Cloudflare Turnstile]
+  U -->|Firebase Token + App Check| CFW[Cloudflare Worker API]
+  CFW -->|原生限流 + 業務限流| DO[Durable Objects]
+  CFW -->|Hyperdrive 連線集區| P[(Neon PostgreSQL 17)]
+  DO -->|WebSocket Hibernation 即時推送| U
+  U -->|WASM 壓縮 + 簽章上傳| CLD[Cloudinary 私有原圖]
+  U -->|HMAC 簽章媒體讀取| CFW
+  CFW -->|Media Gateway 快取| MC[Cloudflare Media Cache]
+  MC -->|未命中回源| CLD
+  P -->|Outbox 事件| Q[Cloudflare Queues]
+  Q -->|非同步分發| W[Jobs Worker]
+  W --> N[Web Push / FCM / Notion]
+  G[GitHub Actions] -->|自動部署 + Checksum 遷移| CFW
+  G -->|每日 age 加密備份| BK[Encrypted Database Backup]
+  G -->|Vercel CLI 發布| V[Vercel 前端 PWA]
 ```
 
-重要原則：瀏覽器不被信任；Cloudflare 先擋下 CORS、未登入、webhook 簽章與短時間刷取，Supabase Edge 再檢查精確業務配額，Postgres 仍重新授權並保存正式關係與計數。Cloudflare 不是唯一權限層。
+核心設計原則：**瀏覽器環境不可信任**。Cloudflare Worker 作為唯一的公開 API 閘道，在邊緣先驗證 CORS、Firebase Auth JWT、App Check 與 Turnstile，再透過 Cloudflare Hyperdrive 連線集區存取 Neon PostgreSQL。資料庫操作強制使用最低權限 `novae_runtime` 角色，瀏覽器絕不直接連線資料庫。
 
-## 前端層級
+## 前端架構層次 (Next.js 16 App Router)
 
-| 目錄 | 責任 |
+| 目錄 | 職責與邊界 |
 | --- | --- |
-| `app/` | Next App Router 路由與 layout 組裝，不直接存取 service |
-| `components/` | 應用 UI 與事件轉發 |
-| `components/ui/` | 無業務資料、service、session 相依的共用 UI |
-| `components/motion/` | 可復用的數字、文字、反應與清單動效 |
-| `hooks/` | React 狀態、生命週期與跨元件流程 |
-| `services/` | `backendAction` 與 Supabase client 邊界 |
-| `lib/` | 無 React 相依的純工具 |
-| `types/` | 跨模組型別 |
-| `generated/` | 由 API error、限流等 JSON config 產生、前端使用的型別化規則；分類不在此處 |
+| `src/app/` | Next.js App Router 路由與 Layout 組裝，負責視窗尺寸與 Providers 邊界，不直接引用後端 service |
+| `src/components/ui/` | 無業務邏輯的基礎 UI Primitives（基於 Radix UI 與 Tailwind CSS 4），共用全域語意 Tokens |
+| `src/components/motion/` | transitions.dev 動態配方（`LiquidTabs`、`ResizableCard`、微光骨架屏、數字跳動與手勢反饋） |
+| `src/components/admin/` | 管理主控台（活動指標概覽、使用者搜尋與互動限制、審計日誌、分類負責人與平台設定） |
+| `src/hooks/` | React 狀態、生命週期、快取管理與領域業務邏輯 |
+| `src/services/` | Cloudflare Worker API、WebSocket 傳輸、Cloudinary 上傳與 Firebase 認證邊界 |
+| `src/lib/` | 無 React 相依的純工具（`navigation-memory`、`request` 超時中斷、WASM 圖片壓縮、Markdown 解析） |
+| `src/i18n/` | 繁體中文 (`zh-TW`) 與英文 (`en`) 領域字典目錄與反應式語言切換 |
 
-主要路由是提案列表／詳情、公告列表／詳情、通知、設定與管理 Dashboard。桌面與手機共用資料流，只切換 layout。
+### 介面與動效系統
+- **視覺規範**：`src/app/globals.css` 與 `src/styles/motion.css` 定義統一的色彩、圓角、三階陰影與動效曲線。
+- **強調色系統 (Accent Themes)**：支援 Slate、Indigo、Emerald、Rose 等多種品牌強調色，與淺色／深色模式即時切換。
+- **導覽記憶 (`navigation-memory`)**：為應用內頁面躍遷標記單調遞增索引，確保上一頁／下一頁能呈現精確的深度方向轉場。
+- **討論區安全底欄**：CommentComposer 組件精確對齊 Safe Area，在手機鍵盤開啟時自適應調整高度。
 
-共用視覺契約位於 `src/app/globals.css`、`src/styles/motion.css`、`components/ui/` 與 `components/motion/`。`AppShell` 統一管理 viewport gutter、safe area、內容寬度與桌面／手機導覽；button、card、list、dropdown、Dialog、control 以 shadcn／Radix primitive 組合，陰影只分 control、card、floating 三階。分段控制與導覽使用同一個 liquid selection 契約；非互動表面保持靜止，hover 只在 `hover: hover` 且 `pointer: fine` 時啟用。主要手機控制至少 44px。完整規範與新頁面清單見 [UI 設計系統](ui-design-system.md)。
+## 後端與資料庫架構
 
-手機底部導覽在已登入且角色 bootstrap 完成後持續顯示；內容頁以目前頁面標題作為 header 脈絡，不再疊加重複的第二列標題。登入過程中不提前露出底欄與側欄，避免半登入狀態。`AppShell` 統一加入 safe area、底部導覽高度與內容尾端空間，捲到底時最後一項仍能完整露出。路由來源只負責返回目的地，導覽 shell 與內容狀態保持分離。正式環境 Google 登入使用 Google Identity Services Token Client，再以 Firebase credential 建立 session；登入頁在使用者就緒後會等角色與分類目錄再導向預設提案分類，過程中登入按鈕維持 busy，避免重複送出。
-
-前端對 `localStorage` 與 `sessionStorage` 的存取統一經過安全 helper；瀏覽器封鎖 storage、無痕模式、quota 或 SSR 都只能讓快取退化，不能阻止登入、更新或 Push 裝置流程。Production HTML 依目前 API 與 Supabase origins 產生精確 CSP，與 Vercel header 共同限制 script、frame、connect、image 與 worker 來源。HarmonyOS Sans TC 只打包實際使用的 400／500／600／700，字族與視覺權重不變。
-
-三種詳情頁共用緊湊的 toolbar、正文與 sidebar 組合，標題區不另建背景卡片。提案與設備 sidebar 呈現進度、手勢反應與響應式時間軸，公告沿用愛心反應；支援數與按讚數以固定寬度數字轉場更新。討論區是一個連續表面，不把每則留言包成獨立卡片，輸入框放在實際回覆位置並保留 reply context。手機依序呈現正文、操作與討論，不建立第二層 header 或重複底部入口。對話框在桌面置中，窄螢幕可改為 bottom sheet，兩者共用 Radix focus、dismiss 與 ARIA 行為。
-
-列表讀取、搜尋、排序與載入更多由各領域 hook 共用既有 service 邊界；React state 原地更新成功結果，避免一般互動觸發整頁重新整理。換頁只重掛 route content，持續存在的 App shell 保持穩定；失敗保留重試，空白與 loading 使用共用 page state 與 skeleton。
-
-## 本地化與錯誤契約
-
-前端語系目錄使用 `src/i18n/messages/<locale>/<domain>.ts`，每個檔案只維護自己的功能領域，key 採短而穩定的語意名稱。繁中與英文必須擁有相同 key；前端只能用 key 查詢字串，不以中文原文反查翻譯。
-
-`config/api-errors.config.json` 是公開 API 錯誤的單一來源，產生前端、Cloudflare Worker 與 Supabase Edge 使用的型別化契約。失敗回應只包含穩定 `code`、`requestId`，限流時另帶 `retryAfterSeconds`；後端不回傳中文、英文句子或供應商原始錯誤。前端依 `code` 對應目前語系，完整技術細節留在以 request ID／trace ID 索引的 log。
-
-背景工作、刪除工作、Push delivery 與 maintenance 資料表只保存 `error_trace_id uuid`，不保存重複的錯誤句子。Dashboard 同樣傳回 `failed_task_codes` 與 `error_trace_id`，由前端負責顯示文字。
-
-## 後端入口
-
-| Function | 真實責任 |
+| 組件 | 職責與安全邊界 |
 | --- | --- |
-| `n<namespace>-api` | 原始碼為 `backendAction`；角色、冪等、驗證與領域分派 |
-| `n<namespace>-sync` | 原始碼為 `syncUser`；登入後同步允許網域使用者與角色 claim |
-| `n<namespace>-media` | 原始碼為 `cloudinaryWebhook`；再次驗證 callback 並更新上傳狀態 |
-| `n<namespace>-outbox` | 處理通知、FCM、選用的 Notion 同步與外部副作用 |
-| `n<namespace>-delete` | 清除 Cloudinary 資源並同步刪除狀態 |
-| `n<namespace>-maintenance` | 執行保留期、維護 RPC，並觸發 deletion/outbox workers |
+| **Cloudflare Worker API** | 唯一的公開入口，處理 Action 分派、JWT 身分驗證、App Check 驗證、Turnstile Siteverify 與 Media Gateway 代理 |
+| **Cloudflare Hyperdrive** | 池化 Worker 與 Neon PostgreSQL 之間的連線，實現零冷啟動延遲與查詢加速 |
+| **Cloudflare Durable Objects** | 基於 SQLite 的 per-UID 業務限流，以及 WebSocket Hibernation 即時中繼樞紐 |
+| **Cloudflare Queues (`novae-jobs`)** | 非同步 Outbox 佇列，處理推播通知 (FCM)、Notion 營運副本同步、Cloudinary 資源刪除與過期案件自動清理 |
+| **Neon PostgreSQL 17** | 系統單一真實來源。採用最低權限 `novae_runtime` 資料庫角色（僅限 DML、Sequence 與 Function 執行，無 DDL 權限） |
 
-公開 API 路徑仍由 Cloudflare Worker 先驗證來源與粗限流，再轉送 Edge。每一次成功轉送都會計入 Supabase Edge Function invocation；因此冷啟動改以 `getSessionBootstrap` 一次讀取角色、分類目錄、內容版本與未讀提示，並可選擇合併平台造訪寫入。這個 bootstrap 在 Edge 內只使用 access context 與一個 Postgres snapshot request；提案、個人提案、設備與公告列表也各自以單一 snapshot RPC 同時取得政策、頁面資料與內容版本，不再為分類驗證、政策陣列或版本拆出額外資料庫請求。細項 action 仍保留給局部刷新與管理寫入。Media Gateway 只負責驗證簽名、固定圖片變體與 edge cache，不承擔提案或設備的 domain 授權判斷；可讀性仍由 Edge 在簽發網址前決定。
+## 資料版本與即時同步
 
-建立內容、流程轉換與外部副作用仍使用可重播的資料庫冪等紀錄。公告按讚與取消附議則是設定明確最終狀態的自然冪等操作，保留 request ID 與業務限流，但不再為每次成功操作額外寫入 claim／complete 紀錄。
+- 提案、設備與公告各自維護單調遞增的 PostgreSQL 內容版本戳記（Content Version）。
+- 任何內容變更在同一交易中觸發版本遞增，並透過 Durable Objects WebSocket Hibernation 即時廣播給在線客戶端。
+- 前端收到版本事件後優先進行原地 Local Patch；若發生版本跳號或重連，則透過單次 `getContentVersions` 進行靜默刷新，兼顧極致流暢與資料一致性。
 
-## 分類設定如何生效
+## 資料保留與生命週期排程
 
-```mermaid
-flowchart LR
-  S[首次設定／系統設定] --> A[受控 backend actions]
-  A --> D[(Postgres 功能開關、動態分類與指派)]
-  D --> UI[前端 runtime catalog]
-  D --> API[Edge 權限、流程與通知]
-  API --> P[新案件規則與留言即時限制]
-```
-
-分類、設備分類、平台功能開關與管理員指派以 Postgres 為單一來源。首次設定與系統設定共用相同的分類選擇與編輯結構；首次完成時先略過尚未註冊人員的負責人指派。提案與設備看板都從同一 runtime catalog 選擇分類，建立與列表查詢都保存分類範圍；關閉的功能不會出現在導覽，但既有資料仍可管理。分類沒有封存狀態，資料庫強制既有分類保持可用；刪除分類會在同一受控流程永久刪除其中案件、關聯、通知與圖片引用並排入外部圖片刪除工作。建立提案時會把隱私、附議與期限規則快照到案件；留言可用性只由執行期分類限制與結案狀態決定。分類關閉會立即限制該分類所有提案，重新開啟恢復仍未結案的提案；結案提案保持關閉。閱讀範圍與作者顯示由資料庫 trigger 鎖定，前端條件不承擔安全責任。
-
-系統設定先在前端暫存變更，最後將提案／設備功能開關、公告留言總開關及兩邊分類的新增／修改／刪除草稿一次寫入受控 backend action 與單一 Postgres 交易；驗證或任一步驟失敗時全部回滾，不會留下部分分類或功能狀態。公告沒有分類，其留言總開關是所有公告的即時限制，不提供單筆覆寫。平台總管理員只由 `ADMIN_EMAILS` 產生；分類指派則是獨立的 scope 資料。新提案與新設備回報寫入個人通知給該分類明確負責人，不使用管理員廣播，因此平台總管理員不會因角色自動成為收件人。
-
-內容與留言的作者顯示改以 UID 讀取使用者資料，避免前端另外保存可漂移的作者副本。
-
-## 資料與副作用
-
-Postgres 是 source of truth。需要通知、Push、Notion 或其他外部服務的交易，先在同一資料庫交易寫入 outbox，再由 worker 執行。Push 另以 delivery key 建立持久化工作，由短租約 claim；暫時性 FCM 錯誤會記錄 attempts 與下次執行時間並指數退避，擁有它的 outbox 事件保持失敗狀態以讓既有排程再次喚醒 worker。成功後清除 payload，永久無效的 token 會移除。
-
-Notion 建立頁面前先在 Postgres 取得 `pending:<uuid>` reservation，頁面帶有穩定的 `Novae ID`。若遠端建立成功後本機 mapping 寫入中斷，重試會先依 ID 找回同一頁再完成 mapping；過期 reservation 可被安全接手，避免重複頁面。
-
-保留期清理提案或設備時，若存在 Notion 對應頁面，會在刪除主資料的同一交易排入刪除同步事件；這類排程清理不會另發使用者通知，但仍會由正常 outbox 重試與追蹤。Maintenance snapshot 會在同一個資料庫 request 回傳實際到期的 outbox／deletion worker，交易提交後只喚醒有 backlog 的項目；事件 trigger 負責即時處理，每 5 分鐘的 cron 只作失敗重試保險，不再每分鐘固定輪詢。
-
-圖片採統一 Media Gateway：瀏覽器仍以受控簽名直接上傳 Cloudinary，callback 驗證後只保存私有原圖識別資料；讀取時由 Edge 先依內容權限簽發 Worker 網址。公開圖片與頭像使用穩定網址，私人提案／留言使用約 15 分鐘的短效網址。Worker 驗證通過後先讀自己的共享 edge cache，未命中才向 Cloudinary 取原圖；圖片列固定使用 320×240 縮圖，正文與燈箱才載完整圖。私人圖片不允許瀏覽器長期快取，但不同已授權使用者仍可共用 Worker 端的圖片內容快取。前端、Notion 匯入與頭像都不接觸 Cloudinary delivery URL。可變內容列表改用 `no-store`，不再保留短時間 POP cache，因此狀態寫入後讀取一致，但列表請求會增加部分 Cloudflare 到 Supabase 的轉送與 Edge invocation。
-
-## 即時更新與驗證快取
-
-內容、通知、留言設定與通知已讀狀態透過 Supabase Realtime 的私有 Broadcast topics 傳送。topic 依校內、管理員或個別使用者分流，連線時由 `realtime.messages` RLS 驗證 Firebase 身分與角色；登入者不需要、也沒有權限直接查詢通知、通知狀態或即時事件私有資料表。提案、公告與設備各自使用 Postgres 單調版本戳記，內容事件攜帶同一交易的版本；連續事件優先原地 patch，版本跳號才靜默刷新。App 恢復前景、瀏覽器恢復網路或 Realtime 重連時只以一次 `getContentVersions` 批次驗證三個領域，Cloudflare Worker 不產生或保存版本。Postgres 仍是 source of truth。
-
-Edge 驗證 Firebase token 後，會將必要的使用者資料短暫保存在 Function instance 記憶體與 Upstash Redis。快取失效時才重新呼叫 Firebase，並保留過期與數量上限，減少重複外部請求而不改變每個 action 的授權檢查。
-
-前端內容讀取會依帳號保存在記憶體與 IndexedDB，維持積極的長效快取以減少伺服器與外部服務用量。記憶體層使用有數量上限的 LRU，讀取命中會更新最近使用順序；持久層仍保留較長存活時間。列表 response 直接帶回查詢前取得的領域版本，不另呼叫版本 action；若寫入、Realtime 或切換帳號已讓資料過期，較早完成的請求不能把舊內容重新寫回。背景 first-page refresh 保留現有畫面，並以第一個可見 content id 恢復相對捲動位置。提案列表在 pointer／focus intent 時只預抓該筆完整 Detail，並以 coalesced request 與詳情路由共用請求；點擊後先用一次性列表摘要畫出穩定骨架，不把整頁阻塞在首次 Detail read。
-
-PWA 發現新版本後會要求 waiting Service Worker 立即接管，等待 `controllerchange` 後以版本化 URL 重新載入；watchdog 與每版本重載次數上限會終止失敗循環。更新流程不保留舊版相容分支，也不需要清除資料庫或關閉積極內容快取。
-
-## 部署拓樸
-
-- `main` → GitHub `production` Environment → Cloudflare Worker + Supabase production + Vercel production。
-- `dev` → `development` Environment → 只有維護測試站時才建立的另一套資源。
-- config 或 Supabase 變更會觸發後端；前端若同時變更會等待同 commit 後端成功。
-- backend workflow 套 migration、由 GitHub secrets 自動設定 Cloudflare／Edge、部署隨機 Functions 與固定 Worker、健康檢查。
-- frontend workflow 由 Vercel CLI build 並 deploy prebuilt artifacts。
-
-完整檔案位置以主程式 repository 的 `structure.md` 為準。
+- **已結案案件清理**：結案超過平台設定保留期限（預設 180 天）之案件，由背景排程自動永久刪除其資料庫紀錄、留言、附議關聯及 Cloudinary 圖片。
+- **審計日誌輪替**：超過 365 天之管理操作紀錄自動清除。
+- **未活躍帳號與無效推播裝置**：定期清理長期未活動之個資快照與失效之 FCM Device Tokens。
+- **自動化每日備份**：由 GitHub Actions 每日定時執行 `pg_dump`，透過 `age` 非對稱加密後存為 GitHub 加密 Artifacts。

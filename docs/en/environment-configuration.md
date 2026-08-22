@@ -1,96 +1,119 @@
 # Credential worksheet
 
-Put every value below in the deploying fork's GitHub `production` Environment secrets. This is the only secret store a deployer must fill. GitHub Actions automatically synchronizes runtime values to Cloudflare and Supabase; do not duplicate them manually in vendor dashboards. `NEXT_PUBLIC_*` values are browser-visible; every other credential stays server-side.
+Put every value below in your GitHub fork's `production` Environment secrets. This is the only secret store a deployer must fill. GitHub Actions automatically injects runtime values into the Vercel frontend and Cloudflare Worker during deployment. `NEXT_PUBLIC_*` values are browser-visible; every other credential stays strictly server-side.
+
+## Visibility and Scope
+
+- `NEXT_PUBLIC_*` values are compiled into the client-side JavaScript bundle and are publicly visible.
+- Database passwords, service-account JSON, API secrets, tokens, and random signing keys stay only in GitHub Environment secrets.
+- `NEXT_PUBLIC_API_BASE_URL` is automatically mapped from `CLOUDFLARE_WORKER_URL` by the deployment workflow.
+- Local `.env` is only for local debugging by contributors.
 
 ## Frontend and Vercel
 
-| Secret | Source |
-| --- | --- |
-| `NEXT_PUBLIC_SCHOOL_NAME` | School display name; recommended |
-| `NEXT_PUBLIC_ALLOWED_DOMAIN` | Email domain without `@` |
-| `NEXT_PUBLIC_FIREBASE_API_KEY` | Firebase Web App `apiKey` |
-| `NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN` | Firebase `authDomain` |
-| `NEXT_PUBLIC_FIREBASE_PROJECT_ID` | Firebase `projectId` |
-| `NEXT_PUBLIC_FIREBASE_APP_ID` | Firebase `appId` |
-| `NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID` | Firebase `messagingSenderId` |
-| `NEXT_PUBLIC_FIREBASE_VAPID_KEY` | FCM Web Push public VAPID key |
-| `NEXT_PUBLIC_GOOGLE_CLIENT_ID` | Same Firebase/GCP project **Web** OAuth 2.0 Client ID (`….apps.googleusercontent.com`); browser-visible; used by Google Identity Services sign-in |
-| `NEXT_PUBLIC_FIREBASE_APP_CHECK_ENABLED` | `false` initially; `true` after App Check setup |
-| `NEXT_PUBLIC_RECAPTCHA_ENTERPRISE_SITE_KEY` | Required when App Check is enabled |
-| `NEXT_PUBLIC_SUPABASE_URL` | Supabase Project URL |
-| `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY` | Supabase publishable key, never service role |
-| `CLOUDFLARE_WORKER_URL` | Stable API root such as `https://novae-api.school.workers.dev`; no trailing slash |
-| `VERCEL_TOKEN` | Vercel account token |
-| `VERCEL_ORG_ID` | Vercel team/account ID |
-| `VERCEL_PROJECT_ID` | Vercel project ID |
+| Secret | Required | Source |
+| --- | --- | --- |
+| `NEXT_PUBLIC_SCHOOL_NAME` | Recommended | School or organization display name (e.g., `National Yang Ming Chiao Tung University`) |
+| `NEXT_PUBLIC_ALLOWED_DOMAIN` | Yes | Allowed Google email domain without `@` (e.g., `nycu.edu.tw`) |
+| `NEXT_PUBLIC_FIREBASE_API_KEY` | Yes | Firebase Web App `apiKey` |
+| `NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN` | Yes | Firebase Web App `authDomain` |
+| `NEXT_PUBLIC_FIREBASE_PROJECT_ID` | Yes | Firebase Web App `projectId` |
+| `NEXT_PUBLIC_FIREBASE_APP_ID` | Yes | Firebase Web App `appId` |
+| `NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID` | Yes | Firebase Web App `messagingSenderId` |
+| `NEXT_PUBLIC_FIREBASE_VAPID_KEY` | Yes | FCM Web Push public key (VAPID) |
+| `NEXT_PUBLIC_GOOGLE_CLIENT_ID` | Yes | Same Firebase/GCP project **Web** OAuth 2.0 Client ID (`….apps.googleusercontent.com`) |
+| `NEXT_PUBLIC_FIREBASE_APP_CHECK_ENABLED` | Yes | `true` in deployed environments |
+| `NEXT_PUBLIC_RECAPTCHA_ENTERPRISE_SITE_KEY` | Yes | Google Cloud reCAPTCHA Enterprise Site Key |
+| `NEXT_PUBLIC_TURNSTILE_SITE_KEY` | Yes | Cloudflare Turnstile Site Key (or `TURNSTILE_SITE_KEY`) |
+| `CLOUDFLARE_WORKER_URL` | Yes | Stable API root such as `https://novae-api.school.workers.dev` (no trailing slash) |
+| `VERCEL_TOKEN` | Yes | Vercel account deployment token |
+| `VERCEL_ORG_ID` | Yes | Vercel team/account ID |
+| `VERCEL_PROJECT_ID` | Yes | Vercel project ID |
 
-## Backend and deployment
+## Backend and Deployment
 
-| Secret | Source |
-| --- | --- |
-| `SUPABASE_ACCESS_TOKEN` | Supabase account access token |
-| `SUPABASE_PROJECT_REF` | Project reference ID |
-| `SUPABASE_DB_PASSWORD` | Project database password |
-| `SUPABASE_SERVICE_ROLE_KEY` | Legacy `service_role` key |
-| `FIREBASE_PROJECT_ID` | Same as `NEXT_PUBLIC_FIREBASE_PROJECT_ID` |
-| `FIREBASE_WEB_API_KEY` | Same as `NEXT_PUBLIC_FIREBASE_API_KEY` |
-| `GOOGLE_SERVICE_ACCOUNT_JSON` | Entire Firebase service-account JSON, not a file path |
-| `ALLOWED_DOMAIN` | Exactly the same as `NEXT_PUBLIC_ALLOWED_DOMAIN` |
-| `ADMIN_EMAILS` | Full emails separated by ASCII commas |
-| `CLOUDINARY_CLOUD_NAME` | Cloudinary product environment |
-| `CLOUDINARY_API_KEY` | Same environment API key |
-| `CLOUDINARY_API_SECRET` | Same environment API secret |
-| `CLOUDINARY_WEBHOOK_SECRET` | Same API secret for the standard HMAC flow |
-| `WEBHOOK_SECRET` | Independently generated random 32-byte value |
-| `CLOUDFLARE_ACCOUNT_ID` | 32-character Cloudflare Account ID, not zone ID |
-| `CLOUDFLARE_API_TOKEN` | Account-scoped token with Workers deployment permission |
-| `ALLOWED_ORIGINS` | Exact frontend origin such as `https://school-novae.vercel.app`; **never add a trailing slash** |
-| `EDGE_FUNCTION_NAMESPACE` | Private 16–48 character lowercase alphanumeric random value |
-| `EDGE_ORIGIN_SECRET` | Independent high-entropy secret for Worker/internal Edge calls |
-| `NOTION_TOKEN` | Optional internal integration secret |
-| `NOTION_DATABASE_ID` | Optional original database shared with the integration |
-| `NOTION_DATA_SOURCE_ID` | Required for a multi-source database; auto-discovered when only one source exists |
-| `UPSTASH_REDIS_REST_URL` | Upstash HTTPS REST URL used only by Supabase, never synchronized to the Cloudflare Worker |
-| `UPSTASH_REDIS_REST_TOKEN` | Writable Standard REST token used only by Supabase |
+| Secret | Required | Source |
+| --- | --- | --- |
+| `ADMIN_EMAILS` | Yes | Platform administrator emails separated by ASCII commas |
+| `ALLOWED_DOMAIN` | Yes | Exactly the same as `NEXT_PUBLIC_ALLOWED_DOMAIN` |
+| `ALLOWED_ORIGINS` | Yes | Exact frontend origin (e.g., `https://school-novae.vercel.app`; **never add a trailing slash**) |
+| `CLOUDFLARE_ACCOUNT_ID` | Yes | 32-character Cloudflare Account ID |
+| `CLOUDFLARE_API_TOKEN` | Yes | Account-scoped token with Workers, Hyperdrive, and Queues edit permissions |
+| `CLOUDFLARE_HYPERDRIVE_ID` | Yes | 32-character hexadecimal Cloudflare Hyperdrive ID |
+| `CLOUDFLARE_WORKER_URL` | Yes | Public Worker API root URL |
+| `CLOUDINARY_CLOUD_NAME` | Yes | Cloudinary product environment cloud name |
+| `CLOUDINARY_API_KEY` | Yes | Same environment API key |
+| `CLOUDINARY_API_SECRET` | Yes | Same environment API secret (Webhook signature verification uses this secret directly) |
+| `FIREBASE_PROJECT_ID` | Yes | Same as `NEXT_PUBLIC_FIREBASE_PROJECT_ID` |
+| `FIREBASE_PROJECT_NUMBER` | Yes | Same as `NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID` |
+| `FIREBASE_APP_IDS` | Yes | Same as `NEXT_PUBLIC_FIREBASE_APP_ID` |
+| `FIREBASE_WEB_API_KEY` | Yes | Same as `NEXT_PUBLIC_FIREBASE_API_KEY`, used for backend validation and smoke tests |
+| `GOOGLE_SERVICE_ACCOUNT_JSON` | Yes | Entire Firebase service-account JSON content (not a path) |
+| `NEON_DATABASE_URL` | Yes | Full PostgreSQL connection string for the Neon project |
+| `NEON_RUNTIME_PASSWORD` | Yes | High-entropy random password to configure the least-privilege `novae_runtime` role |
+| `HEALTHCHECK_SECRET` | Yes | Independent 32-byte base64 secret for smoke testing |
+| `MEDIA_SIGNING_SECRET` | Yes | Independent 32-byte base64 secret for Media Gateway HMAC tokens |
+| `REALTIME_TICKET_SECRET` | Yes | Independent 32-byte base64 secret for WebSocket ticket signing |
+| `TURNSTILE_SECRET_KEY` | Yes | Cloudflare Turnstile secret key |
+| `BACKUP_AGE_RECIPIENT` | Yes (Var) | `age` public key (`age1...`) for encrypting daily database backups (put in GitHub Variables or Secrets) |
+| `NOTION_TOKEN` | Optional | Internal integration secret |
+| `NOTION_DATABASE_ID` | Optional | Dedicated database ID shared with the integration |
+| `NOTION_DATA_SOURCE_ID` | Conditional | Data source ID when using multiple sources |
 
-Hosted Edge Functions provide `SUPABASE_URL` automatically; do not create it as a GitHub secret. `NEXT_PUBLIC_API_BASE_URL` is also not a separate GitHub secret: the frontend workflow uses `CLOUDFLARE_WORKER_URL`. Local `.env` is only for contributors.
+## Optional Custom Service Names (GitHub Variables)
 
-## ALLOWED_ORIGINS: exact format
+If you wish to customize Cloudflare service names, set them in GitHub `production` Environment Variables (or Repository Variables):
+
+| Variable | Default | Description |
+| --- | --- | --- |
+| `CLOUDFLARE_WORKER_NAME` | `novae-api` | Custom Cloudflare Worker name |
+| `CLOUDFLARE_QUEUE_NAME` | `novae-jobs` | Custom Cloudflare Queue name |
+
+## ALLOWED_ORIGINS: Exact Format
 
 ```text
-https://your-production-domain.vercel.app
+ALLOWED_ORIGINS=https://your-production-domain.vercel.app
 ```
 
 > **The final character must not be `/`.**
 
-Include `https://`, omit paths and quotes, and never use `*`. Multiple origins use ASCII commas. The value must exactly match the browser's `from origin 'https://…'` message. After changing it, rerun `Deploy Supabase Backend`; editing GitHub alone does not update the running Worker.
+| Result | Value |
+| --- | --- |
+| Valid | `https://your-production-domain.vercel.app` |
+| Invalid: Missing scheme | `your-production-domain.vercel.app` |
+| Invalid: Trailing slash | `https://your-production-domain.vercel.app/` |
+| Invalid: Path included | `https://your-production-domain.vercel.app/issues` |
+| Invalid: Overly permissive | `*` |
 
-## Generate independent private values
+Multiple origins are separated by ASCII commas: `https://app.school.edu.tw,https://school-novae.vercel.app`.
+
+## Generate Independent Random Backend Secrets
+
+Run the following in PowerShell to generate the four required high-entropy secrets:
 
 ```powershell
-$webhookBytes = New-Object byte[] 32
-[Security.Cryptography.RandomNumberGenerator]::Fill($webhookBytes)
-$webhookSecret = [Convert]::ToBase64String($webhookBytes)
+function New-RandomSecret {
+    $bytes = New-Object byte[] 32
+    [Security.Cryptography.RandomNumberGenerator]::Fill($bytes)
+    [Convert]::ToBase64String($bytes)
+}
 
-$namespaceBytes = New-Object byte[] 18
-[Security.Cryptography.RandomNumberGenerator]::Fill($namespaceBytes)
-$edgeFunctionNamespace = ([Convert]::ToHexString($namespaceBytes)).ToLower()
-
-$originBytes = New-Object byte[] 32
-[Security.Cryptography.RandomNumberGenerator]::Fill($originBytes)
-$edgeOriginSecret = [Convert]::ToBase64String($originBytes)
+Write-Host "NEON_RUNTIME_PASSWORD  = $(New-RandomSecret)"
+Write-Host "HEALTHCHECK_SECRET     = $(New-RandomSecret)"
+Write-Host "MEDIA_SIGNING_SECRET   = $(New-RandomSecret)"
+Write-Host "REALTIME_TICKET_SECRET = $(New-RandomSecret)"
 ```
 
-Use these for `WEBHOOK_SECRET`, `EDGE_FUNCTION_NAMESPACE`, and `EDGE_ORIGIN_SECRET`. Never reuse provider tokens or reuse one value for multiple roles.
+## Checklist
 
-## Final check
-
-- [ ] Every value is an Environment secret in `production`, not a public variable.
-- [ ] The secrets are in the fork that actually runs Actions, not only in upstream or another GitHub account.
-- [ ] Firebase, Supabase, and Cloudinary values each come from one matching project/environment.
-- [ ] No service role, service account, API secret, password, or token appears in Git.
+- [ ] All values are Environment secrets in `production`, not public variables.
+- [ ] Secrets are in the fork repository that actually runs Actions.
+- [ ] No secret values contain leading/trailing whitespaces or typo names.
+- [ ] `GOOGLE_SERVICE_ACCOUNT_JSON` is full JSON text.
 - [ ] All administrator emails belong to the allowed domain.
-- [ ] Worker URL and allowed origins include `https://` and have no trailing slash.
-- [ ] `ALLOWED_ORIGINS` contains the frontend Vercel origin, not the Worker URL.
+- [ ] `CLOUDFLARE_WORKER_URL` and `ALLOWED_ORIGINS` include `https://` and have no trailing slash.
+- [ ] `NEON_DATABASE_URL` and `NEON_RUNTIME_PASSWORD` are configured.
+- [ ] `CLOUDFLARE_HYPERDRIVE_ID`, `TURNSTILE_SECRET_KEY`, and `NEXT_PUBLIC_TURNSTILE_SITE_KEY` are set.
+- [ ] `BACKUP_AGE_RECIPIENT` is configured with an `age1...` public key for automated encrypted backups.
 
-`NOTION_TOKEN` and `NOTION_DATABASE_ID` must either both be set or both be omitted. When both are omitted, the workflow writes `NOTION_ENABLED=false` and Edge Functions safely skip Notion synchronization. A partial pair fails deployment with a clear error. `NOTION_DATA_SOURCE_ID` may only accompany that pair and is checked against the configured database. The API is pinned to `2026-03-11`; there is no `NOTION_VERSION` secret.
+Next: [Categories and product rules](configuration.md).

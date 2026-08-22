@@ -1,121 +1,73 @@
 # 一步一步排錯
 
-先找「第一個失敗的階段」。不要看到網頁錯誤就同時重設 Firebase、Supabase 與 Vercel；那會讓問題更難追。
+排錯的關鍵是先鎖定「第一個失敗的邊界」，不要同時修改多個服務的設定。
 
-## 1. GitHub workflow 失敗
+## 1. GitHub Actions 部署工作流程失敗
 
-1. 打開該 run。
-2. 找第一個紅色 step，不要只看最後的 cancelled step。
-3. 若訊息是 `Missing deployment secrets` 或 `Missing Supabase backend secrets`，回到 `production` Environment 對照[憑證填寫表](environment-configuration.md)。
-4. 若是 Supabase link／db push，確認 token、project ref、DB password 屬於同一 project。
-5. 若是 generated config diff，只檢查仍使用 codegen 的 API error、限流與保留期設定；分類已不是 codegen。
-6. 若上游已發布修正，先在 fork 按 `Sync fork → Update branch`，確認最新 commit 已出現，再執行新 run；不要只重跑舊 commit。
-7. 修正後重新執行失敗的 workflow。
+1. 打開失敗的 workflow run，定位第一個紅色的步驟。
+2. **`Missing backend deployment values`**：回到 GitHub fork 的 `Settings → Environments → production`，對照[憑證填寫表](environment-configuration.md)補齊缺少的 secret。
+3. **`Apply forward-only Neon migrations` 失敗**：
+   - 檢查 `NEON_DATABASE_URL` 是否正確且 Neon Project 處於 Active 狀態。
+   - 確認沒有手動修改過資料庫結構或破壞 Checksum 雜湊。
+4. **`Configure the least-privilege Worker database role` 失敗**：
+   - 檢查 `NEON_RUNTIME_PASSWORD` 是否為有效隨機密碼。
+   - 確認 Neon 資料庫使用者具備建立角色的權限。
+5. **`Validate Hyperdrive binding` 失敗**：
+   - 確認 `CLOUDFLARE_HYPERDRIVE_ID` 為 32 字元的十六進位 ID（不含空格或額外字元）。
+6. **`Smoke test authentication and database health` 失敗**：
+   - 檢查 Cloudflare Dashboard 中的 `Workers & Pages → novae-api → Logs`。
+   - 確認 `HEALTHCHECK_SECRET` 已正確設定。
 
-### `Invalid Function name`
+## 2. 登入問題與人機驗證
 
-先確認 fork 已同步包含 Function 名稱正規化的最新版。現行 workflow 會自動部署 `n<EDGE_FUNCTION_NAMESPACE>-api` 等名稱，固定的 `n` 確保第一個字元是英文字母。不要自行把 namespace 加上空白、連字號或大寫，也不要手動建立六個 Function 名稱。
+1. **Google 帳號選擇器未跳出或報錯**：
+   - 確認 `NEXT_PUBLIC_GOOGLE_CLIENT_ID` 來自與 Firebase 相同的 GCP 專案。
+   - 確認 Google Cloud Console 中 Web OAuth Client 的 **Authorized JavaScript origins** 包含目前訪問的完整網域（含 `https://`，結尾無 `/`）。
+   - 確認 CSP 未阻擋 `https://accounts.google.com`。
+2. **Cloudflare Turnstile 驗證失敗**：
+   - 確認 `NEXT_PUBLIC_TURNSTILE_SITE_KEY` 與 `TURNSTILE_SECRET_KEY` 成對且正確。
+   - 確認 Turnstile Widget 的允許網域清單包含正式站網域與 `localhost`。
+3. **登入提示「網域不符」**：
+   - 確認登入的 Google 信箱後綴與 `NEXT_PUBLIC_ALLOWED_DOMAIN` / `ALLOWED_DOMAIN` 完全一致（例如 `school.edu.tw`，不可帶 `@`）。
 
-### Cloudflare smoke test `500`／`1101`
+## 3. 瀏覽器 API 請求與 CORS 錯誤
 
-`1101` 代表 Worker 執行時發生例外，不是一般 CORS 拒絕。
-
-1. 確認八個 Worker 執行值都已由最新版 backend workflow 同步。
-2. 打開 Cloudflare `Workers & Pages → novae-api → Logs` 查看第一個 exception。
-3. 第一次建立 Worker或剛更新 secret 時，Cloudflare 節點可能短暫讀到舊版本；最新版 workflow 會重新部署並對暫時性錯誤重試。
-4. 若持續發生，記錄 exception、時間與 request ID，不要公開 token。
-
-### Cloudflare smoke test `403 origin-denied`
-
-1. 打開 fork 的 `Settings → Environments → production`。
-2. 找 `ALLOWED_ORIGINS`。
-3. 確認它與瀏覽器 Console 顯示的 `from origin 'https://…'` 完全相同。
-4. **刪掉最後一個 `/`**。正確是 `https://school-novae.vercel.app`，不是 `https://school-novae.vercel.app/`。
-5. 確認沒有引號、路徑或多餘空白。
-6. 重新執行 `Deploy Supabase Backend`；只更新 GitHub secret 不會改變已部署 Worker。
-
-Cloudflare secret 更新可能有短暫傳播時間；最新版 workflow 對暫時性的 `403 origin-denied` 會重試。如果 run 最後仍為 403，通常就是值本身不完全相同。
-
-## 2. 網頁打不開或空白
-
-1. 確認 frontend workflow 成功並取得 deployment URL。
-2. 檢查 Vercel project、org ID、project ID 是否相符。
-3. 檢查 build log 是否缺少必要 `NEXT_PUBLIC_*`。
-4. 若自訂路徑重新整理 404，確認 repository 的 `vercel.json` rewrites 沒被移除。
-5. 若只有舊畫面，先保持頁面開啟等待 Service Worker 接管；更新流程會自動以版本化 URL 重載且限制重試。只有 watchdog 明確失敗時才手動重新整理一次，不要先清除網站資料、內容快取或任何資料庫。
-
-首次設定先確認瀏覽器／作業系統的第一首選語言，再以與系統設定相同的介面設定功能與分類；完成前會提示負責人先略過，待相關人員註冊後再指派。若按下完成時短暫報錯、重試後顯示初始設定已完成，代表第一次請求可能已成功寫入但回應中斷；目前版本會刷新平台狀態並直接進入主畫面。若仍停在 Setup，檢查每個已啟用功能至少有一個分類、最新 migration 已套用，並記錄 request ID。
-
-## 3. 無法登入
-
-1. Firebase Google provider 是否啟用。
-2. 正式網域是否加入 Firebase authorized domains。
-3. `NEXT_PUBLIC_GOOGLE_CLIENT_ID` 是否為同一 Firebase／GCP 專案的 **Web** OAuth Client ID，且 OAuth client 的 **Authorized JavaScript origins** 含正式站（與本機開發 origin）。
-4. `NEXT_PUBLIC_ALLOWED_DOMAIN` 與 `ALLOWED_DOMAIN` 是否完全相同。
-5. Web App config、`FIREBASE_PROJECT_ID`、`FIREBASE_WEB_API_KEY`、service account 是否來自同一 project。
-6. 若剛啟用 App Check，暫時確認 site key 與網域是否正確；不要用關閉所有後端驗證當永久修法。
-7. 彈出視窗被擋、使用者關閉帳號選擇器，或在應用程式內建瀏覽器中：只會顯示錯誤（例如允許彈出視窗／改用系統瀏覽器），**不會**再改走 Firebase 整頁 redirect。
-8. 顯示「無法啟動登入」：先確認 GitHub Environment 已設 `NEXT_PUBLIC_GOOGLE_CLIENT_ID` 並重新部署前端；再檢查 OAuth JS origin 與 CSP 是否允許 `https://accounts.google.com`。
-9. 登入後仍停在登入卡、或點「提案」卻進「我的提案」：確認角色 bootstrap 與分類目錄是否成功；正常情況會等 bootstrap 完成後自動導向預設分類。
-
-## 4. 登入成功但資料操作失敗
-
-1. 先看 Network 中 `https://novae-api.<子網域>.workers.dev/v1/actions` 的 HTTP status 與 request ID。
-2. 全部 401／403：檢查 Firebase token、允許網域、service account 與使用者是否重新登入。
-3. 只有管理操作 403：檢查 `ADMIN_EMAILS` 並重新登入刷新角色。
-4. 只有特定分類看不到：比對 `readAccess`、狀態與使用者是否作者；這可能是正確權限。
-5. 429：先看回應 code；短時間連續操作檢查 `cloudflare/wrangler.toml` 的原生 binding，累積業務配額則檢查 Upstash 與 `rate-limits.config.json`。
-
-API 錯誤 body 使用機器可讀契約：`error.code` 是穩定錯誤碼、`error.requestId` 是查 log 的追蹤值，429 另有 `error.retryAfterSeconds`。後端不會回傳中文說明或完整供應商錯誤；畫面文字由前端語系目錄產生。回報問題時請提供 code、request ID 與發生時間，不要要求把原始 exception 暴露到瀏覽器。
-
-### 瀏覽器顯示 CORS／`net::ERR_FAILED`
-
-若 Console 顯示：
-
+若瀏覽器 Console 出現：
 ```text
-Response to preflight request doesn't pass access control check
-No 'Access-Control-Allow-Origin' header
+Response to preflight request doesn't pass access control check: No 'Access-Control-Allow-Origin' header is present
 ```
 
-依序檢查：
+請依序檢查：
+1. `ALLOWED_ORIGINS` 必須與 Console 顯示的 `from origin 'https://…'` 完全一致。
+2. **`ALLOWED_ORIGINS` 結尾絕對不能有 `/`**（正確：`https://school-novae.vercel.app`；錯誤：`https://school-novae.vercel.app/`）。
+3. 確認填入的是前端 Vercel 網域，而不是 Worker 本身的 URL。
+4. 修改 GitHub secret 後，必須**重新執行一次後端部署**以更新 Worker 執行期設定。
 
-1. Console 的 `from origin` 是否就是 `ALLOWED_ORIGINS`。
-2. `ALLOWED_ORIGINS` 是否包含 `https://`。
-3. **最後是否多了一個 `/`；有就刪掉。**
-4. 是否誤填成 Worker URL，而不是 Vercel 前端 Origin。
-5. 更新 GitHub production secret 後，是否重新執行 backend workflow。
+## 4. 圖片上傳或顯示異常
 
-正確預檢應回 `204`，`Access-Control-Allow-Origin` 應等於 Vercel Origin。
+1. **上傳時瀏覽器卡住或報錯**：
+   - 確認瀏覽器支援 WebAssembly（用於 `@jsquash/webp` 客戶端壓縮）。
+   - 檢查上傳張數是否超過「系統設定 → 平台設定」中所設定的上限。
+2. **圖片上傳後無法顯示**：
+   - 確認 `CLOUDINARY_CLOUD_NAME`、`CLOUDINARY_API_KEY`、`CLOUDINARY_API_SECRET` 正確。
+   - 確認後端部署時 `srp-secure-images` preset 已由 `configure-cloudinary.mjs` 自動建立成功。
+   - 確認 `MEDIA_SIGNING_SECRET` 已設定且前後端版本一致。
 
-### API `502` 或 `503`
+## 5. 即時更新與通知異常
 
-- `502`：Worker 無法完成 Supabase origin 請求。確認 backend workflow 已成功部署同一個 namespace 的六個 Functions。
-- `503 rate-limit-provider-unavailable`：Supabase 的 Upstash REST URL／token 錯誤或 Upstash 暫時無法使用。精確業務配額會 fail closed；Cloudflare 原生 burst protection 不受影響。
+1. **討論區或狀態沒有即時連線**：
+   - 確認 `REALTIME_TICKET_SECRET` 已設定。
+   - 檢查 Cloudflare Worker 是否已正確綁定 Durable Objects（`RealtimeHub`）。
+2. **Web Push 推播無法送達**：
+   - 確認 `NEXT_PUBLIC_FIREBASE_VAPID_KEY` 為有效的 FCM VAPID Public Key。
+   - 確認 `GOOGLE_SERVICE_ACCOUNT_JSON` 為完整 JSON 內容且具備 Firebase Cloud Messaging 發送權限。
+   - 檢查使用者的推播裝置 Token 是否在「設定」中正常啟用。
 
-## 5. 附議人數或天數不對
+## 6. 提供除錯資訊
 
-1. 在「系統設定 → 分類與處理流程」確認該分類目前的附議門檻與天數。
-2. 確認提案建立時間；既有提案沿用建立時快照，不會跟著後來的分類設定改變。
-3. 不要把 landing mockup 或文件範例值當成執行時設定；真正來源是 Postgres runtime category 與案件快照。
-4. 不要直接改歷史資料；需要修正時先確認 migration 與稽核紀錄。
-
-## 6. 圖片卡住
-
-1. 確認四個 Cloudinary 值來自同一 Product Environment。
-2. `CLOUDINARY_WEBHOOK_SECRET` 是否等於 API secret。
-3. 檢查 `cloudinaryWebhook` log 是否簽章失敗。
-4. 檢查圖片是否超過來源大小、張數或每日限額。
-5. 不要為了測試把私密資源改成公開。
-
-## 7. 通知或 Notion 沒有更新
-
-1. 先確認站內通知資料是否已建立。
-2. 查看 outbox backlog 與最舊事件。
-3. 檢查 `outboxWorker` log。
-4. Push：確認 VAPID key、瀏覽器權限、FCM token 與 service account。
-5. Notion：確認 database 已分享給 integration，token 與 database ID 同 workspace；若 database 有多個 data source，確認 `NOTION_DATA_SOURCE_ID` 已設定且確實屬於該 database。
-6. 修正後讓 worker 重試；不要手動重送大量事件造成重複副作用。
-
-## 8. 還是無法解決
-
-建立 GitHub issue 時附上：部署 commit、發生時間與時區、角色、分類、狀態、操作步驟、第一個錯誤、HTTP status、request ID、已檢查項目。移除所有 token、Email、service account、資料庫內容與 private URL。
+向維護團隊提報問題時，請附上：
+- 發生時間與時區
+- 操作的使用者角色、案件分類與目標 ID
+- 瀏覽器 Network 面板中的 HTTP 狀態碼與回應中的 `error.code`、`error.requestId`
+- 相關 GitHub Actions Workflow Run 連結
+*(注意：提供日誌前請移除所有密鑰、Token、密碼與 Service Account 敏感內容)*

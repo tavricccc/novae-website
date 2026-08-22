@@ -1,81 +1,90 @@
-# 8. Create Cloudflare Worker
+# 6. Create Cloudflare Worker
 
-Cloudflare Worker is the stable public API entry point. It checks CORS, Firebase identity, and native Cloudflare Rate Limiting bindings before forwarding accepted requests to randomly named Supabase Edge Functions. Edge burst protection returns `429` before Supabase; precise daily and hourly business quotas are checked by Supabase through Upstash.
+Cloudflare Worker serves as Novae's sole public API and backend runtime. It executes business Actions, authentication synchronization, Media Gateway caching, Cloudflare Queues asynchronous jobs (notifications, Notion sync, retention cleanup), and WebSocket Hibernation realtime updates via Cloudflare Durable Objects.
 
-## 1. Register workers.dev
+## 1. Create Cloudflare Account and workers.dev Subdomain
 
 1. Sign in to the [Cloudflare Dashboard](https://dash.cloudflare.com/).
-2. Open `Workers & Pages`.
-3. Register a `workers.dev` subdomain when prompted.
-4. Cloudflare normalizes accepted subdomains to lowercase.
+2. Navigate to **Workers & Pages**.
+3. Register a `workers.dev` subdomain (e.g., `school`) if using Workers for the first time.
 
-The production Worker name remains `novae-api`, producing:
-
-```text
-https://novae-api.<workers-subdomain>.workers.dev
-```
-
-Do not randomize the Worker name. Only the private Supabase Function names use the secret namespace.
-
-## 2. Collect account and token values
-
-Copy the 32-character Cloudflare Account ID as `CLOUDFLARE_ACCOUNT_ID`; do not use a zone ID. Under `My Profile → API Tokens`, create a token from the `Edit Cloudflare Workers` template, restrict it to the Novae account, and save it as `CLOUDFLARE_API_TOKEN`.
-
-Save the stable URL as:
+The production Worker name defaults to `novae-api`, making the public API URL:
 
 ```text
-CLOUDFLARE_WORKER_URL=https://novae-api.<workers-subdomain>.workers.dev
+https://novae-api.<your-subdomain>.workers.dev
 ```
 
-Include `https://`, omit a trailing slash, and do not append `/v1/actions`.
+Example: `https://novae-api.school.workers.dev`.
 
-## 3. Set ALLOWED_ORIGINS exactly
+## 2. Obtain Account ID and API Token
 
-Use the complete Vercel production origin:
+1. **Account ID**: Copy the 32-character hexadecimal Account ID from the Dashboard and save it as `CLOUDFLARE_ACCOUNT_ID`.
+2. **API Token**: Under **My Profile → API Tokens**, click **Create Token**, use the **Edit Cloudflare Workers** template (with Workers Scripts Edit, Hyperdrive Edit, and Queues Edit permissions), select the target account, and save the token as `CLOUDFLARE_API_TOKEN`.
 
-```text
-https://your-project.vercel.app
-```
+## 3. Create Cloudflare Hyperdrive
 
-> **Do not add a trailing slash.**  
-> Correct: `https://your-project.vercel.app`  
-> Wrong: `https://your-project.vercel.app/`
+Hyperdrive provides connection pooling and query acceleration between Cloudflare Workers and Neon PostgreSQL:
 
-The value must include `https://`, contain no path or quotes, and must not be `*`. Separate multiple origins with ASCII commas. Browsers send origins without a trailing slash; the Worker uses exact matching, so an extra `/` causes `403 origin-denied` and a browser CORS error.
+1. In the Cloudflare Dashboard, go to **Workers & Pages → Hyperdrive** (or create via Wrangler CLI).
+2. Create a Hyperdrive configuration. GitHub Actions will automatically synchronize the verified `novae_runtime` connection string during deployment.
+3. Save the 32-character Hyperdrive ID as:
+   ```text
+   CLOUDFLARE_HYPERDRIVE_ID
+   ```
 
-## 4. Generate the private Edge values
+## 4. Create Cloudflare Turnstile Verification
 
-In trusted PowerShell:
+Novae integrates Turnstile bot protection for profile creation and authentication boundaries:
+
+1. Go to **Turnstile** in the Cloudflare Dashboard and click **Add Site**.
+2. Name the site `Novae`, enter your production Vercel domain and `localhost`, and select **Invisible** or **Managed** mode.
+3. Record the keys:
+   - **Site Key** → Save as frontend secret `NEXT_PUBLIC_TURNSTILE_SITE_KEY`.
+   - **Secret Key** → Save as backend secret `TURNSTILE_SECRET_KEY`.
+
+## 5. Generate Random Backend Secrets
+
+Run the following in PowerShell to generate three independent random secrets:
 
 ```powershell
-$namespaceBytes = New-Object byte[] 18
-[Security.Cryptography.RandomNumberGenerator]::Fill($namespaceBytes)
-$edgeNamespace = ([Convert]::ToHexString($namespaceBytes)).ToLower()
+$healthBytes = New-Object byte[] 32
+[Security.Cryptography.RandomNumberGenerator]::Fill($healthBytes)
+$healthSecret = [Convert]::ToBase64String($healthBytes)
 
-$secretBytes = New-Object byte[] 32
-[Security.Cryptography.RandomNumberGenerator]::Fill($secretBytes)
-$edgeOriginSecret = [Convert]::ToBase64String($secretBytes)
+$mediaBytes = New-Object byte[] 32
+[Security.Cryptography.RandomNumberGenerator]::Fill($mediaBytes)
+$mediaSecret = [Convert]::ToBase64String($mediaBytes)
+
+$ticketBytes = New-Object byte[] 32
+[Security.Cryptography.RandomNumberGenerator]::Fill($ticketBytes)
+$realtimeSecret = [Convert]::ToBase64String($ticketBytes)
 ```
 
-Store them as `EDGE_FUNCTION_NAMESPACE` and `EDGE_ORIGIN_SECRET`. Deployed Functions become `n<namespace>-api`, `-sync`, `-media`, `-outbox`, `-delete`, and `-maintenance`. The fixed `n` guarantees a valid leading letter. Names change only when you deliberately rotate the namespace and redeploy.
-
-## 5. Put everything in GitHub production only
-
-Add these to the fork's `Settings → Environments → production → Environment secrets`:
+Save them to GitHub `production` Environment secrets:
 
 ```text
-CLOUDFLARE_ACCOUNT_ID
-CLOUDFLARE_API_TOKEN
-CLOUDFLARE_WORKER_URL
-ALLOWED_ORIGINS
-EDGE_FUNCTION_NAMESPACE
-EDGE_ORIGIN_SECRET
+HEALTHCHECK_SECRET     = $healthSecret
+MEDIA_SIGNING_SECRET   = $mediaSecret
+REALTIME_TICKET_SECRET = $realtimeSecret
 ```
 
-Do not duplicate these values manually in Cloudflare Worker Settings or Supabase. After changing a GitHub secret, rerun `Deploy Supabase Backend`; Actions synchronizes and deploys everything automatically.
+## 6. Configure ALLOWED_ORIGINS and CLOUDFLARE_WORKER_URL
 
-Rate Limiting bindings and their `namespace_id` values are declared in the application repository's `cloudflare/wrangler.toml`, including a separate burst limit for media delivery. Worker deployment creates them automatically: there is no separate Dashboard service to register and no additional secret. Production and development use separate namespaces so test traffic cannot consume production counters.
+- `CLOUDFLARE_WORKER_URL`: Public API root URL (e.g., `https://novae-api.school.workers.dev`; must include `https://`, no trailing slash).
+- `ALLOWED_ORIGINS`: Allowed frontend Origin (e.g., `https://school-novae.vercel.app`; **must NOT have a trailing slash**).
 
-The same Worker exposes `/v1/media/...`. The backend workflow synchronizes the existing Cloudinary cloud name/API secret and `EDGE_ORIGIN_SECRET` to it. Cloudinary credentials are used only to construct the authenticated origin URL inside the Worker; the origin secret signs and verifies domain-separated media capabilities. Reuse the GitHub secrets already created by the Cloudinary and Edge setup pages—do not add a second media secret or duplicate values manually in the Cloudflare Dashboard.
+## 7. Optional: Custom Worker and Queue Names
 
-All eight service setups are now complete. Next, use the [credential worksheet](../environment-configuration.md) to add every value to GitHub `production` Environment secrets.
+If you want to customize Cloudflare resource names, configure these in GitHub `production` Environment Variables (or Repository Variables):
+- `CLOUDFLARE_WORKER_NAME`: Defaults to `novae-api` (production) or `novae-api-<env>` (development).
+- `CLOUDFLARE_QUEUE_NAME`: Defaults to `novae-jobs` (production) or `novae-jobs-<env>` (development).
+
+## Checklist
+
+- [ ] `CLOUDFLARE_ACCOUNT_ID` and `CLOUDFLARE_API_TOKEN` are recorded.
+- [ ] `CLOUDFLARE_HYPERDRIVE_ID` is a 32-character hexadecimal string.
+- [ ] `TURNSTILE_SECRET_KEY` and `NEXT_PUBLIC_TURNSTILE_SITE_KEY` are created.
+- [ ] `HEALTHCHECK_SECRET`, `MEDIA_SIGNING_SECRET`, and `REALTIME_TICKET_SECRET` are generated independently.
+- [ ] `ALLOWED_ORIGINS` is configured without trailing slashes.
+
+Next step: [Create Vercel](vercel-github.md).

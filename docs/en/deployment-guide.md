@@ -1,61 +1,73 @@
 # Final release and acceptance
 
-Use this page after all eight service setups and production secrets are complete. The first administrator configures categories in the app after deployment.
+Use this page after all service setups and production secrets are configured. The initial administrator completes guided category setup in the app after deployment.
 
 ## Prerequisites
 
-- [ ] GitHub, Firebase, Supabase, Cloudinary, Upstash, Cloudflare, and Vercel are ready; optional Notion is ready when needed.
+- [ ] GitHub, Firebase, Neon, Cloudinary, Cloudflare, and Vercel are ready; optional Notion is ready when needed.
 - [ ] Every required value from the [credential worksheet](environment-configuration.md) is in GitHub `production` Environment secrets.
-- [ ] The campus domain and first administrator in `ADMIN_EMAILS` are final.
-- [ ] Proposal and facility-report rules are ready to enter during guided first sign-in.
+- [ ] The campus domain and initial administrator in `ADMIN_EMAILS` are final.
+- [ ] Proposal and facility-report rules are prepared for initial setup.
 
-If any item is incomplete, return to that page instead of running a deployment workflow early.
+## Deployment Flow
 
-## 1. Verify production secrets
+```mermaid
+flowchart LR
+  A[Prerequisites Complete] --> B[Deploy Neon & Cloudflare Backend]
+  B --> C[Deploy Vercel Frontend]
+  C --> D[Configure Production Domain & OAuth]
+  D --> E[Initial Admin Guided Setup]
+  E --> F[Full Acceptance Testing]
+```
 
-Open `Settings → Environments → production` in the GitHub fork and compare every entry with the [credential worksheet](environment-configuration.md). Use Environment secrets, not repository Variables, and remove accidental whitespace.
+## 1. Verify Production Secrets
 
-These pairs must match:
+Open `Settings → Environments → production` in your GitHub fork and compare every entry with the [credential worksheet](environment-configuration.md).
 
+Important matching pairs:
 - `NEXT_PUBLIC_ALLOWED_DOMAIN` = `ALLOWED_DOMAIN`
 - `NEXT_PUBLIC_FIREBASE_PROJECT_ID` = `FIREBASE_PROJECT_ID`
 - `NEXT_PUBLIC_FIREBASE_API_KEY` = `FIREBASE_WEB_API_KEY`
-- `NEXT_PUBLIC_GOOGLE_CLIENT_ID` is the same Firebase/GCP project's Web OAuth Client ID, with Authorized JavaScript origins covering production (and local Next.js)
-- Standard Cloudinary HMAC flow: `CLOUDINARY_WEBHOOK_SECRET` = `CLOUDINARY_API_SECRET`
-- Worker URL and allowed origins include `https://` and have no trailing slash.
+- `NEXT_PUBLIC_GOOGLE_CLIENT_ID` is the same GCP project's Web OAuth Client ID, with Authorized JavaScript origins covering production and local development.
+- `CLOUDFLARE_WORKER_URL` and `ALLOWED_ORIGINS` include `https://` and have **no trailing slashes**.
 - `ALLOWED_ORIGINS` is the Vercel frontend origin, not the Worker URL.
+- `NEON_DATABASE_URL` and `NEON_RUNTIME_PASSWORD` are valid.
 
-Notion secrets are not required when Notion is disabled; the workflow releases with that optional integration turned off.
+## 2. Deploy Backend (Deploy Neon and Cloudflare Backend)
 
-## 2. Release the Supabase backend
+In GitHub `Actions`, select `Deploy Neon and Cloudflare Backend` and trigger `Run workflow` on `main`.
 
-In GitHub `Actions`, choose `Deploy Supabase Backend` and run it for `main`. It deploys random-name Supabase Functions, the stable Cloudflare Worker, synchronizes secrets automatically, runs a Worker smoke test, then completes origin health and maintenance checks.
+The workflow executes:
+1. **Verifies Contracts and Types**: Runs `npm run generate:all`, checks Worker types, and verifies architecture boundaries.
+2. **Applies Neon Migrations**: Runs `npm run db:migrate` with canonical checksum validation.
+3. **Configures Runtime Role**: Configures least-privilege `novae_runtime` database role via `configure-database-runtime.mjs`.
+4. **Provisions Cloudinary Preset**: Auto-provisions the `srp-secure-images` preset.
+5. **Synchronizes Hyperdrive**: Binds verified runtime database credentials to Cloudflare Hyperdrive.
+6. **Creates Cloudflare Queue**: Ensures `novae-jobs` queue exists.
+7. **Deploys Cloudflare Worker**: Deploys Worker API and Durable Objects.
+8. **Runs Healthcheck Smoke Test**: Verifies unauthorized requests return `401` and authenticated healthcheck returns `200` with active database connection.
 
-Stop at the first failed step. Do not run the frontend yet; use [step-by-step troubleshooting](troubleshooting.md), fix the cause, and rerun the backend workflow.
+## 3. Deploy Frontend (Deploy Frontend to Vercel)
 
-## 3. Release the Vercel frontend
+After backend success, run `Deploy Frontend to Vercel`. It uses `CLOUDFLARE_WORKER_URL` as the frontend API endpoint, builds the Next.js 16 PWA bundle, and deploys prebuilt artifacts to Vercel production.
 
-Only after backend success, run `Deploy Frontend to Vercel`. It uses `CLOUDFLARE_WORKER_URL` as the frontend API root and removes legacy fixed Supabase Function entries after successful cutover.
+## 4. Add Production Domain & OAuth
 
-Later pushes to `main` trigger the relevant workflow automatically. When the same commit changes backend or configuration, frontend release waits for backend success.
+1. Connect the custom domain in Vercel.
+2. Add the domain to Firebase Authentication **Authorized domains**.
+3. Add the origin to Google Cloud Console **Authorized JavaScript origins** for `NEXT_PUBLIC_GOOGLE_CLIENT_ID`.
+4. If using Cloudflare Turnstile, add the domain to the Turnstile Widget configuration.
 
-## 4. Add the production domain
+## 5. Production Acceptance Checklist
 
-After the deployment URL opens successfully, connect the production domain in Vercel, add it to Firebase Authentication authorized domains, and add the same origin to the OAuth Web client's Authorized JavaScript origins for `NEXT_PUBLIC_GOOGLE_CLIENT_ID`. When App Check is enabled, allow the domain in the reCAPTCHA Enterprise site key as well.
+- [ ] Allowed-domain Google sign-in works; other domains are rejected.
+- [ ] First-time profile creation completes single-use Cloudflare Turnstile verification.
+- [ ] Initial platform administrator completes language confirmation and dynamic category setup.
+- [ ] Proposal support, facility "I also encountered this", and announcement like reactions update optimistically.
+- [ ] Images upload with client-side WebAssembly WebP compression and render through the Worker Media Gateway.
+- [ ] Realtime discussion updates and notifications function smoothly.
+- [ ] Admin Console provides metrics, user search, member restrictions (mute/ban), and audit logging.
+- [ ] In-app notifications and Web Push notifications arrive reliably.
+- [ ] If Notion is enabled, operations pages are synchronized as expected.
 
-## 5. Production acceptance test
-
-- [ ] Allowed-domain Google sign-in works; another domain is rejected.
-- [ ] Browser API requests go to Cloudflare Worker, not directly to a Supabase Function.
-- [ ] CORS preflight returns `204` with the exact Vercel origin.
-- [ ] An administrator can see the Dashboard and moderation actions after signing in again.
-- [ ] The first platform administrator in `ADMIN_EMAILS` confirms language, then completes proposal and facility category setup; retrying completion does not duplicate setup.
-- [ ] Public, reviewed, and private categories have the correct visibility.
-- [ ] Support goal and days match in-app category settings, while older proposals retain their creation-time snapshot.
-- [ ] Proposal and facility boards both browse and create within dynamic categories; scoped managers can comment, update status, and delete.
-- [ ] New proposals notify only proposal-category managers, new reports notify only facility-category managers whose setting is enabled, and an unassigned platform administrator receives neither.
-- [ ] Images survive reload and remain permission controlled.
-- [ ] Review, status updates, announcements, notifications, and Web Push work.
-- [ ] If Notion is enabled, its operations copy is created; otherwise the app works normally without treating Notion as a failure.
-
-Announce the site only after acceptance passes. Then follow [post-launch operations](operations.md); use [step-by-step troubleshooting](troubleshooting.md) when something fails.
+Next: Follow [post-launch operations](operations.md).

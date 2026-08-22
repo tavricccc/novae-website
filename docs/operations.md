@@ -1,56 +1,74 @@
 # 上線後維運
 
-維運的目標不是每天手動修資料，而是及早發現「登入、資料、圖片、通知、外部同步、部署」哪一層出問題，再在正確邊界處理。
+維運的核心在於建立明確的例行檢查、自動化備份驗證與事故處理邊界，保障校園平台長期穩定運行。
 
-## 每次部署後
+## 每次部署後驗收
 
-1. 確認 backend workflow 先成功，frontend workflow 後成功。
-2. 開正式網址並重新登入。
-3. 讀取提案、公告、通知與設定頁。
-4. 建立一件測試提案，確認圖片、附議、留言與回饋列。
-5. 用管理員完成一次審核或狀態更新。
-6. 檢查 Dashboard 與 Supabase Function logs 沒有新錯誤。
+1. 確認 `Deploy Neon and Cloudflare Backend` 先成功，隨後的 `Deploy Frontend to Vercel` 亦順利完成。
+2. 開啟正式網址重新登入，確認角色與分類載入無誤。
+3. 建立一件測試提案，確認圖片 WebAssembly 壓縮、上傳、附議與討論區功能。
+4. 使用管理員帳號執行一次審核或狀態更新，並在管理主控台查看審計日誌。
+5. 檢查 Cloudflare Worker 與 Neon 資料庫日誌無異常錯誤。
 
-## 固定節奏
+## 例行檢查節奏
 
-| 頻率 | 依序檢查 |
+| 頻率 | 檢查項目 |
 | --- | --- |
-| 每日 | 待審核、未回覆、Dashboard 錯誤、outbox backlog、Functions 失敗 |
-| 每週 | 圖片 pending／刪除工作、Notion reservation、Push delivery 重試、Redis 與資料庫用量 |
-| 每月 | GitHub/Cloudflare/Vercel/Supabase/Firebase/Cloudinary/Upstash/Notion 帳單與 token、備份還原演練 |
-| 每學期 | 網域、管理員、分類、附議人數與天數、回應期限、隱私告知 |
+| 每日 | 檢視待審核／未回覆案件、管理主控台活動指標、Cloudflare Queue (`novae-jobs`) 佇列堆積與錯誤追蹤 |
+| 每週 | 檢視資料保留清理排程狀態、推播送達重試次數、Cloudinary 與 Neon 儲存用量 |
+| 每月 | 核對各雲端平台免費額度（Neon, Cloudflare, Firebase, Cloudinary, Vercel）與 Token 有效期限、確認每日加密備份產物正常產出 |
+| 每學期 | 檢視校內允許網域、總管理員名單、分類規則、附議門檻與資料保留天數設定 |
 
-## 事故處理五步
+## 自動化資料庫備份與災難復原
 
-1. **界定範圍**：全部使用者還是單一帳號？全部分類還是單一分類？讀取還是寫入？
-2. **找第一個失敗邊界**：瀏覽器、Cloudflare Worker、Firebase、Edge Function、Postgres、Cloudinary、Notion、Upstash 或 Vercel。
-3. **保留證據**：時間、request ID、HTTP status、第一個錯誤、相關 workflow run。
-4. **降低影響**：暫停有問題的發布或管理操作，不要直接關閉驗證或 RLS。
-5. **修正與驗收**：只改出錯層，重新跑完整使用流程，記錄原因與防止再發方式。
+### 1. 自動化加密備份（Daily Backup）
+專案內建 `.github/workflows/backup-database.yml` 工作流程：
+- 每日定時檢查最新備份時間，超過 72 小時即自動觸發。
+- 使用 `pg_dump` 導出完整 PostgreSQL 邏輯備份。
+- 採用 **`age` 非對稱加密工具** 對導出資料進行高強度加密，明文資料絕不離開 GitHub Runner。
+- 校驗 Checksum 後上傳為 GitHub Artifacts，並自動保留最新的 2 份備份。
 
-## 資料與備份
+#### 設定 `BACKUP_AGE_RECIPIENT` 加密公鑰
+1. 在本機安裝 `age`（macOS: `brew install age`、Windows: `winget install FiloSottile.age`、Linux: `apt install age`）。
+2. 執行指令產生公私鑰對：
+   ```bash
+   age-keygen -o key.txt
+   ```
+3. 檔案內容包含：
+   - 公鑰（Public key / Recipient）：形如 `age1...`
+   - 私鑰（Secret key）：形如 `AGE-SECRET-KEY-1...`
+4. 將公鑰字串（`age1...`）填入 GitHub `production` Environment Variables（或 Secrets）的 `BACKUP_AGE_RECIPIENT`。
+5. 將 `key.txt` 私鑰檔案安全離線保存於密碼管理器中，切勿提交至程式庫。
+6. 日後需解密下載的備份 Artifact 時，執行：
+   ```bash
+   age --decrypt -i key.txt novae.dump.age > novae.dump
+   ```
 
-- Supabase Postgres 是主要資料來源；Notion 只是營運副本。
-- 使用 Supabase 的正式備份／PITR 能力時，先確認方案與保留期。
-- 圖片在 Cloudinary；資料庫保存受控識別與狀態。復原要一起驗證兩邊的一致性。
-- 刪除經 deletion job 處理；不要手動刪 Cloudinary 後留下資料庫引用。
-- 保留期清理會在刪除提案／設備時一併排入既有 Notion 頁面的刪除標記，不會對使用者產生一般刪除通知；應從 maintenance details 與 outbox 狀態確認完成。
-- Push delivery 暫時失敗時應保留 payload、增加 attempts 並設定下次執行時間；成功後狀態為 sent 且 payload 清空。不要手動把 failed row 標成 sent，先依 `error_trace_id` 查 FCM／worker log。
-- Notion mapping 若短暫顯示 `pending:<uuid>`，先確認 worker 是否仍在重試；超過 reservation 時限會由後續工作接手並以 `Novae ID` 找回遠端頁面，不要人工再建一頁。
-- 已部署 migration 不回改；schema 變更新增後續 migration。
+### 2. 受保護的手動災難重設（Disaster Reset）
+專案提供手動緊急重設工作流程 `.github/workflows/reset-database-and-cloudinary.yml`：
+- 具備防誤觸機制，必須在 `workflow_dispatch` 輸入精確的確認字串 `RESET_DATABASE_AND_CLOUDINARY` 才會執行。
+- 清空資料表、重新按版本順序套用所有 Neon migrations。
+- 自動修復最低權限 `novae_runtime` 資料庫角色與 Hyperdrive 連線。
+- 清除 Cloudinary 資源並重新配置 `srp-secure-images` 上傳 preset。
 
-## 變更分類前
+## 事故處理五步驟
 
-1. 在「系統設定 → 分類與處理流程」確認分類是否已有提案、報修或管理員指派。
-2. 已建立的 ID、閱讀範圍與作者顯示不能修改；需要不同隱私規則時新增分類。刪除舊分類會永久刪除其中所有案件與關聯資料，不是封存，操作前必須確認資料確實不需保留。
-3. 留言、附議與期限只影響新提案，先記錄生效時間。
-4. 功能開關與提案／設備分類的新增、修改、刪除草稿會在同一交易儲存；儲存前確認提案／設備是否仍應啟用，以及每個已啟用功能都有可用分類。若畫面回報失敗，整批都不應生效，重新整理確認後再重試。
-5. 修改後逐分類建立多件提案與設備測試案件，確認建立、列表篩選、留言、狀態與刪除都維持分類範圍。
-6. 確認新提案只通知提案分類負責人，新報修只通知已開啟通知的設備分類負責人；未指派的平台總管理員不得收到。
-7. 在「人員與管理權限」確認每個分類的既有負責人、多人指派、修改通知設定與撤銷都正確；查找可用姓名、Email 或 UID。
+1. **界定影響範圍**：全體成員或特定帳號？全部分類或特定分類？讀取受阻或寫入失敗？
+2. **定位失敗邊界**：
+   - 瀏覽器端 / CSP Nonce
+   - Cloudflare Turnstile 人機驗證
+   - Firebase Authentication / App Check
+   - Cloudflare Worker API 核心 / Hyperdrive 連線
+   - Neon PostgreSQL 資料庫
+   - Cloudflare Queues (`novae-jobs`) 佇列
+   - Cloudinary / Notion 外部服務
+3. **保留診斷證據**：記錄精確時間點、`requestId`、`error_trace_id`、HTTP 狀態碼與相關 Actions 執行日誌。
+4. **降低損害**：暫停異常操作或問題發布，**切勿直接關閉身分驗證或資料庫角色安全邊界**。
+5. **修復與驗收**：於正確層級修復問題，進行全流程測試驗證，並記錄原因與防範措施。
 
-## 憑證輪替
+## 憑證輪替指引
 
-每次只換一組服務，依「建立新值 → 更新 production secret → 部署 → 驗收 → 撤銷舊值」進行。若同時輪替全部服務，發生錯誤時很難定位。
+每次只輪替一項服務憑證，遵循以下順序：
+`產生新憑證 → 更新 GitHub production secret → 重新執行對應部署流程 → 完整功能驗收 → 撤銷舊憑證`。切勿同時輪替所有服務，以免難以定位配置問題。
 
-遇到具體症狀，接著使用[一步一步排錯](troubleshooting.md)。
+若遇具體錯誤症狀，請參閱[一步一步排錯](troubleshooting.md)。

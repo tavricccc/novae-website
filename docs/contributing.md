@@ -1,10 +1,10 @@
 # 貢獻指南
 
-本頁是唯一以本機開發為主的文件。只想部署 Novae 的人不需要執行這些指令，請從[部署準備與服務設定](quick-start.md)開始。
+本頁為開發者本機開發與貢獻指引。若您只是要部署 Novae，請直接參考[部署準備與服務設定](quick-start.md)。
 
-## 1. 準備本機
+## 1. 準備本機環境
 
-需要 Git、Node.js 24 與 npm。涉及 Edge Function 型別時，專案依賴會提供 Deno；涉及本機 Supabase 才需要 Docker。
+需要 Git、Node.js 24 與 npm。若需執行本機資料庫與整合測試，需要 Docker（Windows 使用 WSL 2 + Docker Desktop）。
 
 ```bash
 git clone https://github.com/<your-account>/novae.git
@@ -12,121 +12,69 @@ cd novae
 npm ci
 ```
 
-只有要連接開發服務時才複製 `.env.example` 為未追蹤的 `.env`。不得提交真實值。
+只有在需要連接自訂開發環境時才複製 `.env.example` 為 `.env`。切勿提交任何真實密鑰。
 
-## 2. 修改前
+## 2. 修改前須知
 
-1. 讀主 repository 的 `AGENTS.md` 與 `structure.md`。
-2. 確認工作樹已有的變更，不覆蓋無關內容。
-3. 依 `app → components → hooks → services/lib` 邊界修改，不另起平行 API。
-4. 新增、刪除、搬移或拆分檔案時同步更新 `structure.md`。
+1. 閱讀主程式庫的 `AGENTS.md`、`PRODUCT.md` 與 `structure.md`。
+2. 遵守 `app → components → hooks → services/lib` 架構分層，不隨意建立平行 API。
+3. 新增、刪除或拆分檔案時同步更新 `structure.md`。
 
-## 3. 本機執行
+## 3. 本機執行與測試環境
 
 ```bash
 npm run dev
 ```
 
-需要完整且不連正式服務的互動測試環境時，使用單一入口：
+啟動完整隔離的本機測試環境（含本地 PostgreSQL、Firebase Auth Emulator、Cloudflare Worker 代理與 Next.js）：
 
 ```bash
 npm run test:env
 ```
 
-它會啟動隔離的 Supabase、Edge Functions、Firebase Auth Emulator、Cloudflare gateway 與 Next.js，套用 `supabase/seed.sql` 的開發分類、帳號與範例內容，並在登入、custom claims、平台總管理員與 Setup 前置檢查成功後顯示 Ready。可在 Auth Emulator 建立任意 `@integration.invalid` 測試帳號；按 `Ctrl+C` 會關閉整組服務。本機 emulator debug log 是產物，不應提交。自動整合驗證另會啟動隔離的 Upstash 與外部服務收件器，用來檢查 FCM topic／token 推播、Cloudinary 刪除與保留期清理，不連正式 provider。新增高頻讀取時優先考慮併入 `getSessionBootstrap` 或前端快取，避免冷啟動再多一次 Edge invocation。
-
-只有要驗證 migration 與本機 Supabase 時才使用：
+管理本地資料庫容器與遷移：
 
 ```bash
-npm run db:start
-npm run db:reset:local
-npm run db:lint:local
+npm run db:start        # 啟動本地 PostgreSQL 容器
+npm run db:migrate      # 套用全部 Checksummed 遷移
+npm run db:reset:local  # 重設本地資料庫並重新套用遷移
 ```
 
-## 4. 驗證
+## 4. 驗證指令
 
 ```bash
 npm run verify:local
 ```
 
-這個入口會依序執行型別與未使用宣告檢查、雙語與 UI primitive 規則、lint、Next production build、建置體積預算、Worker／Edge 型別、Vitest 單元測試、架構測試與完整 npm audit。建置預算目前限制 production 字型最多 40 個／2 MiB、JavaScript 2.5 MiB、CSS 600 KiB；若確實需要調高，變更必須說明產品理由與量測結果，不可直接移除門檻。
+該指令會依序執行：
+- TypeScript 型別檢查與未宣告變數檢查
+- UI Primitives 與雙語（i18n）規則檢查
+- ESLint 語法檢查
+- Next.js 16 Production Build 與 Bundle Size 體積預算校驗
+- Cloudflare Worker 型別與邊界驗證
+- Vitest 單元測試與架構測試
+- npm audit 安全稽核
 
-若修改後端 action、權限、RPC、RLS、migration、Edge Function 或 worker：
+修改後端 Action、權限、資料庫遷移或 Worker 邏輯後執行整合驗證：
 
 ```bash
 npm run verify:integration
 ```
 
-大型變更或合併前執行：
+大型變更或發送 PR 前執行完整驗證：
 
 ```bash
 npm run verify:all
 ```
 
-權限、分類、提案、設備、公告或功能開關的使用者流程，可單獨執行真實 Chromium E2E：
+執行 Chromium E2E 瀏覽器端對端測試：
 
 ```bash
-npm run test:e2e:install
-npm run test:e2e
+npm run test:e2e:install  # 首次安裝 Playwright 瀏覽器
+npm run test:e2e          # 執行 E2E 測試
 ```
 
-第一次只需安裝一次瀏覽器。E2E 會自動重建隔離環境，透過真實 UI 完成 Setup、建立多個測試帳號與兩組分類，並在桌面及手機 viewport 驗證按鈕顯示／隱藏、實際點擊結果、跨分類隔離、權限撤銷／恢復、分類生命週期與提案／設備四種開關組合。測試登入橋接只允許開發模式、loopback Auth Emulator 與 `@integration.invalid` 帳號，production build 不會開放。
-
-多人、多分類、多權限與完整內容流程的壓力矩陣使用：
-
-```bash
-npm run verify:stress
-```
-
-預設會從實際 runtime catalog 展開多名使用者與重疊權限，涵蓋每個提案／設備分類、圖片、巢狀留言、附議／我也遇到、通知、狀態、多人管理與分類新增／刪除，不以固定分類數或單一帳號代替壓測。
-
-PR CI 會自動執行本機靜態／單元、後端整合與真實瀏覽器 E2E 三層驗證。Windows 直接在 PowerShell 執行 npm 指令即可；整合與 E2E 環境會自動轉入 WSL。Windows 需要 WSL 2、Docker，以及 WSL `PATH` 內的 Supabase CLI 與 Deno；Linux 與 CI 不需要 WSL。
-
-整合驗證會重建隔離的本地 Supabase、套用全部 migration、執行 database lint，再檢查 action、權限、RLS、冪等與 worker lifecycle。外部服務測試器可注入 FCM 暫時失敗，必須實際斷言 delivery 留在持久化佇列、退避後重試成功且 payload 清除。`.env.local` 可省略；即使存在，Supabase 網址與金鑰也會強制換成本地值，不會寫入遠端資料。
-
-### 何時補整合測試
-
-| 修改 | 必須補的案例 |
-|---|---|
-| 新 backend action | 成功行為與相關拒絕行為；漏掉 action 時 coverage guard 會失敗 |
-| 新角色／權限 | allowed、denied；有 scope 時再測 scope 內與 scope 外 |
-| 權限授予／撤銷 | grant 後允許、revoke 後立即拒絕讀寫、其他 scope 不受影響、負責人列表同步移除 |
-| RPC／schema／migration | 對真實本地資料庫的結果 assertion |
-| RLS | 依適用範圍測 anon、authenticated、service role |
-| 冪等寫入 | 缺少 request ID、首次執行、相同 ID replay |
-| worker／outbox／刪除工作 | claim、完成或失敗、retry／deduplication |
-| hook／瀏覽器儲存／元件互動 | 在 `tests/unit/` 補 Vitest 成功與失敗情境 |
-| 權限型 UI／功能開關 | 以表格化矩陣測 visible、hidden、disabled 與 click／emit；至少涵蓋一般人、owner、正確 scope、錯誤 scope、平台管理員及所有開關組合 |
-| 純前端版面 | 通常不需補整合測試，跑 `verify:local` |
-
-不得只加入沒有 assertion 的 action 呼叫來通過 coverage guard。新增案例放進 `tests/integration/` 最接近的領域檔案；若建立新領域檔，也要加入 `action-coverage.test.ts` 的掃描清單。
-
-權限判斷不得只在元件內複製。角色／permission／分類 scope 使用 `src/lib/session-access.ts`，提案／設備開關與路由使用 `src/lib/feature-access.ts`；元件行為測試與後端整合測試必須同時保護 UI 呈現與真正授權，避免只藏按鈕卻仍可呼叫 API，或後端已拒絕但畫面仍提供操作。
-
-大型測試檔使用薄入口依領域匯入案例，共用帳號、fixture、page object 與 emulator helper 集中在同層 `support`／`helpers`。單一檔案接近 400 行時檢查責任，不能讓不同權限領域、worker、RLS 與 UI 流程繼續堆進同一支數千行腳本。
-
-## 5. 共用 UI 規範
-
-完整的 token、primitive、響應式、動效契約與新頁面清單見 [UI 設計系統](ui-design-system.md)。本節只保留貢獻時必須遵守的邊界。
-
-主程式的視覺 primitive 以 `src/app/globals.css`、`src/styles/motion.css`、`src/components/ui/` 與 `src/components/motion/` 為單一來源。提案、公告、設備、通知、設定與管理頁可以保留資料欄位和狀態差異，但不得各自維護近似的 viewport、button、card、list、dropdown、shadow、motion 或 control。
-
-| 需求 | 規範入口 |
-|---|---|
-| 頁面左右留白、safe area、內容最大寬度 | `AppShell` 與 `globals.css` 的 viewport tokens |
-| 一般、icon、toolbar、主要與次要動作 | `components/ui/button.tsx` 的既有 variant／size |
-| 卡片、欄位、浮動層與對話框 | `Card`、`Input`／`Textarea`、Radix `Dialog`／`Sheet`／`DropdownMenu` |
-| 頁面 Tabs、互斥選項與分段控制 | `Tabs`／`LiquidTabs`；選取狀態維持單一資料來源 |
-| 狀態與非同步回饋 | `StatusBadge`、`PageState`、Sonner toast、`components/motion/` |
-| Markdown 與留言 | 共用 composer fields、content renderer 與 discussion surface |
-
-手機主要控制至少 44×44px，並保留 safe area 與底部導覽空間；hover 只允許在 `(hover: hover) and (pointer: fine)` 中啟用，觸控回饋使用 active state。詳情正文、actions 與討論使用單一內容流；留言保持一個連續區域，composer 放在實際回覆位置，不建立留言內層卡片或第二個捲動容器。
-
-陰影只有 control、card、floating 三階，分別使用 `--shadow-control`、`--shadow-card`、`--shadow-floating`。不得加入 arbitrary shadow、在 route view 自行加頁面級左右 padding、用固定 `left-*`／`right-*` 模擬 safe area，或手組另一個近似卡片。
-
-相同結構若只差字串、icon、狀態、children 或 callback，先擴充既有 primitive 的 props。只有至少兩個合理使用點、且現有 primitive 無法清楚表達時才新增；新增後必須同步 `structure.md`、架構測試與本頁雙語文件。`npm run verify:local` 內的 `check:ui` 會阻止已知的平行樣式重新出現。
-
-## 6. Config 變更
+## 5. 設定變更與程式碼生成
 
 修改 `config/rate-limits.config.json` 或 `config/api-errors.config.json` 後執行：
 
@@ -134,12 +82,10 @@ PR CI 會自動執行本機靜態／單元、後端整合與真實瀏覽器 E2E 
 npm run generate:all
 ```
 
-提交原始 JSON 與所有產生檔。分類是 migration 與受控 backend action 管理的 runtime 資料，不再有分類 codegen。API error code 必須同時符合前端、Cloudflare 與 Edge；精確業務限流由 JSON 產生給 Supabase，Cloudflare 原生 burst limit 則由 `wrangler.toml` 維護。不要手改 `generated/`。
+提交原始 JSON 與自動產生的對應型別檔。分類為執行期動態資料，不再依賴 codegen。
 
-語系 catalog 依 `src/i18n/messages/<locale>/<domain>.ts` 拆分；檔名就是 key 的第一段 domain。新增或搬移 key 時必須同步繁中與英文，key 使用短而穩定的語意名稱，不用完整句子、hash 或中文原文作 key。
+## 6. Pull Request 規範
 
-背景錯誤若需落地，只保存原生 `uuid` 型別的 `error_trace_id`，完整內容寫入 log。schema 變更以新 migration 搬移並移除舊欄位／RPC overload，不修改已部署 migration，也不保留雙格式相容層。
-
-## 7. Pull request
-
-PR 應說明問題、修改範圍、驗證結果、UI／資料／權限影響。schema 變更新增 migration，不修改已部署 migration；安全問題依 `SECURITY.md` 私下回報。
+- PR 應詳細說明問題背景、修改範圍、驗證結果與 UI/權限影響。
+- 資料庫結構變更必須新增全新的 migration 檔案，不可修改已發布的 migration。
+- 安全性漏洞請依 `SECURITY.md` 管道私下通報。

@@ -1,68 +1,70 @@
 # User workflows
 
-Desktop uses the sidebar and multi-column lists; mobile uses floating bottom navigation, with each content list providing its own create action. Announcements, notifications, and settings are separate pages.
+Novae provides a consistent and responsive experience across devices. Desktop uses a sidebar and multi-column layout; mobile uses an ergonomic floating bottom dock aligned with device safe areas.
 
-## Sign in and browse
+## 1. Sign In and Authentication
 
-1. Sign in with a Google account in the allowed school domain. The control shows a busy spinner and stays disabled while sign-in is in progress.
-2. Google always shows the account picker. Closing it, a blocked popup, or an in-app browser shows an error only; production does not fall back to a full-page Firebase redirect.
-3. After role and category bootstrap, the app leaves the sign-in page for the default proposal category; mobile bottom navigation and the desktop sidebar appear only then.
-4. Browse a proposal category or My proposals, then search, filter, and sort cards before opening a detail page. Desktop details use a flat content/comments split without an outer card; mobile presents body, action summary, discussion, and comments in one continuous feed.
-5. Pending-review and private proposals remain visible only to their author and administrators.
+1. Open your campus Novae deployment URL.
+2. Click **Sign in with Google**; the system invokes Google Identity Services for account selection within the permitted school domain.
+3. On first-time profile creation, an invisible **Cloudflare Turnstile** verification runs in the background for bot protection.
+4. Upon authentication, user roles and category catalogs are loaded, redirecting to the default board.
 
-On an unconfigured installation, the first platform administrator confirms language, chooses whether proposals and facility reports are enabled, and then creates categories only for the enabled features. The browser or operating system's first preferred language is the default. If completion is interrupted, refresh or retry; the app recognizes setup that already committed.
+Accounts outside the permitted domain are rejected by the backend.
 
-## Create a proposal
+## 2. Browse and Search Proposals
 
-1. Open Proposals and choose a category from the page title.
-2. Select New proposal on that category page.
-3. Add a title of at most 30 characters, up to 1,000 visible content characters, and optional images.
-4. Publish and wait for the inline busy state plus bottom feedback result.
+1. Switch between categories using the top/sidebar navigation, or open "My Proposals".
+2. Use `LiquidTabs` to filter between "Active" and "Closed" records, or search by keyword.
+3. Click a card to view details: desktop displays a clean two-column layout; mobile presents body, milestone timeline, and threaded comments in one continuous feed.
+4. Private rights cases and pending-review proposals remain strictly visible only to their author and assigned managers.
 
-Category policy determines whether the proposal is immediately school-readable, awaits review, or stays owner/admin-only; whether the author is visible; and whether support is required.
+## 3. Create a Proposal
 
-## Support and comments
+1. Open Proposals and click "New Proposal".
+2. Select a category, enter a title (max 30 characters), and write content (Markdown supported, max 1,000 visible characters).
+3. Optionally attach photos; client-side WebAssembly (`@jsquash/webp`) automatically encodes images to WebP before signed upload.
+4. Click "Publish"; the button displays a spinner and transitions to a checkmark confirmation.
 
-Support-enabled categories show the configured goal and remaining days. Meeting `support.goal` succeeds early; missing it after `support.deadlineDays` produces the did-not-pass status. Comment visibility follows category access, and reviewed categories do not open school-wide comments before approval.
+## 4. Support, Gestures, and Comments
 
-Proposal and facility details place progress, actions, and dates in one quiet summary area. Dates form a horizontal milestone timeline on desktop and a vertical timeline on mobile; announcement details do not show this timeline.
+- **Proposal Support**: Click the support button in support-enabled categories. The action applies optimistic updates with rollback protection.
+- **Facility "I Also Encountered This"**: Click the affected counter to report experiencing the same facility issue.
+- **Announcement Likes**: Click the heart icon on announcements.
+- **Threaded Discussions**:
+  - The comment composer docks above the mobile bottom navigation and aligns avatars with submit controls.
+  - Replying to a comment displays the target author name and excerpt quote.
+  - When comments are disabled by policy or completion, an unavailable notice is displayed.
 
-Comments support replies and plain-text input only. Markdown is not rendered and there is no preview mode. Each comment accepts at most 70 visible characters and may still include one image under the current `rate-limits.config.json` setting. On mobile, comments share the page scroll with the content and a divider replaces repeated discussion headings, count badges, and the large empty state. The composer stays docked above bottom navigation without covering the last comment. Comment notifications open the discussion and center the referenced comment.
-
-When comments are unavailable, the normal composer remains visible with an unavailable placeholder, while typing, image selection, and submission are disabled. Existing comments remain readable.
-
-## Status meanings
+## 5. Understanding Statuses
 
 | Status | Meaning |
 | --- | --- |
-| Pending review | An administrator has not decided publication |
-| Review rejected | Publication was rejected; author/admin retain access |
-| Awaiting response | The proposal entered the response stage but has no response yet |
-| Processing | Work has started |
-| Did not pass | The support window ended below its goal |
-| Completed | Closed with an outcome |
-| Infeasible | Closed with constraints or alternatives explained |
+| Pending review | Administrator has not yet approved public release |
+| Review rejected | Publication was rejected; author retains access with reason |
+| Awaiting response | Support goal met or direct processing awaiting first response |
+| Processing | Management has begun working on the issue |
+| Did not pass | Support window closed before reaching threshold |
+| Completed | Closed with a concrete outcome description |
+| Infeasible | Closed with constraints or alternative directions explained |
 
-## Facility reports
+## 6. Appearance and Settings
 
-The facility board, like proposals, starts with a category. The selection remains in the URL and carries into creation. Reports can include content and images; their detail page supports “I have this issue too” and status tracking. Mobile shows the same discussion shape with a “comments are currently unavailable” disabled composer, but facilities do not currently have comment functionality; desktop shows no comment column. Only a manager assigned to that facility category or a platform administrator may manage the report, and each assignment controls whether it receives new-report notices.
+Under **Settings**:
+- **Accent Themes**: Select custom accent palettes (Slate, Indigo, Emerald, Rose, etc.) with seamless light/dark mode transitions.
+- **Language**: Switch between Traditional Chinese and English.
+- **PWA Installation**: Install the app to the home screen or desktop application list with platform-specific instructions.
+- **Push Notifications**: Enable or disable Web Push notifications with a 7-day heartbeat throttle to manage device tokens.
 
-## Announcements, notifications, and settings
-
-Announcements have separate list and detail pages with likes and comments. New announcements use the same 30-character title and 1,000-visible-character content limits. The notification page groups items inside one card and synchronizes read state; it does not show per-item time or a per-item mark-read button. Settings controls Push and app preferences. Language uses a dropdown that shows the active locale and all available options, so future locales join the same list. Sign-out is one standalone action.
-
-### Notification recipients
+## 7. Notification Routing
 
 | Event | Recipients |
 | --- | --- |
-| New announcement | All signed-in school users eligible for broadcast notifications |
-| Announcement comment | Parent-comment author for a reply, otherwise announcement author; actor excluded |
-| New proposal | Explicit managers of that proposal category, excluding the author; platform administrators are not implicit recipients |
-| Proposal comment | Parent-comment author for a reply, otherwise proposal author; actor excluded |
-| Proposal status change | Proposal author and current supporters; actor excluded |
-| Support goal met | Proposal author and all supporters |
-| Proposal deleted | Proposal author and the pre-deletion supporter snapshot; actor excluded |
-| New facility report | Managers in that facility category with new-report notices enabled, excluding the author; platform administrators are not implicit recipients |
-| Facility status change | Report author and everyone who marked “I have this issue too” |
+| New Announcement | All eligible campus users |
+| Proposal / Announcement Comment | Parent comment author for replies, or content author (excluding actor) |
+| Proposal Status Change | Author and all active supporters |
+| Support Goal Met | Author and all active supporters |
+| Facility Status Change | Author and all affected reporters |
+| New Proposal Submission | Explicitly assigned managers for that category |
+| New Facility Report | Assigned managers with report notices enabled |
 
-In-app and Web Push delivery share this recipient logic. Disabling device notifications stops Push only; it does not alter authorization or storage for in-app notifications.
+If you experience unexpected behavior, report the issue to your administrator and consult [troubleshooting](troubleshooting.md).

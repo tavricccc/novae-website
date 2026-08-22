@@ -13,9 +13,8 @@ Cloudinary 保存 Novae 的提案、公告、留言與頭像圖片。前端先�
 | Cloud name | `CLOUDINARY_CLOUD_NAME` |
 | API key | `CLOUDINARY_API_KEY` |
 | API secret | `CLOUDINARY_API_SECRET` |
-| 同一 API secret | `CLOUDINARY_WEBHOOK_SECRET` |
 
-目前程式的標準 Cloudinary HMAC callback 驗證使用 API secret；不要另外發明一個隨機 webhook secret，否則 callback 會驗證失敗。
+目前程式的標準 Cloudinary HMAC callback 驗證直接使用 `CLOUDINARY_API_SECRET`；不需要也不應另外建立名為 `CLOUDINARY_WEBHOOK_SECRET` 的變數。
 
 ## 3. 不要建立重複的全域 webhook
 
@@ -31,9 +30,8 @@ Novae 上傳流程會在簽名請求中指定 callback。除非你已閱讀並�
 
 ## 完成檢查
 
-- [ ] 四個值來自同一 Product Environment。
+- [ ] 三個值來自同一 Product Environment。
 - [ ] API secret 沒有進入前端或 Git commit。
-- [ ] webhook secret 與 API secret 相同。
 - [ ] 沒有額外建立重複的全域 webhook。
 - [ ] 後端 workflow 健康檢查成功，`srp-secure-images` preset 已由程式建立或更新。
 

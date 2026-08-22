@@ -1,60 +1,47 @@
 # 安全與隱私
 
-Novae 的安全模型是假設瀏覽器、使用者輸入與公開網路都不可信。登入只是第一關；每個 action 與資料讀寫仍由後端與資料庫重新授權。
+Novae 採用縱深防禦（Defense-in-Depth）安全模型：假設瀏覽器客戶端、使用者輸入與公開網路皆不可完全信任。身分驗證只是第一道防線，所有業務操作、資料讀寫與媒體傳輸皆由後端與資料庫獨立進行多層授權與約束。
 
-## 上線前逐步確認
+## 上線前安全檢查
 
-1. 只允許學校控制的 Google 網域，且 `NEXT_PUBLIC_ALLOWED_DOMAIN` 與 `ALLOWED_DOMAIN` 相同。
-2. `ADMIN_EMAILS` 只列出確實需要管理權限的人。
-3. 所有敏感值只在 GitHub `production` Environment secrets 與供應商 secret store。
-4. service role、service account、API secret、DB password、token 沒有進瀏覽器或 Git。
-5. Firebase authorized domains 只有實際使用的網域。
-6. 正式站驗收完成後啟用 App Check。
-7. 逐分類確認公開、審核後公開與私密案件的讀取、附件與留言權限。
-8. 學校已提供隱私告知、內容申訴、資料保留與刪除窗口。
+1. **網域鎖定**：嚴格限定學校控制的 Google Workspace 網域，確認 `NEXT_PUBLIC_ALLOWED_DOMAIN` 與 `ALLOWED_DOMAIN` 相同。
+2. **最高管理員邊界**：`ADMIN_EMAILS` 只列出實際需要全站管理權限的人員。
+3. **金鑰隔離**：所有機密憑證（資料庫密碼、Service Account JSON、API Secret）只保存在 GitHub `production` Environment secrets 與執行期容器環境中，絕不出現在瀏覽器或 Git 歷史。
+4. **人機驗證與防護**：
+   - 啟用 **Cloudflare Turnstile** 阻擋自動化註冊與爬蟲。
+   - 啟用 **Firebase App Check**（reCAPTCHA Enterprise）保護公開 API 端點。
+5. **分類權限核對**：逐一確認公開、審核後公開與私密案件的閱讀範圍、附件與留言授權。
+6. **合規與告知**：校方已提供完整的個人資料保護告知、內容申訴機制與資料保留政策。
 
-## 信任邊界
+## 系統信任邊界
 
-| 邊界 | 控制 |
+| 邊界層級 | 安全控制機制 |
 | --- | --- |
-| 瀏覽器 | 只持有公開 config；內容清理、依部署 origin 產生的精確 CSP、無敏感憑證 |
-| Firebase | token signature、project/audience、verified Email、允許網域 |
-| Cloudflare Worker | 固定公開入口、CORS、Firebase token、webhook 簽章、原生 Rate Limiting bindings |
-| Edge Functions | 私密隨機名稱、origin secret、action allowlist、角色、schema、冪等與 request ID |
-| Postgres | RLS、私有 schema、RPC、constraints、交易 |
-| Cloudinary | 簽名上傳、受控 preset、簽章 callback、短效簽名讀取 |
-| 第三方服務 | 專用 integration、最小權限、失敗隔離與 outbox |
-| GitHub Actions | Environment secrets、分支／review 保護、固定工具版本 |
+| 瀏覽器客戶端 | 嚴格 Nonce-based CSP、WebAssembly (`@jsquash/webp`) 安全編碼、無敏感金鑰 |
+| 人機防護 | Cloudflare Turnstile 隱形驗證（單次 Token 消耗）、Firebase App Check JWT 驗證 |
+| 驗證與身分 | Firebase Google OAuth (GIS)、允許網域比對、JWT Signature 校驗 |
+| 後端 API (Cloudflare Worker) | 嚴格 CORS Origin 比對、原生速率限制、Durable Objects 業務配額、Action 註冊表分派 |
+| 資料庫連線 (Hyperdrive) | Cloudflare Hyperdrive 憑證隔離與查詢加速 |
+| 資料庫 (Neon PostgreSQL) | 最低權限 `novae_runtime` 資料庫角色（無 DDL 結構修改權限）、Functions 邊界、交易原子性、單調版本戳記 |
+| 媒體儲存 (Cloudinary) | 後端簽章上傳、受控 Upload Preset、Worker Media Gateway 短效 HMAC 簽章讀取 |
+| 非同步佇列 (Cloudflare Queues) | `novae-jobs` 任務租約、指數退避重試、失敗隔離與資料生命週期清理 |
+| 備份與災難復原 | 每日 `pg_dump` 邏輯導出經 `age` 非對稱加密後保存至 GitHub Artifacts |
 
-## 分類與隱私
+## 分類與隱私範圍
 
-- `school` 代表允許網域的已登入者可讀，不等於公開網際網路。
-- `reviewed-school` 在審核前只供作者與管理員讀，通過後才校內可讀。
-- `owner-admin` 只供作者與管理員讀；附件與留言也維持私密。
-- `authorVisible: false` 只隱藏一般內容畫面的作者，不代表系統完全不保存作者關聯。
+- `school`（校內可讀）：僅限同校已登入使用者，非公開網際網路可直接爬取。
+- `reviewed-school`（審核後校內可讀）：審核前僅作者與管理員可見，通過後才進入校內列表。
+- `owner-admin`（作者與管理員）：僅供作者與該分類指派之負責人處理；附件與討論維持私密。
+- `authorVisible: false`：僅在前端隱藏作者名稱與頭像，後端仍保留權限校驗與案件處理關聯。
 
-`ADMIN_EMAILS` 是平台總管理員的唯一來源；程式內沒有也不應新增授予、撤銷或提升平台總管理員的入口。提案與設備分類負責人是另一套範圍式指派，權限由 Edge 與 RLS 依分類重新驗證，不能用前端顯示或全域 permission 取代。
+平台總管理員名單僅由後端環境變數 `ADMIN_EMAILS` 決定；分類負責人則透過範圍指派，權限完全由後端與資料庫函數校驗，前端條件不承擔安全責任。
 
-## 濫用與成本邊界
+## 濫用防護與成員互動限制
 
-- 公開 action、登入同步與 Cloudinary webhook 先由 Cloudflare 原生 binding 阻擋短時間刷取；登入後主要依 UID 計數，入口 IP 門檻刻意較高以免整校共用 NAT 時互相誤傷。
-- 一般 JSON 與 webhook request body 上限為 64 KB，避免大型無效內容消耗解析記憶體與執行時間。
-- Supabase 透過 Upstash 精確限制建立、留言、附議、按讚、「我也遇到」、管理、刪除、偏好與 Push 等業務操作；Postgres 關係表與 transaction counter 仍是正式數量來源。
-- 每位使用者最多保留 10 個 Push 裝置；既有裝置可以更新 token，但新裝置不能無限增加通知 fan-out。
-- `localStorage`／`sessionStorage` 只保存非敏感偏好、快取與裝置識別，且所有讀寫都允許安全失敗；授權不能依賴瀏覽器 storage。
-- Push payload 只在待送與可重試期間保留，成功後清空；worker 以租約避免同一 delivery 被同時處理。
-- Realtime 只允許訂閱經 RLS 授權的私有 Broadcast topics，登入者不能直接讀取通知與即時事件私有表。
-- 新提案與新設備回報使用個人通知，只送給該分類明確指派且符合通知設定的負責人；平台總管理員不因角色自動收件，避免無關個資擴散。
-- Cloudinary preset 在供應商端強制 authenticated WebP、800 KB 與最長邊 2000 px；webhook 仍會再次驗證結果並排程刪除不合規資源。
+- **多層速率限制**：Cloudflare 原生 Limiter 阻擋短時間高頻攻擊，Durable Objects 依使用者 UID 限制每日提案、留言、附議等業務額度。
+- **管理員互動限制 (Interaction Restrictions)**：針對濫用行為，管理員可施加限制提案、限制留言、限制按讚/附議或全面凍結帳號，所有操作即時生效並記錄至審計日誌。
+- **資料生命週期排程 (Data Retention Lifecycle)**：自動定期清除已結案逾期案件（預設 180 天）、過期審計日誌、未活躍個資與無效推播 Token。
 
-## Secret 處理
+## 漏洞通報
 
-部署者只在 fork 的 GitHub `production` Environment 維護 secrets，Action 自動同步供應商執行值。日誌遮罩不是萬無一失；不要 `echo` 結構化 service account JSON。輪替時建立新值、更新 GitHub、部署與驗收後再撤銷舊值。人員交接時同時檢查 GitHub、Cloudflare、Vercel、Supabase、Firebase、Cloudinary、Notion、Upstash 權限。
-
-## 已知責任
-
-開源程式不會替學校自動完成個資法評估、資料處理協議、事件通報、備份政策或內容治理。部署單位必須依所在法域、學生年齡與校內制度決定保留期限、管理責任與告知內容。
-
-## 回報漏洞
-
-不要在公開 issue 貼可利用細節或真實資料。請依主 repository 的 `SECURITY.md` 私下回報，附版本、影響、重現條件與建議修法；移除所有學生資料與憑證。
+請勿在公開 Issue 發表可利用的漏洞細節或真實使用者資料。請依專案 `SECURITY.md` 進行負責任的私下通報。

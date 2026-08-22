@@ -1,79 +1,73 @@
 # Categories and product rules
 
-Proposal and facility-report categories are runtime data created after installation, not hard-coded repository JSON. After the first deployment, the initial platform administrator listed in `ADMIN_EMAILS` signs in and completes guided setup. Later changes live under **My → System settings**.
+Proposal and facility-report categories are runtime data created after installation, not hard-coded repository JSON. After the initial deployment, the platform administrator listed in `ADMIN_EMAILS` signs in and completes guided setup. Later changes are maintained under **System settings**.
 
-## Initial setup
+## Initial Setup
 
 1. Deploy the backend and frontend.
 2. Sign in with an account listed in `ADMIN_EMAILS`.
-3. Step 1: confirm the interface language. The browser or operating system's first preferred language is preselected, and it can be changed before continuing.
-4. In the proposal/facility switcher, choose which platform features to enable. Both are enabled by default; either may be turned off, or both may be left off when only announcements are needed.
-5. Use the same category list and editor as System settings to create at least one category for every enabled feature, with a permanent unique ID, display name, and exactly one default.
-6. For proposals, choose read access, author visibility, comments, support goal/window, and response days.
-7. Finishing setup first explains that manager assignment will be skipped. After everyone who needs responsibility has registered and signed in once, open **System settings → People and management access** and assign them by category.
+3. **Step 1**: Confirm interface language (preselected from browser preferences, changeable at any time).
+4. **Step 2**: Choose which platform features to enable in the proposal/facility switcher (both enabled by default).
+5. **Step 3**: Create at least one category for every enabled feature using the category editor, with a permanent unique ID, display name, and designated default category.
+6. For proposals, configure read access, author visibility, support goals/windows, and response deadlines.
+7. Finish setup (manager assignment is skipped initially until relevant users complete their first sign-in).
 
-Disabled features do not require categories. They can be reopened later under **System settings → Categories and workflows**. Manager assignment is intentionally optional during setup because other administrators may not have registered yet. Setup completion is safe to retry: if data committed but the response was interrupted, refreshing or submitting again reads the completed state instead of creating another setup.
-
-## Platform feature switches
+## Platform Feature Switches
 
 | Feature | When turned off |
 | --- | --- |
-| Proposals | Hidden from desktop and mobile navigation; existing proposals, categories, and assignments remain |
-| Facility reports | Hidden from desktop and mobile navigation; existing reports, categories, and assignments remain |
-| Announcement comments | New comments and replies stop on every existing and new announcement; announcements and existing comments remain readable |
+| Proposals | Hidden from navigation; existing proposals, categories, and assignments remain |
+| Facility reports | Hidden from navigation; existing reports, categories, and assignments remain |
+| Announcement comments | New comments and replies stop on every announcement; announcements and existing comments remain readable |
 
-The announcement entry point is unaffected by the proposal and facility switches; comments have their own global switch. All three switches and category drafts are saved together in System settings so a partial write cannot leave only one side applied.
+Switches and category drafts are saved together atomically in System Settings so a partial write cannot occur.
 
-## What can change later
+## What Can Change Later
 
 | Rule | After creation | Scope |
 | --- | --- | --- |
-| Category ID | Locked | Protects URLs, relationships, and notifications |
-| Read access | Permanently locked | Prevents an edit from exposing existing content |
+| Category ID | Locked | Protects URLs, relations, and notifications |
+| Read access | Permanently locked | Prevents accidental data exposure |
 | Author visibility | Permanently locked | Preserves the original anonymity promise |
-| Proposal comments | Editable | The category switch constrains existing proposals immediately; record overrides preserve manual and completed closures |
-| Announcement comment switch | Editable | Constrains every announcement immediately; record overrides preserve manual closures |
+| Proposal comments | Editable | Constrains proposals immediately |
+| Announcement comment switch | Editable | Constrains every announcement immediately |
 | Support and deadlines | Editable | Future proposals only |
-| Name | Editable | Updates category display immediately |
-| Platform feature switches | Editable | Navigation and new entry points only; existing data remains |
+| Name and label | Editable | Updates category display immediately |
+| Platform feature switches | Editable | Navigation and new entry points only |
 
-Each proposal snapshots privacy, support, and deadline rules when it is created. Comment availability combines the live category switch with a record-level `comments_override`. Disabling a category immediately blocks new comments and replies on all its proposals. Re-enabling restores only non-completed proposals that still follow the category; manually or completed closures remain closed, and completed proposals cannot be reopened. Existing comments remain readable.
+## Read Access Levels
 
-Announcements have no category. Their global comment switch combines with the same record-level override model: disabling it blocks new comments and replies on every existing and new announcement, and no record can bypass it. Re-enabling restores announcements that follow the global setting while manually closed announcements stay closed.
+- `school`: Any signed-in user from the allowed campus domain may read.
+- `reviewed-school`: Only the author and managers may read before approval; approved content enters the school feed.
+- `owner-admin`: Only the author and assigned category managers may read (private rights cases).
 
-## Read access
+## Category Managers and Notifications
 
-- `school`: any signed-in user from the allowed campus domain may read.
-- `reviewed-school`: only the author and managers may read before approval; approved content enters the school list.
-- `owner-admin`: only the author and assigned category managers may read; the author remains visible to managers.
+Under **System settings → People and management access**:
+1. Select a proposal category, facility category, or announcement scope.
+2. View the list of currently assigned managers.
+3. Search registered users by name, email, or UID to assign or revoke permissions.
+4. Proposal/facility creation notices are sent only to explicitly assigned managers (excluding the author). Platform administrators come from `ADMIN_EMAILS`.
 
-Backend authorization and database rules enforce these boundaries.
+## Platform Settings (Media Limits & Data Retention)
 
-## Category managers and notifications
+Platform administrators can configure global media and retention policies under **System settings → Platform settings**:
 
-**System settings → People and management access** starts with a proposal or facility category and lists everyone who already has access. From there, search registered users to add them, change notification preferences, or revoke access quickly. One person may manage multiple categories, and one category may have multiple managers. Search accepts name, email, or UID.
+### 1. Media Upload Limits
+- **Proposals**: Default max 2 images.
+- **Facility Reports**: Default max 2 images.
+- **Announcements**: Default max 10 images.
+- **File Size Limit**: Default 5 MB per file; client-side WebAssembly WebP compression is applied automatically before upload.
 
-Proposal-category managers receive new-proposal notifications. Facility-category managers receive new-report notifications only when that assignment enables them. Both exclude the author. Platform administrators can operate across all categories but do not receive new-proposal or new-report notifications merely because they are platform administrators; assign them explicitly when they should receive a category's events. Platform-administrator status can only be changed through the deployment environment's `ADMIN_EMAILS`; the application has no grant or revoke control.
+### 2. Data Retention Lifecycle
+- **Closed Case Retention**: Default 180 days. Expired closed proposals and facilities along with their comments, votes, and Cloudinary media assets are permanently purged by scheduled background queue jobs. Announcements are kept permanently.
+- **Audit Log Retention**: Default 365 days; expired audit logs are automatically pruned.
+- **Inactive Profile & Push Device Cleanup**: Long-inactive profiles and dead push notification tokens are regularly cleaned up by background jobs.
 
-If a campus email or UID cannot be found, ask that person to sign in once before assigning access.
+## Acceptance Checklist
 
-## Upgrading an existing installation
-
-The migration converts existing proposal categories, assignments, and facility reports to runtime records automatically and supplies default platform feature switches. Existing proposals receive privacy, comment, support, and deadline snapshots from their previous rules. Facility reports enter a compatible default category. Never rewrite an already deployed migration.
-
-Categories have no archive or stop-accepting state. Use the platform feature switch to stop the entire proposal or facility entry point. Deleting a category is permanent and also removes every record in it, comments, support/affected-user relations, notifications, and uploaded images. A default category must be transferred before it can be deleted.
-
-## Rate limits and images
-
-`config/rate-limits.config.json` still controls action quotas, image counts, and browser compression. It is not a category source. Follow the repository codegen and verification workflow when changing it. Native Cloudflare burst limits remain in `cloudflare/wrangler.toml`.
-
-## Acceptance checks
-
-1. Create test proposals in public, reviewed, and private categories.
-2. Verify what a general user, author, and category manager can see.
-3. Confirm category comment switches immediately constrain existing proposals, re-enabling restores only non-completed proposals that still follow the category, and manual or completed closures cannot be reopened. Existing comments remain readable.
-4. Disable the global announcement comment switch and verify that existing and new announcements cannot receive comments or be reopened individually. Restore it and verify that followers reopen while manually closed announcements stay closed.
-5. Create a proposal and facility report in every category. Verify that only explicitly assigned managers whose notification setting applies receive creation notices, and that an unassigned platform administrator does not.
-6. Verify the facility board switches categories, creation preserves the active category, and the correct manager can comment, update status, and delete.
-7. Create a dedicated test category and record, delete the category, and confirm the record plus comments, support/affected-user relations, notifications, and images are gone. Confirm that a default category cannot be deleted directly.
-8. Turn a feature off and on again; navigation should hide and restore while existing records and categories remain manageable.
+1. Create test proposals in public, reviewed, and private categories to verify access isolation.
+2. Disable proposal/announcement comments and verify immediate enforcement.
+3. Assign managers and verify notifications reach only explicitly assigned users.
+4. Update upload limits in Platform Settings and verify frontend validation immediately reflects new limits.
+5. Delete a test category and verify records and media are completely pruned.

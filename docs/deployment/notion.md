@@ -1,6 +1,6 @@
 # 5. 選用：建立 Notion 副本
 
-Novae 可以透過 outbox worker 把提案與公告同步成營運副本。這項功能完全選用；Supabase 才是主要資料來源，Notion 不是授權或交易資料庫。
+Novae 可以透過 outbox worker 把提案與公告同步成營運副本。這項功能完全選用；Neon PostgreSQL 才是主要資料來源，Notion 不是授權或交易資料庫。
 
 ## 不需要 Notion
 
@@ -33,8 +33,8 @@ Novae 會自動維護 `Novae ID` rich text 欄位，用來在重試時找回已�
 - [ ] token 與 database ID 屬於同一 workspace。
 - [ ] 多 data source database 已設定正確的 `NOTION_DATA_SOURCE_ID`；單一來源則可省略。
 - [ ] 保留程式管理的 `Novae ID` 欄位，不人工修改。
-- [ ] 了解 Notion 是營運副本，不能取代 Supabase 備份。
+- [ ] 了解 Notion 是營運副本，不能取代 Neon 資料庫備份。
 
 若啟用，`NOTION_TOKEN` 與 `NOTION_DATABASE_ID` 必須一起填；只填其中一個會被 workflow 拒絕。`NOTION_DATA_SOURCE_ID` 只能在這兩者都存在時設定，程式也會驗證它確實屬於指定 database。
 
-下一步：[建立 Upstash](upstash.md)。
+下一步：[建立 Cloudflare Worker](cloudflare.md)。

@@ -5,7 +5,7 @@
 ## 第一次部署的閱讀順序
 
 1. 先讀[產品與流程](project-overview.md)，確認 Novae 適合你的校園情境。
-2. 按[部署準備與服務設定](quick-start.md)依序建立 GitHub、Firebase、Supabase、Cloudinary、Upstash、Cloudflare 與 Vercel；需要營運副本時再加 Notion。
+2. 按[部署準備與服務設定](quick-start.md)依序建立 GitHub、Firebase、Neon、Cloudinary、Cloudflare 與 Vercel；需要營運副本時再加 Notion。
 3. 用[憑證填寫表](environment-configuration.md)逐項核對 GitHub `production` Environment secrets。
 4. 執行[最後發布與驗收](deployment-guide.md)，再由 `ADMIN_EMAILS` 管理員首次登入完成[分類與平台規則](configuration.md)。
 5. 發布後照[使用者流程](user-guide.md)與[管理員流程](admin-guide.md)完成操作驗收。

@@ -1,110 +1,91 @@
 # Contributing
 
-This is the only local-development-first document. Deployment operators should begin with [preparation and service setup](quick-start.md) instead.
+This document is the local-development guide for contributors. Operators who simply want to deploy Novae should refer to [preparation and service setup](quick-start.md).
 
-## Setup
+## 1. Local Environment Setup
 
-Install Git, Node.js 24, and npm, then:
+Requires Git, Node.js 24, and npm. Running local database integration tests requires Docker (Windows uses WSL 2 + Docker Desktop).
 
 ```bash
 git clone https://github.com/<your-account>/novae.git
 cd novae
 npm ci
+```
+
+Copy `.env.example` to `.env` only when connecting to local development services. Never commit secrets.
+
+## 2. Before Making Changes
+
+1. Review `AGENTS.md`, `PRODUCT.md`, and `structure.md` in the main repository.
+2. Respect the layered architecture: `app → components → hooks → services/lib`.
+3. Update `structure.md` whenever adding, moving, or removing files.
+
+## 3. Local Development & Test Environments
+
+```bash
 npm run dev
 ```
 
-Copy `.env.example` only when connecting to development services, and never commit real values. Read `AGENTS.md` and `structure.md` before editing; preserve architecture boundaries and update `structure.md` when files move, split, appear, or disappear.
-
-For a complete interactive environment isolated from production services, use the single supported entry point:
+Launch a fully isolated local test stack (Local PostgreSQL, Firebase Auth Emulator, Cloudflare Worker proxy, and Next.js):
 
 ```bash
 npm run test:env
 ```
 
-It starts local Supabase, Edge Functions, Firebase Auth Emulator, the Cloudflare gateway, and Next.js, applies the development categories, accounts, and sample content from `supabase/seed.sql`, then reports Ready only after sign-in, custom-claim, platform-administrator, and Setup prerequisites pass. Create arbitrary `@integration.invalid` accounts in the Auth Emulator. `Ctrl+C` stops the whole stack. Local emulator debug logs are generated artifacts and must not be committed. Automatic integration runs also start isolated Upstash and external-provider receivers so FCM topic/token delivery, Cloudinary deletion, and retention cleanup can be asserted without production credentials. Prefer folding high-frequency cold-start reads into `getSessionBootstrap` or client caches instead of adding another Edge invocation on every app open.
+Manage local database containers and schema migrations:
 
-## Verify
+```bash
+npm run db:start        # Start local PostgreSQL container
+npm run db:migrate      # Apply all checksummed migrations
+npm run db:reset:local  # Reset local database and reapply migrations
+```
+
+## 4. Verification Commands
 
 ```bash
 npm run verify:local
 ```
 
-This entry point runs type and unused-declaration checks, bilingual and UI-primitive validation, lint, a Next production build, build budgets, Worker/Edge type checks, Vitest unit tests, architecture tests, and a full npm audit. Current production budgets allow at most 40 font files / 2 MiB of fonts, 2.5 MiB of JavaScript, and 600 KiB of CSS. Raise a budget only with a measured product reason; do not remove the gate.
+Executes:
+- TypeScript type checking and unused variable validation
+- UI primitives and i18n message parity checks
+- ESLint rules
+- Next.js 16 production build and bundle size budgeting
+- Cloudflare Worker type & boundary validation
+- Vitest unit tests and architectural tests
+- npm audit security audit
 
-For backend actions, permissions, RPCs, RLS, migrations, Edge Functions, or workers:
+Run integration tests after modifying backend actions, permissions, migrations, or Worker logic:
 
 ```bash
 npm run verify:integration
 ```
 
-Before merging a large change:
+Before opening a pull request:
 
 ```bash
 npm run verify:all
 ```
 
-Run the real Chromium user-flow suite directly for permissions, categories, proposals, facilities, announcements, or feature switches:
+Run Playwright Chromium end-to-end browser tests:
 
 ```bash
-npm run test:e2e:install
-npm run test:e2e
+npm run test:e2e:install  # Install browser binaries once
+npm run test:e2e          # Run E2E test suite
 ```
 
-The browser installation is needed only once. E2E rebuilds the isolated stack, completes Setup through the real UI, creates multiple accounts and two category scopes, then checks desktop and mobile button visibility, click results, cross-category isolation, grant/revoke recovery, category lifecycles, and all four proposal/facility switch combinations. Its sign-in bridge is restricted to development mode, a loopback Auth Emulator, and `@integration.invalid` accounts; production builds cannot expose it.
+## 5. Configuration & Code Generation
 
-For the multi-user, multi-category, overlapping-permission stress matrix:
+After editing `config/rate-limits.config.json` or `config/api-errors.config.json`, run:
 
 ```bash
-npm run verify:stress
+npm run generate:all
 ```
 
-It expands from the runtime catalog and covers every proposal and facility category, images, nested comments, support/affected reports, notifications, status, multiple managers, and category creation/deletion. Do not replace it with fixed category counts or a single test account.
+Commit the source JSON files and all generated TypeScript types. Categories are runtime data and do not use codegen.
 
-PR CI runs three layers: local static/unit verification, backend integration, and real-browser E2E. On Windows, run the npm command from PowerShell; integration and E2E environment launchers enter WSL automatically. Windows requires WSL 2, Docker, and Supabase CLI plus Deno in the WSL `PATH`. Linux and CI do not need WSL.
+## 6. Pull Request Guidelines
 
-The integration suite rebuilds an isolated local Supabase stack, applies every migration, runs database lint, and checks actions, permissions, RLS, idempotency, and worker lifecycles. Its external-provider receiver can inject a transient FCM failure; the test must assert that delivery remains durable, retries after backoff, succeeds, and clears its payload. `.env.local` is optional. Supabase URLs and keys are always replaced by local values, so the suite does not write remote application data.
-
-Add integration assertions when introducing or changing:
-
-- backend actions: successful behavior and relevant denial paths;
-- roles or permissions: allowed and denied actors, plus in-scope and out-of-scope resources;
-- access grants and revocations: allowed after grant, immediately denied after revoke, unrelated scopes preserved, and removal from the assignee list;
-- RPCs, schemas, or migrations: real local-database results;
-- RLS: anon, authenticated, and service-role access as applicable;
-- idempotent writes: missing request ID, first execution, and replay;
-- workers, outbox, or deletion jobs: claim, completion/failure, retry, and deduplication.
-- hooks, browser storage, or component interactions: successful and failure behavior in `tests/unit/`.
-- permission-driven UI and feature switches: table-driven visible, hidden, disabled, and click/emit assertions covering ordinary users, owners, correct scope, wrong scope, platform administrators, and every switch combination.
-
-Pure frontend layout work normally needs only `verify:local`. The action coverage guard rejects registered actions that are not referenced by a domain integration test. Do not bypass it with a call that has no assertion.
-
-Do not duplicate authorization rules only inside components. Role, permission, and category-scope decisions use `src/lib/session-access.ts`; proposal/facility feature routing uses `src/lib/feature-access.ts`. Component behavior and backend integration tests must jointly protect presentation and real authorization so hiding a button never substitutes for denying the API, and a denied operation is not still offered by the UI.
-
-Large suites use thin entry files that import domain-focused cases; shared accounts, fixtures, page objects, and emulator helpers belong in a sibling `support` or `helpers` module. Reassess responsibility as a test file approaches 400 lines. Do not keep adding unrelated permission domains, workers, RLS boundaries, and UI flows to a multi-thousand-line script.
-
-## Reusable UI system
-
-See the [UI design system](ui-design-system.md) for the complete token, primitive, responsive, motion, and new-page contract. This section keeps the boundaries every contribution must follow.
-
-The main application treats `src/app/globals.css`, `src/styles/motion.css`, `src/components/ui/`, and `src/components/motion/` as the single source of truth for visual primitives. Proposals, announcements, facilities, notifications, settings, and administration may keep domain-specific fields and states, but must not maintain parallel viewport, button, card, list, dropdown, shadow, motion, or control systems.
-
-| Need | Canonical entry point |
-|---|---|
-| Page gutters, safe areas, and content width | `AppShell` and the viewport tokens in `globals.css` |
-| Standard, icon, toolbar, primary, and secondary actions | Existing variants and sizes in `components/ui/button.tsx` |
-| Cards, fields, floating layers, and dialogs | `Card`, `Input` / `Textarea`, and Radix `Dialog` / `Sheet` / `DropdownMenu` |
-| Page tabs, exclusive choices, and segments | `Tabs` / `LiquidTabs`, with one source of truth for selection |
-| Status and asynchronous feedback | `StatusBadge`, `PageState`, Sonner toast, and `components/motion/` |
-| Markdown and discussion | Shared composer fields, content renderer, and discussion surface |
-
-Primary mobile controls remain at least 44×44px and preserve safe-area and bottom-navigation clearance. Hover is enabled only inside `(hover: hover) and (pointer: fine)`; touch feedback uses active state. Detail body, actions, and discussion form one content flow. Comments remain one continuous region with the composer at the actual reply location, without per-comment cards or a second scroll container.
-
-Elevation has exactly three levels: `--shadow-control`, `--shadow-card`, and `--shadow-floating`. Do not add arbitrary shadows, page-level horizontal padding in route views, fixed left/right offsets that imitate safe areas, or manually assembled near-duplicate cards.
-
-When structures differ only by strings, icons, states, children, or callbacks, extend an existing primitive through props. Add a new primitive only when it has at least two valid consumers and the existing contract cannot express it clearly; then update `structure.md`, architecture tests, and both language versions of this guide. `check:ui`, included in `npm run verify:local`, rejects known parallel styling patterns.
-
-After changing `config/rate-limits.config.json` or `config/api-errors.config.json`, run `npm run generate:all` and commit source JSON plus every generated output. Categories are runtime data managed through migrations and controlled backend actions; there is no category codegen. API error codes must agree across the frontend, Cloudflare, and Edge. Never hand-edit generated files.
-
-Locale catalogs are split by `src/i18n/messages/<locale>/<domain>.ts`, with the filename matching the first key segment. Keep Traditional Chinese and English keys identical and use short stable semantic names rather than sentences, hashes, or translated source text.
-
-Persist background diagnostics only as native UUID `error_trace_id` values and keep full details in logs. Add a migration that removes the old column or RPC overload; never rewrite a deployed migration or retain two storage formats as a compatibility layer.
+- Detail the problem, solution, validation steps, and any UI/permission implications in your PR.
+- Database changes must introduce a new, numbered migration file; never mutate existing applied migrations.
+- Report security issues privately following `SECURITY.md`.

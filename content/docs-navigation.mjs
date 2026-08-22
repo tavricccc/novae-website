@@ -58,25 +58,24 @@ export const NAV_EN = [
 export const DEPLOYMENT_NAV_ZH = [
   { id: 'deployment/github', title: '1. 準備 GitHub', file: 'deployment/github.html' },
   { id: 'deployment/firebase', title: '2. 建立 Firebase', file: 'deployment/firebase.html' },
-  { id: 'deployment/supabase', title: '3. 建立 Supabase', file: 'deployment/supabase.html' },
+  { id: 'deployment/neon', title: '3. 建立 Neon 資料庫', file: 'deployment/neon.html' },
   { id: 'deployment/cloudinary', title: '4. 建立 Cloudinary', file: 'deployment/cloudinary.html' },
   { id: 'deployment/notion', title: '5. 選用：Notion 副本', file: 'deployment/notion.html' },
-  { id: 'deployment/upstash', title: '6. 建立 Upstash', file: 'deployment/upstash.html' },
+  { id: 'deployment/cloudflare', title: '6. 建立 Cloudflare Worker', file: 'deployment/cloudflare.html' },
   { id: 'deployment/vercel-github', title: '7. 建立 Vercel', file: 'deployment/vercel-github.html' },
-  { id: 'deployment/cloudflare', title: '8. 建立 Cloudflare Worker', file: 'deployment/cloudflare.html' },
 ];
 
 export const DEPLOYMENT_NAV_EN = [
   { id: 'deployment/github', title: '1. Prepare GitHub', file: 'deployment/github.html' },
   { id: 'deployment/firebase', title: '2. Create Firebase', file: 'deployment/firebase.html' },
-  { id: 'deployment/supabase', title: '3. Create Supabase', file: 'deployment/supabase.html' },
+  { id: 'deployment/neon', title: '3. Create Neon database', file: 'deployment/neon.html' },
   { id: 'deployment/cloudinary', title: '4. Create Cloudinary', file: 'deployment/cloudinary.html' },
   { id: 'deployment/notion', title: '5. Optional: Notion copy', file: 'deployment/notion.html' },
-  { id: 'deployment/upstash', title: '6. Create Upstash', file: 'deployment/upstash.html' },
+  { id: 'deployment/cloudflare', title: '6. Create Cloudflare Worker', file: 'deployment/cloudflare.html' },
   { id: 'deployment/vercel-github', title: '7. Create Vercel', file: 'deployment/vercel-github.html' },
-  { id: 'deployment/cloudflare', title: '8. Create Cloudflare Worker', file: 'deployment/cloudflare.html' },
 ];
 
 export function flattenNav(nav) {
   return nav.flatMap((section) => section.items);
 }
+

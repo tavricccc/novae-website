@@ -28,6 +28,6 @@ Keep all three values in a password manager or protected worksheet. Never commit
 - [ ] `VERCEL_ORG_ID` and `VERCEL_PROJECT_ID` are stored safely.
 - [ ] No release was attempted before the remaining secrets were ready.
 
-Record the production origin shown by Vercel, such as `https://your-project.vercel.app`. The next step must use this exact origin for `ALLOWED_ORIGINS`.
+Record the production origin shown by Vercel, such as `https://your-project.vercel.app`. Cloudflare configuration must use this exact origin for `ALLOWED_ORIGINS`.
 
-Next: [create Cloudflare Worker](cloudflare.md).
+All services are now prepared. Next: open the [credential worksheet](../environment-configuration.md) to review and enter secrets into GitHub `production` Environment.

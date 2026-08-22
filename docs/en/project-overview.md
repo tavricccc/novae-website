@@ -1,8 +1,17 @@
 # Product and workflows
 
-Novae is a campus PWA for proposals, facility reports, support, review, responses, announcements, and notifications. It replaces disconnected forms and posts with category-scoped, stateful, time-bound workflows.
+Novae is an open-source campus Progressive Web App (PWA) for proposals, facility reports, support, review, official responses, announcements, in-app notifications, and Web Push. It organizes campus feedback into transparent, category-scoped, time-bound, and verifiable workflows.
 
-## The proposal lifecycle
+## User Roles
+
+| Role | Capabilities |
+| --- | --- |
+| Campus User | Signs in with allowed school Google domain; browses, searches, submits proposals, supports, comments, reads announcements, manages push notifications, and customizes accent themes |
+| Proposal Author | Tracks public, pending, or private proposal progress from "My Proposals" with real-time review and status updates |
+| Category Manager | Reviews, replies to, updates statuses, and resolves proposals or facilities within assigned categories; multiple managers per category supported |
+| Platform Administrator | Defined via `ADMIN_EMAILS`; accesses the Admin Console to view activity metrics, search users, enforce interaction restrictions (mute/ban), inspect audit logs, and configure media limits and data retention |
+
+## The Proposal Lifecycle
 
 ```mermaid
 flowchart LR
@@ -20,22 +29,25 @@ flowchart LR
 
 The real statuses are pending review, awaiting response, review rejected, processing, did not pass, infeasible, and completed.
 
-## What each category controls
+## What Each Category Controls
 
-Each category independently sets who may read, whether the author is shown, whether support is enabled, the support goal, the support window in days, and the response deadline. The repository's 50 supporters in 14 days is an example configuration, not a hard-coded product rule.
+Each proposal category independently configures:
+- **Visibility**: School-wide, school-wide after review, or author-and-admin-only (private rights cases).
+- **Author Display**: Publicly visible or anonymous in the feed.
+- **Support Mechanism**: Enable/disable support, required supporter count (positive integer), and support window in days.
+- **Response Deadline**: Expected response time in days once processing begins, or no deadline.
 
-The first administrator chooses which features to enable, creates institutional category rules during guided sign-in, and maintains them later in System settings.
+The default 50 supporters in 14 days is an example configuration. Administrators customize all rules during initial setup and manage them in System Settings.
 
-## Real product capabilities
+## Real Product Capabilities
 
-- Google sign-in restricted to an allowed school domain.
-- Public-after-review and owner/admin-only privacy models.
-- Proposal search, comments, sharing, support, review, status, and deadlines.
-- Dynamic multi-category facility boards and creation, with images, comments, affected-user tracking, status, and category-scoped management.
-- Category-first manager assignment with several people per category and several categories per person. Platform administrators come only from `ADMIN_EMAILS` and are not implicit recipients of new-record notifications.
-- Separate announcement, notification, settings, and admin Dashboard pages.
-- Signed Cloudinary image upload and expiring signed delivery.
-- Supabase Postgres, RLS, RPC, Realtime, Edge Functions, and outbox processing.
-- In-app notifications, Firebase Cloud Messaging Web Push, and a Notion operations copy.
+- **Modern Frontend & Silky Motion**: Built on Next.js 16 App Router and React 19, featuring transitions.dev motion recipes (`LiquidTabs`, `ResizableCard`, calm skeleton shimmer, depth-aware directional transitions) and customizable accent themes.
+- **Announcements & Discussions**: Standalone announcement feeds with likes and discussion threads; comment composer with mobile safe-area docking and reply threading.
+- **Facilities Board**: Multi-category facility reporting with location tags, photos, "I also encountered this" counter, and category-scoped workflows.
+- **Realtime & Web Push**: Private in-app realtime updates via Cloudflare Durable Objects WebSocket Hibernation and Web Push via Firebase Cloud Messaging with 7-day heartbeat throttling.
+- **WebAssembly Media Pipeline**: Client-side WebAssembly WebP encoding (`@jsquash/webp`) under strict CSP, signed Cloudinary uploads, and cached Worker Media Gateway delivery.
+- **Robust Backend & Database**: Neon Serverless PostgreSQL 17 source of truth, Cloudflare Workers API backend, Cloudflare Hyperdrive connection pooling, and least-privilege `novae_runtime` database role.
+- **Asynchronous Queues & Data Lifecycle**: Cloudflare Queues (`novae-jobs`) for outbox dispatch, Notion operational copy sync, and automated retention cleanup (expiring closed records, audit logs, inactive PII, and dead push tokens).
+- **Integrated Admin Console**: System overview metrics, user search, member interaction restrictions (mute, comment limits, full suspension), audit logging, and platform media/retention configuration.
 
 Next: begin [preparation and service setup](quick-start.md).

@@ -28,6 +28,6 @@
 - [ ] 已安全保存 `VERCEL_ORG_ID` 與 `VERCEL_PROJECT_ID`。
 - [ ] 尚未因缺少其他 secrets 而嘗試發布。
 
-建立 project 後，記下 Vercel 顯示的正式 Origin，例如 `https://your-project.vercel.app`。下一步設定 Cloudflare 時，`ALLOWED_ORIGINS` 必須逐字使用這個 Origin。
+建立 project 後，記下 Vercel 顯示的正式 Origin，例如 `https://your-project.vercel.app`。在 Cloudflare 設定時，`ALLOWED_ORIGINS` 必須逐字使用這個 Origin。
 
-下一步：[建立 Cloudflare Worker](cloudflare.md)。
+所有服務準備完成。下一步：開啟[憑證填寫表](../environment-configuration.md)，一次核對並填入 GitHub `production` Environment secrets。

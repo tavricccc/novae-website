@@ -1,52 +1,73 @@
 # Step-by-step troubleshooting
 
-Always start with the first failed stage. Do not reset Firebase, Supabase, and Vercel at the same time.
+Always isolate the first failing boundary before modifying multi-service configurations.
 
-## Workflow failure
+## 1. GitHub Actions Deployment Failures
 
-1. Open the run and the first red step.
-2. Missing secrets: compare `production` Environment secrets with the [credential worksheet](environment-configuration.md).
-3. Link or database push: ensure token, project ref, and password belong to one Supabase project.
-4. Generated config diff: inspect only API error, rate-limit, and retention sources that still use codegen; categories no longer do.
-5. If upstream contains a fix, use `Sync fork → Update branch`, confirm the new commit, and start a new run instead of rerunning an old commit.
-6. Fix the cause and rerun that workflow.
+1. Open the failed workflow run and inspect the earliest failing step.
+2. **`Missing backend deployment values`**: Compare your repository's GitHub `production` Environment secrets with the [credential worksheet](environment-configuration.md).
+3. **`Apply forward-only Neon migrations` fails**:
+   - Verify `NEON_DATABASE_URL` is active and correct.
+   - Confirm no out-of-order schema mutations were applied manually.
+4. **`Configure the least-privilege Worker database role` fails**:
+   - Ensure `NEON_RUNTIME_PASSWORD` is set.
+   - Verify the admin database user has permission to configure roles and grant schema privileges.
+5. **`Validate Hyperdrive binding` fails**:
+   - Ensure `CLOUDFLARE_HYPERDRIVE_ID` is a 32-character hexadecimal string without whitespace.
+6. **`Smoke test authentication and database health` fails**:
+   - Inspect Worker logs under `Workers & Pages → novae-api → Logs` in the Cloudflare Dashboard.
+   - Verify `HEALTHCHECK_SECRET` matches across workflow and Worker environment.
 
-## Cloudflare deployment errors
+## 2. Authentication and Verification Failures
 
-- `Invalid Function name`: sync the latest workflow. Current deployments automatically use `n<EDGE_FUNCTION_NAMESPACE>-api` and related names so the first character is always a letter.
-- `500` / Cloudflare `1101`: inspect `Workers & Pages → novae-api → Logs`. The current workflow redeploys after secret synchronization and retries transient propagation failures.
-- `403 origin-denied`: make `ALLOWED_ORIGINS` exactly match the browser's Vercel origin. Include `https://`, remove paths and quotes, and **remove the final `/`**.
-- Browser CORS / `net::ERR_FAILED`: this is commonly the same origin mismatch. After editing GitHub production, rerun `Deploy Supabase Backend`.
-- `502`: verify that all six random-name Supabase Functions deployed under the same namespace.
-- `503 rate-limit-provider-unavailable`: verify the writable Upstash REST credentials used by Supabase. Precise business quotas fail closed; native Cloudflare burst protection remains independent.
+1. **Google Account Picker Does Not Open or Shows Errors**:
+   - Confirm `NEXT_PUBLIC_GOOGLE_CLIENT_ID` is from the matching GCP/Firebase project.
+   - Confirm Google Cloud Console **Authorized JavaScript origins** includes the active production domain (with `https://`, no trailing slash).
+   - Verify CSP headers do not block `https://accounts.google.com`.
+2. **Cloudflare Turnstile Verification Fails**:
+   - Verify `NEXT_PUBLIC_TURNSTILE_SITE_KEY` and `TURNSTILE_SECRET_KEY` match.
+   - Ensure your production domain and `localhost` are added to the Turnstile Widget allowed domains.
+3. **"Domain mismatch" Notice**:
+   - Verify the signed-in Google account domain matches `NEXT_PUBLIC_ALLOWED_DOMAIN` / `ALLOWED_DOMAIN` (e.g., `school.edu.tw` without `@`).
 
-A correct preflight returns `204` and an `Access-Control-Allow-Origin` equal to the Vercel origin. An unauthenticated smoke POST should return `401`.
+## 3. Browser API Requests and CORS Errors
 
-## Sign-in failure
+If the browser Console displays:
+```text
+Response to preflight request doesn't pass access control check: No 'Access-Control-Allow-Origin' header is present
+```
 
-Check the Google provider, Firebase authorized production domain, matching `NEXT_PUBLIC_ALLOWED_DOMAIN`/`ALLOWED_DOMAIN`, one matching Firebase project, and App Check site-key domain. Confirm `NEXT_PUBLIC_GOOGLE_CLIENT_ID` is the same project's Web OAuth 2.0 Client ID and that its **Authorized JavaScript origins** include production (and local Next.js when developing). An administrator who was just added must sign in again. Production sign-in uses Google Identity Services only; a blocked popup, closed account picker, or in-app browser shows an error and does not fall back to Firebase redirect. If the UI says sign-in could not start, redeploy after setting `NEXT_PUBLIC_GOOGLE_CLIENT_ID` and verify the OAuth JS origin plus CSP allowlisting of `https://accounts.google.com`. If sign-in succeeds but the login card remains, or Proposal opens My proposals, verify that role bootstrap and the category catalog completed; the app should leave login only after that and route to the default category.
+Verify:
+1. `ALLOWED_ORIGINS` exactly matches the browser `from origin 'https://…'`.
+2. **`ALLOWED_ORIGINS` must NOT have a trailing slash** (Correct: `https://school-novae.vercel.app`; Incorrect: `https://school-novae.vercel.app/`).
+3. The value represents the frontend Vercel origin, not the Worker URL.
+4. Rerun `Deploy Neon and Cloudflare Backend` after updating secrets.
 
-## API or permission failure
+## 4. Image Upload and Display Issues
 
-- All 401/403 after CORS passes: inspect Firebase token, domain, service account, and fresh sign-in.
-- Admin-only 403: inspect `ADMIN_EMAILS` and refresh the session.
-- One category missing: compare `readAccess`, status, author, and role; it may be correct privacy behavior.
-- 429: inspect the response code. For rapid bursts, review native bindings in `cloudflare/wrangler.toml`; for accumulated business quotas, review Upstash and `rate-limits.config.json`.
+1. **Upload Fails or Freezes in Browser**:
+   - Ensure browser supports WebAssembly for client-side `@jsquash/webp` compression.
+   - Verify image count and file sizes comply with **System settings → Platform settings**.
+2. **Uploaded Images Cannot Be Displayed**:
+   - Verify `CLOUDINARY_CLOUD_NAME`, `CLOUDINARY_API_KEY`, and `CLOUDINARY_API_SECRET`.
+   - Ensure `srp-secure-images` preset was created successfully during backend deployment.
+   - Verify `MEDIA_SIGNING_SECRET` is configured.
 
-API error bodies are machine-readable: `error.code` is the stable contract value, `error.requestId` indexes logs, and a 429 also provides `error.retryAfterSeconds`. Backend responses do not contain localized explanations or complete provider errors; the frontend renders the code through its locale catalog. Report the code, request ID, and occurrence time instead of exposing raw exceptions to the browser.
+## 5. Realtime and Notification Issues
 
-If an installed PWA still shows an old version, keep it open long enough for the new Service Worker to take control. The app reloads through a versioned URL and caps retries automatically. Manually reload once only after the update watchdog reports failure; do not start by clearing site data, content caches, or databases.
+1. **Discussions Do Not Update Live**:
+   - Confirm `REALTIME_TICKET_SECRET` is configured.
+   - Verify Cloudflare Durable Objects binding (`RealtimeHub`) is deployed.
+2. **Web Push Notifications Not Received**:
+   - Confirm `NEXT_PUBLIC_FIREBASE_VAPID_KEY` is a valid FCM VAPID key.
+   - Verify `GOOGLE_SERVICE_ACCOUNT_JSON` is full JSON text with FCM permissions.
+   - Check device push registration status under user Settings.
 
-Guided setup first confirms the browser or operating system's first preferred language, then uses the same feature-and-category editor as System settings. Completion explains that manager assignment is skipped until the relevant people have registered. If completion briefly fails and retry says setup is already complete, the first request may have committed before its response was interrupted; the current client refreshes platform state and continues. If it remains on Setup, verify that every enabled feature has at least one category, the latest migration is applied, and capture the request ID.
+## 6. Submitting Diagnostics
 
-## Wrong support goal or days
-
-1. Inspect the category in **System settings → Categories and workflows**.
-2. Check when the proposal was created. Existing proposals keep their creation-time snapshot and do not follow later category edits.
-3. Postgres runtime categories and proposal snapshots are authoritative; landing mockups and documentation examples are not.
-
-## Images, notifications, and Notion
-
-For images, verify one Cloudinary environment, matching API/webhook secret, webhook logs, file limits, and quotas. For notifications or Notion, inspect the outbox backlog and worker logs, then verify FCM/VAPID/service-account values or Notion database sharing. A multi-source Notion database also requires a `NOTION_DATA_SOURCE_ID` that belongs to the configured database. Avoid unlimited manual retries.
-
-When opening an issue, include commit, time zone, role, category, state, steps, first error, HTTP status, request ID, and checks already completed. Remove all credentials and personal data.
+When reporting an issue, provide:
+- Timestamp and timezone.
+- User role, category, and target record ID.
+- Network panel HTTP status code, `error.code`, and `error.requestId`.
+- Link to relevant GitHub Actions workflow runs.
+*(Never share raw secrets, passwords, or service-account keys).*
